@@ -21,7 +21,7 @@ Generation time : 2012-03-12 09:23:52 CET
   <name>${project.artifactId}</name>
 
   <build>
-    <finalName>${project.artifactId}</finalName>
+    <finalName>notifications-ws</finalName>
     <plugins>
       <plugin>
         <!-- Configure eclipse plug-in to generate a context root that does not have the version number on it -->
@@ -115,6 +115,14 @@ Generation time : 2012-03-12 09:23:52 CET
       <artifactId>commons-io</artifactId>
       <version>1.4</version>
     </dependency>
+    
+        <dependency>
+      <groupId>com.liferay.portal</groupId>
+      <artifactId>portal-service</artifactId>
+      <version>${liferay.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    
   </dependencies>
 
 </project>

@@ -9,8 +9,13 @@
     <param-name>contextConfigLocation</param-name>
     <param-value>/WEB-INF/spring-application.xml</param-value>
   </context-param>
+  
+<!--    <context-param>
+    <param-name>portalContextConfigLocation</param-name>
+    <param-value>/WEB-INF/spring-application.xml</param-value>
+  </context-param>-->
 
-  <servlet>
+   <servlet>
     <servlet-name>spring-ws</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
   </servlet>
@@ -22,6 +27,7 @@
 
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>
+  </listener>  
+  
 
 </web-app>

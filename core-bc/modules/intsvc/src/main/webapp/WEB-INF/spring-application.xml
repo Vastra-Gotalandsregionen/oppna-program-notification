@@ -10,8 +10,8 @@
 
   <mvc:annotation-driven/>
 
-  <context:component-scan base-package="se.vgregion.notifications.service"/>
+  <!-- <context:component-scan base-package="se.vgregion.notifications.service"/> -->
 
-  <!--<bean class="se.vgregion.notifications.service.SpringTestCounter"/>-->
+  <bean class="se.vgregion.notifications.service.SpringTestCounter"/>
 
 </beans>
