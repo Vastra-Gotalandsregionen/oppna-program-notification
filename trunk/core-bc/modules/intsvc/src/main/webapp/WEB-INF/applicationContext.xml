@@ -5,14 +5,29 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
+
+  <import resource="classpath:cxf-context.xml"/>
+  <import resource="classpath*:META-INF/spring/raindance-context.xml"/>
+
   <!-- Configures the @Controller programming model -->
 
-  <mvc:annotation-driven />
+  <!--<mvc:annotation-driven />-->
 
-  <context:component-scan base-package="se.vgregion.notifications.service"/>
+  <!--<context:component-scan base-package="se.vgregion.notifications.service"/>-->
 
  <import resource="classpath*:META-INF/spring/messagebus-counter-routes.xml" />
  
 <!--   <bean class="se.vgregion.notifications.service.SpringTestCounter" /> -->
- 
+
+  <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>classpath*:META-INF/camel.properties</value>
+        <value>classpath*:raindance-svc.properties</value>
+        <value>classpath*:hibernate.properties</value>
+      </list>
+    </property>
+  </bean>
+
+
 </beans>

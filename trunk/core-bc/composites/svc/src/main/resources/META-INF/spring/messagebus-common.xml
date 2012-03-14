@@ -4,15 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-  <bean id="messagebusConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="locations">
-      <list>
-        <value>classpath:META-INF/camel.properties</value>
-        <value>classpath*:datasource.properties</value>
-        <value>classpath*:hibernate.properties</value>
-      </list>
-    </property>
-  </bean>
+
 
   <!-- Message bus -->
 
