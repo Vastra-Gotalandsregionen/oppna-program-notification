@@ -14,15 +14,7 @@
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">
 
-    <!-- <routeBuilder ref="alfrescoCounterRoutes"/>
-    
-    <routeBuilder ref="testCounterRoutes"/>
-
-    <routeBuilder ref="testCounterRoutes2"/>
-
-    <routeBuilder ref="testBean"/>
-
-    <routeBuilder ref="testEcho"/>-->
+    <routeBuilder ref="raindanceInvoiceCounter"/>
 
     <routeBuilder ref="notesCalendarCounter" />
 
@@ -30,48 +22,22 @@
 
   </camelContext>
 
- <!--  <bean id="alfrescoCounterRoutes" class="se.vgregion.routes.MessagebusRestRouteBuilder">
-    <constructor-arg index="0" value="vgr/notificationalfresco" />
-    <constructor-arg index="1"
-      value="http://alfresco-stage.vgregion.se/alfresco/wcservice/slingshot/doclib/doclist/documents/site/susannetest/documentLibrary" />
-    <constructor-arg index="2" value="GET" />
-    <constructor-arg index="3" value="application/json" />
-  </bean>
 
-  <bean id="testCounterRoutes" class="se.vgregion.routes.MessagebusRestRouteBuilder">
-    <constructor-arg index="0" value="${test.counter.messagebus.destination}"/>
-    <constructor-arg index="1" value="${test.counter.rest.destination}"/>
-    <constructor-arg index="2" value="GET"/>
-    <constructor-arg index="3" value="application/json"/>
-  </bean>
 
-  <bean id="testCounterRoutes2" class="se.vgregion.routes.MessagebusRestRouteBuilder">
-    <constructor-arg index="0" value="vgr/counter_test2"/>
-    <constructor-arg index="1" value="${test.counter.rest.destination}"/>
-    <constructor-arg index="2" value="GET"/>
-    <constructor-arg index="3" value="application/json"/>
+  <bean id="raindanceInvoiceCounter" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
+    <constructor-arg index="0" value="vgr/raindance_invoices_count"/>
+    <constructor-arg index="1" value="se.vgregion.notifications.counter.RaindanceInvoiceBean" />
+    <constructor-arg index="2" value="getCount" />
   </bean>
-
-  <bean id="testBean" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
-    <constructor-arg index="0" value="vgr/counter_bean"/>
-    <constructor-arg index="1" value="se.vgregion.test.RandomBean" />
-    <constructor-arg index="2" value="getRandom" />
-  </bean>
-
-  <bean id="testEcho" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
-    <constructor-arg index="0" value="vgr/counter_echo"/>
-    <constructor-arg index="1" value="se.vgregion.test.EchoBean" />
-    <constructor-arg index="2" value="echo" />
-  </bean>-->
 
   <bean id="notesCalendarCounter" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
-    <constructor-arg index="0" value="vgr/counter_notes_calendar"/>
+    <constructor-arg index="0" value="vgr/notes_calendar_count"/>
     <constructor-arg index="1" value="se.vgregion.notifications.counter.NotesCalendarCounterBean" />
     <constructor-arg index="2" value="getCount" />
   </bean>
 
   <bean id="notesEmailCounter" class="se.vgregion.routes.MessagebusBeanrefRouteBuilder">
-    <constructor-arg index="0" value="vgr/counter_notes_email"/>
+    <constructor-arg index="0" value="vgr/notes_email_count"/>
     <constructor-arg index="1" value="notesEmailCounterBean" />
     <constructor-arg index="2" value="getCount" />
   </bean>

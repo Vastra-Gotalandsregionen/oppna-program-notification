@@ -1,107 +1,107 @@
 <?xml version="1.0"?>
-	<!--
-		This is the Service-composite Maven POM. Template version:
-		1.4 Generation time : 2012-03-12 09:23:52 CET
-	-->
+<!--
+        This is the Service-composite Maven POM. Template version:
+        1.4 Generation time : 2012-03-12 09:23:52 CET
+    -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>se.vgregion.notifications</groupId>
-		<artifactId>notifications-core-bc</artifactId>
-		<version>1.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
-	</parent>
-	<groupId>se.vgregion.notifications</groupId>
-	<artifactId>notifications-core-bc-composite-svc</artifactId>
-	<packaging>jar</packaging>
-	<name>${project.artifactId}</name>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>se.vgregion.notifications</groupId>
+    <artifactId>notifications-core-bc</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <groupId>se.vgregion.notifications</groupId>
+  <artifactId>notifications-core-bc-composite-svc</artifactId>
+  <packaging>jar</packaging>
+  <name>${project.artifactId}</name>
 
-	<dependencies>
-        <dependency>
-          <groupId>se.vgregion.commons-util</groupId>
-          <artifactId>commons-util-core-bc-composite-svc-camel</artifactId>
-          <version>3.8</version>
-          <scope>runtime</scope>
-        </dependency>
-            
-        <dependency>
-          <groupId>se.vgregion.cs-iframe</groupId>
-          <artifactId>cs-iframe-core-composite-svc</artifactId>
-          <version>2.1</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>se.vgregion.cs-iframe</groupId>
-          <artifactId>cs-iframe-core-composite-types</artifactId>
-          <version>2.1</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-validator</artifactId>
-          <version>4.1.0.Final</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-aspects</artifactId>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.apache.camel</groupId>
-          <artifactId>camel-core</artifactId>
-          <version>${camel-version}</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.apache.camel</groupId>
-          <artifactId>camel-restlet</artifactId>
-          <version>${camel-version}</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-beans</artifactId>
-        </dependency>
-    
-        <dependency>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-          <version>1.4</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-          <version>4.0.1</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpcore</artifactId>
-          <version>4.0.1</version>
-        </dependency>
-    
-        <dependency>
-          <groupId>org.mockito</groupId>
-          <artifactId>mockito-all</artifactId>
-        </dependency>
-      
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>notifications-core-bc-composite-types</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+  <dependencies>
+    <dependency>
+      <groupId>se.vgregion.commons-util</groupId>
+      <artifactId>commons-util-core-bc-composite-svc-camel</artifactId>
+      <version>3.11</version>
+      <scope>runtime</scope>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>se.vgregion.commons-util</groupId>
+      <artifactId>commons-util-core-bc-composite-security</artifactId>
+      <version>3.11</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-		</dependency>
-	</dependencies>
+    <dependency>
+      <groupId>se.vgregion.raindancenotifier</groupId>
+      <artifactId>raindancenotifier-core-composite-svc</artifactId>
+      <version>1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>4.1.0.Final</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aspects</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-core</artifactId>
+      <version>${camel-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-restlet</artifactId>
+      <version>${camel-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>notifications-core-bc-composite-types</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+  </dependencies>
 </project>
