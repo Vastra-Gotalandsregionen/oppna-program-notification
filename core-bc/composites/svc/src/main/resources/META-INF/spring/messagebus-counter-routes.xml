@@ -14,13 +14,15 @@
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">
 
+    <!-- <routeBuilder ref="alfrescoCounterRoutes"/>
+    
     <routeBuilder ref="testCounterRoutes"/>
 
     <routeBuilder ref="testCounterRoutes2"/>
 
     <routeBuilder ref="testBean"/>
 
-    <routeBuilder ref="testEcho"/>
+    <routeBuilder ref="testEcho"/>-->
 
     <routeBuilder ref="notesCalendarCounter" />
 
@@ -28,6 +30,13 @@
 
   </camelContext>
 
+ <!--  <bean id="alfrescoCounterRoutes" class="se.vgregion.routes.MessagebusRestRouteBuilder">
+    <constructor-arg index="0" value="vgr/notificationalfresco" />
+    <constructor-arg index="1"
+      value="http://alfresco-stage.vgregion.se/alfresco/wcservice/slingshot/doclib/doclist/documents/site/susannetest/documentLibrary" />
+    <constructor-arg index="2" value="GET" />
+    <constructor-arg index="3" value="application/json" />
+  </bean>
 
   <bean id="testCounterRoutes" class="se.vgregion.routes.MessagebusRestRouteBuilder">
     <constructor-arg index="0" value="${test.counter.messagebus.destination}"/>
@@ -53,7 +62,7 @@
     <constructor-arg index="0" value="vgr/counter_echo"/>
     <constructor-arg index="1" value="se.vgregion.test.EchoBean" />
     <constructor-arg index="2" value="echo" />
-  </bean>
+  </bean>-->
 
   <bean id="notesCalendarCounter" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
     <constructor-arg index="0" value="vgr/counter_notes_calendar"/>
