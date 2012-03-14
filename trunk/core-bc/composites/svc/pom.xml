@@ -24,7 +24,7 @@
           <version>3.8</version>
           <scope>runtime</scope>
         </dependency>
-    
+            
         <dependency>
           <groupId>se.vgregion.cs-iframe</groupId>
           <artifactId>cs-iframe-core-composite-svc</artifactId>

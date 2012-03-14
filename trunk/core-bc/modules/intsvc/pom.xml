@@ -1,13 +1,8 @@
 <?xml version="1.0"?>
-<!--
-This is the Integration Service (Webservice, Messaging, ...) Maven POM.
-
-
-Template version: 1.4
-Generation time : 2012-03-12 09:23:52 CET
--->
+<!-- This is the Integration Service (Webservice, Messaging, ...) Maven POM. Template version: 1.4 Generation time : 
+  2012-03-12 09:23:52 CET -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>se.vgregion.notifications</groupId>
@@ -37,7 +32,7 @@ Generation time : 2012-03-12 09:23:52 CET
         <version>6.1.8</version>
         <configuration>
           <contextPath>/notifications-ws</contextPath>
-          <!--<scanIntervalSeconds>1</scanIntervalSeconds>-->
+          <!--<scanIntervalSeconds>1</scanIntervalSeconds> -->
           <connectors>
             <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
               <port>9080</port>
@@ -59,10 +54,34 @@ Generation time : 2012-03-12 09:23:52 CET
     </plugins>
   </build>
 
+  <properties>
+    <camel-version>2.7.1</camel-version>
+  </properties>
+
+
   <dependencies>
+  
+    <dependency>
+      <groupId>se.vgregion.commons-util</groupId>
+      <artifactId>commons-util-core-bc-composite-svc-camel</artifactId>
+      <version>3.8</version>
+      <scope>runtime</scope>
+    </dependency>
+    
+   <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>notifications-core-bc-composite-svc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
+    </dependency>
+    
+   <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
     </dependency>
 
     <dependency>
@@ -70,12 +89,7 @@ Generation time : 2012-03-12 09:23:52 CET
       <artifactId>spring-webmvc</artifactId>
     </dependency>
 
-    <!--
-        <dependency>
-          <groupId>org.springframework.ws</groupId>
-          <artifactId>spring-ws-core</artifactId>
-        </dependency>
-    -->
+    <!-- <dependency> <groupId>org.springframework.ws</groupId> <artifactId>spring-ws-core</artifactId> </dependency> -->
 
 
     <dependency>
@@ -107,7 +121,7 @@ Generation time : 2012-03-12 09:23:52 CET
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-jaxrs</artifactId>
       <version>1.6.4</version>
-      <!--<scope>runtime</scope>-->
+      <!--<scope>runtime</scope> -->
     </dependency>
 
     <dependency>
@@ -115,14 +129,32 @@ Generation time : 2012-03-12 09:23:52 CET
       <artifactId>commons-io</artifactId>
       <version>1.4</version>
     </dependency>
-    
-        <dependency>
+
+    <dependency>
       <groupId>com.liferay.portal</groupId>
       <artifactId>portal-service</artifactId>
       <version>${liferay.version}</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-core</artifactId>
+      <version>${camel-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.camel</groupId>
+      <artifactId>camel-restlet</artifactId>
+      <version>${camel-version}</version>
+    </dependency>
     
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.0.1</version>
+    </dependency>
+
   </dependencies>
 
 </project>
