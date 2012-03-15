@@ -32,6 +32,18 @@
     </dependency>
 
     <dependency>
+      <groupId>se.vgregion.commons-util</groupId>
+      <artifactId>commons-util-core-bc-composite-svc-usd</artifactId>
+      <version>3.11</version>
+    </dependency>
+
+    <dependency>
+      <groupId>se.vgregion.alfresco-client</groupId>
+      <artifactId>alfresco-client-core-bc-composite-svc</artifactId>
+      <version>1.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>se.vgregion.raindancenotifier</groupId>
       <artifactId>raindancenotifier-core-composite-svc</artifactId>
       <version>1.1</version>
@@ -84,11 +96,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>notifications-core-bc-composite-types</artifactId>
       <version>${project.version}</version>
@@ -102,6 +109,24 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.9.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+      <version>1.9.5</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
     </dependency>
   </dependencies>
 </project>

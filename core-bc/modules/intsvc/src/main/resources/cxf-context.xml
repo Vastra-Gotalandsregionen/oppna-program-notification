@@ -15,14 +15,18 @@
 
   <jaxrs:server id="notificationService" address="/">
     <jaxrs:serviceBeans>
-      <ref bean="testCounter"/>
+      <ref bean="testService"/>
     </jaxrs:serviceBeans>
 
-    <!--<jaxrs:providers>
-      <ref bean="atomFeedProvider"/>
-      <ref bean="atomEntryProvider"/>
-    </jaxrs:providers>-->
+    <jaxrs:providers>
+      <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider" />
+    </jaxrs:providers>
+    <!--<jaxrs:providers>-->
+      <!--<ref bean="jsonProvider"/>-->
+    <!--</jaxrs:providers>-->
   </jaxrs:server>
 
-  <bean id="testCounter" class="se.vgregion.notifications.service.TestCounter"/>
+  <!--<bean id="jsonProvider" class="org.apache.cxf.jaxrs.provider.JSONProvider" />-->
+  
+  <bean id="testService" class="se.vgregion.notifications.service.TestService"/>
 </beans>

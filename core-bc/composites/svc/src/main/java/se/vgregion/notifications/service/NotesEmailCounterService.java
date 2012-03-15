@@ -1,4 +1,4 @@
-package se.vgregion.notifications.counter;
+package se.vgregion.notifications.service;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
@@ -30,10 +30,10 @@ import java.net.URISyntaxException;
  * Date: 8/8-11
  * Time: 14:55
  */
-public class NotesEmailCounterBean {
+public class NotesEmailCounterService {
     private String siteKey;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotesEmailCounterBean.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotesEmailCounterService.class);
 
     @Autowired
     private CredentialService credentialService;

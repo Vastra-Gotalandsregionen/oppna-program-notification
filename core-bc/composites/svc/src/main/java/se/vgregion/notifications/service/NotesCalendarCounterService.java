@@ -1,4 +1,4 @@
-package se.vgregion.notifications.counter;
+package se.vgregion.notifications.service;
 
 import org.apache.camel.*;
 import org.apache.camel.builder.xml.XPathBuilder;
@@ -23,10 +23,10 @@ import java.util.Calendar;
  * Date: 4/8-11
  * Time: 12:11
  */
-public class NotesCalendarCounterBean {
+public class NotesCalendarCounterService {
     private int period = 1;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotesCalendarCounterBean.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotesCalendarCounterService.class);
 
     @Autowired
     private ProducerTemplate template;

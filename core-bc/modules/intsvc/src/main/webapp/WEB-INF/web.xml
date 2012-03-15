@@ -5,16 +5,6 @@
 
   <display-name>Archetype Created Web Application</display-name>
 
-  <!--<context-param>
-    <param-name>contextConfigLocation</param-name>
-    <param-value>/WEB-INF/spring-application.xml</param-value>
-  </context-param>-->
-  
-<!--    <context-param>
-    <param-name>portalContextConfigLocation</param-name>
-    <param-value>/WEB-INF/spring-application.xml</param-value>
-  </context-param>-->
-
   <servlet>
     <servlet-name>CXFServlet</servlet-name>
     <servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
@@ -26,19 +16,28 @@
     <url-pattern>/*</url-pattern>
   </servlet-mapping>
 
-   <!--<servlet>
-    <servlet-name>spring-ws</servlet-name>
-    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>spring-ws</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>-->
-
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-  </listener>  
-  
+  </listener>
+
+  <security-constraint>
+
+    <!-- This security constraint means that the server this web application is run on must provide a connector which
+    is secured by SSL/TLS. For e.g. Tomcat, see http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html. -->
+
+    <display-name>Https Security Constraint</display-name>
+
+    <web-resource-collection>
+      <web-resource-name>Secure Area</web-resource-name>
+      <url-pattern>/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+
+  </security-constraint>
 
 </web-app>
