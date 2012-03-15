@@ -27,8 +27,25 @@
   <!-- Enables component scanning -->
   <context:component-scan base-package="se.vgregion.raindancenotifier" />
   <context:component-scan base-package="se.vgregion.portal.raindancenotifier" />
-  
+
   <!-- Enables annotations -->
   <context:annotation-config />
+
+  <bean id="usdService" class="se.vgregion.usdservice.USDServiceImpl">
+    <constructor-arg ref="usdProperties"/>
+  </bean>
+
+  <bean id="usdProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property name="locations">
+      <list>
+        <value>classpath*:security.properties</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean class="se.vgregion.alfrescoclient.service.AlfrescoService">
+    <constructor-arg index="0" value="http://alfresco-stage.vgregion.se"/>
+    <constructor-arg index="1" value="X-Alfresco-Remote-User"/>
+  </bean>
 
 </beans>

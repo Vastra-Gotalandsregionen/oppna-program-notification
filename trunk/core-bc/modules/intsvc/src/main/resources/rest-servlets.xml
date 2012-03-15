@@ -21,7 +21,7 @@
     </jaxrs:providers>
   </jaxrs:server>
 
-  <bean id="testService" class="se.vgregion.notifications.service.TestCounter">
+  <bean id="testService" class="se.vgregion.notifications.service.TestService">
   </bean>
 
 </beans>

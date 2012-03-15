@@ -4,12 +4,10 @@ import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.ws.rs.*;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -20,14 +18,14 @@ import java.util.Random;
 
 @Path("/n")
 @Produces("application/json")
-public class TestCounter {
+public class TestService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestCounter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestService.class);
 
-    @Path("/alfresco")
+    @Path("/alfresco/{userId}")
     @GET
-    public String getAlfresco() {
-        String msg = getFromMessageBus("vgr/notification_alfresco", null);
+    public String getAlfresco(@PathParam("userId") String userId) {
+        String msg = getFromMessageBus("vgr/alfresco_recently_modified_json", userId);
         return msg;
     }
 
@@ -35,6 +33,14 @@ public class TestCounter {
     @GET
     public String getInvoices(@PathParam("userId") String userId) {
         String msg = getFromMessageBus("vgr/raindance_invoices_count", userId);
+        return msg;
+    }
+
+    @Path("/invoices/json/{userId}")
+    @Produces("application/json")
+    @GET
+    public String getInvoicesJson(@PathParam("userId") String userId) {
+        String msg = getFromMessageBus("vgr/raindance_invoices_json", userId);
         return msg;
     }
 
@@ -50,6 +56,13 @@ public class TestCounter {
     @GET
     public String getCalendar(@PathParam("userId") String userId) {
         String msg = getFromMessageBus("vgr/notes_calendar_count", userId);
+        return msg;
+    }
+
+    @Path("/usd/{userId}")
+    @GET
+    public String getUsd(@PathParam("userId") String userId) {
+        String msg = getFromMessageBus("vgr/usd_issues_json", userId);
         return msg;
     }
 
