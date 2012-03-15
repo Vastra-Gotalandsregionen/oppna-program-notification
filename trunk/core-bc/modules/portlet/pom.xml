@@ -29,6 +29,11 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>se.vgregion.commons-util</groupId>
+      <artifactId>commons-util-core-bc-composite-svc-usd</artifactId>
+      <version>3.11</version>
+    </dependency>
 
     <dependency>
       <groupId>com.liferay.portal</groupId>

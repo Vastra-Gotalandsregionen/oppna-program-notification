@@ -35,7 +35,6 @@ public class AlfrescoDocumentsService {
             List<Document> recentlyModified = alfrescoService.getRecentlyModified(userId, site.getShortName());
             siteWithRecentlyModified.put(site.getTitle(), recentlyModified);
         }
-
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
         try {
             return writer.writeValueAsString(siteWithRecentlyModified);
