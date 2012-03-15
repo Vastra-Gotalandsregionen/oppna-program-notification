@@ -17,7 +17,7 @@ import java.util.Random;
  */
 
 @Path("/n")
-@Produces("application/json")
+@Produces("application/json;charset=UTF-8")
 public class TestService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestService.class);
