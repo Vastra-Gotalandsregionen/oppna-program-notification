@@ -1,11 +1,5 @@
 <?xml version="1.0"?>
-<!--
-This is the Web-app Maven POM.
-
-
-Template version: 1.4
-Generation time : 2012-03-12 09:23:52 CET
--->
+<!-- This is the Web-app Maven POM. Template version: 1.4 Generation time : 2012-03-12 09:23:52 CET -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -35,6 +29,14 @@ Generation time : 2012-03-12 09:23:52 CET
   </build>
 
   <dependencies>
+
+    <dependency>
+      <groupId>com.liferay.portal</groupId>
+      <artifactId>portal-service</artifactId>
+      <version>6.0.6</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>javax.portlet</groupId>
       <artifactId>portlet-api</artifactId>
@@ -60,10 +62,21 @@ Generation time : 2012-03-12 09:23:52 CET
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
     </dependency>
-    <!--
-      We use a Servlet Filter from spring-web to control UTF-8 encodings.
-      Facelets doesn't do this for us.
-    -->
+
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.9.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>se.vgregion.alfresco-client</groupId>
+      <artifactId>alfresco-client-core-bc-composite-svc</artifactId>
+      <version>1.1-SNAPSHOT</version>
+    </dependency>
+
+
+    <!-- We use a Servlet Filter from spring-web to control UTF-8 encodings. Facelets doesn't do this for us. -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
@@ -85,12 +98,12 @@ Generation time : 2012-03-12 09:23:52 CET
       <groupId>org.springframework</groupId>
       <artifactId>spring-context-support</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
-        
+
   </dependencies>
 
   <profiles>
