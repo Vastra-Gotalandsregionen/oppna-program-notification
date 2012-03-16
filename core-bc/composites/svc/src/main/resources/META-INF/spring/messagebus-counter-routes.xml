@@ -31,7 +31,7 @@
   <bean id="alfrescoJson" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
     <constructor-arg index="0" value="vgr/alfresco_recently_modified_json"/>
     <constructor-arg index="1" value="se.vgregion.notifications.service.AlfrescoDocumentsService" />
-    <constructor-arg index="2" value="getRecentlyModified" />
+    <constructor-arg index="2" value="getRecentlyModifiedJson" />
   </bean>
 
   <bean id="usdIssuesJson" class="se.vgregion.routes.MessagebusBeanRouteBuilder">

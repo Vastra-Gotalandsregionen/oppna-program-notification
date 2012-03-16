@@ -6,15 +6,18 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import se.vgregion.usdservice.USDService;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Patrik Bergström
  */
+@Service
 public class UsdIssuesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UsdIssuesService.class);
@@ -27,7 +30,7 @@ public class UsdIssuesService {
     }
 
 
-    public String getUsdIssuesJson(final String userId){
+    public String getUsdIssuesJson(String userId){
 
         List<Issue> issues = usdService.lookupIssues(userId, -1, true);
 
@@ -38,5 +41,13 @@ public class UsdIssuesService {
             LOGGER.error(e.getMessage(), e);
             return "Internt fel.";
         }
+    }
+
+    public List<Issue> getUsdIssues(String userId) {
+        List<Issue> issues = usdService.lookupIssues(userId, -1, true);
+        if (issues == null) {
+            return new ArrayList<Issue>();
+        }
+        return issues;
     }
 }

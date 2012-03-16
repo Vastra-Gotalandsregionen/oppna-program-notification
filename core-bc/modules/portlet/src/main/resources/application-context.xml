@@ -1,0 +1,23 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <import resource="classpath*:META-INF/spring/services-context.xml" />
+  <import resource="classpath:usersNotificationsCache-context.xml" />
+
+  <context:annotation-config/>
+  <context:component-scan base-package="se.vgregion.notifications.controller"/>
+  <context:component-scan base-package="se.vgregion.notifications.service"/>
+
+  <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>classpath*:META-INF/camel.properties</value>
+        <value>classpath*:raindance-svc.properties</value>
+        <value>classpath*:hibernate.properties</value>
+      </list>
+    </property>
+  </bean>
+</beans>
