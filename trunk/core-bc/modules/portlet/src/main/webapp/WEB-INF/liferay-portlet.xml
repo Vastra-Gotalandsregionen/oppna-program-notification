@@ -5,6 +5,7 @@
   <portlet>
     <portlet-name>notifications</portlet-name>
     <instanceable>false</instanceable>
+    <ajaxable>true</ajaxable>
     <header-portlet-css>/style/notifications.css</header-portlet-css>
     <css-class-wrapper>notifications-portlet</css-class-wrapper>
   </portlet>

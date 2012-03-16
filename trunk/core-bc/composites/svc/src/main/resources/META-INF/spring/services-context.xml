@@ -24,9 +24,16 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
 >
+
+  <!-- This is for commons-util-core-bc-composite-security -->
+  <import resource="classpath*:service-configuration.xml"/>
+
   <!-- Enables component scanning -->
   <context:component-scan base-package="se.vgregion.raindancenotifier" />
   <context:component-scan base-package="se.vgregion.portal.raindancenotifier" />
+  <!--<context:component-scan base-package="se.vgregion.portal.cs.service" />
+  <context:component-scan base-package="se.vgregion.portal.cs.domain.persistence" />-->
+
 
   <!-- Enables annotations -->
   <context:annotation-config />

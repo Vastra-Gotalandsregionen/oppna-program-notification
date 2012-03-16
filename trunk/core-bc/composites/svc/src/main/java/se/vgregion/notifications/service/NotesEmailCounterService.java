@@ -17,6 +17,7 @@ import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import se.vgregion.portal.cs.domain.UserSiteCredential;
 import se.vgregion.portal.cs.service.CredentialService;
 
@@ -30,6 +31,7 @@ import java.net.URISyntaxException;
  * Date: 8/8-11
  * Time: 14:55
  */
+@Service
 public class NotesEmailCounterService {
     private String siteKey;
 

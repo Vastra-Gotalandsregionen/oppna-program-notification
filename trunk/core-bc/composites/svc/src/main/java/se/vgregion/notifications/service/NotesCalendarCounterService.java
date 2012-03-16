@@ -11,6 +11,7 @@ import org.apache.http.params.HttpParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,13 +24,11 @@ import java.util.Calendar;
  * Date: 4/8-11
  * Time: 12:11
  */
+@org.springframework.stereotype.Service
 public class NotesCalendarCounterService {
     private int period = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotesCalendarCounterService.class);
-
-    @Autowired
-    private ProducerTemplate template;
 
     public String getCount(final String userId, CamelContext context) throws URISyntaxException, IOException {
         if (userId == null || "".equals(userId)) return "";

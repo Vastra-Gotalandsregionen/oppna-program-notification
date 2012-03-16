@@ -26,8 +26,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
  
-  <context:annotation-config/>
-  <context:component-scan base-package="se.vgregion.notifications.controller"/>
+  <import resource="classpath:application-context.xml"/>
     
   <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
     <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>

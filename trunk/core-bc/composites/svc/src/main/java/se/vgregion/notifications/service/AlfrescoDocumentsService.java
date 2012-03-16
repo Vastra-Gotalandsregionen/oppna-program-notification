@@ -5,15 +5,18 @@ import org.codehaus.jackson.map.ObjectWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.alfrescoclient.service.AlfrescoService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class AlfrescoDocumentsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoDocumentsService.class);
@@ -24,17 +27,25 @@ public class AlfrescoDocumentsService {
     public AlfrescoDocumentsService(AlfrescoService alfrescoService) {
         this.alfrescoService = alfrescoService;
     }
-
-    public String getRecentlyModified(final String userId) {
-        if (userId == null || "".equals(userId)) return "";
+    
+    public List<Site> getRecentlyModified(final String userId) {
+        if (userId == null || "".equals(userId)) {
+            return new ArrayList<Site>();
+        }
 
         List<Site> sitesByUser = alfrescoService.getSitesByUser(userId, "", "");
 
-        Map<String, List<Document>> siteWithRecentlyModified = new HashMap<String, List<Document>>();
         for (Site site : sitesByUser) {
             List<Document> recentlyModified = alfrescoService.getRecentlyModified(userId, site.getShortName());
-            siteWithRecentlyModified.put(site.getTitle(), recentlyModified);
+            site.setRecentModifiedDocuments(recentlyModified);
         }
+
+        return sitesByUser;
+    }
+
+    public String getRecentlyModifiedJson(final String userId) {
+        List<Site> siteWithRecentlyModified = getRecentlyModified(userId);
+
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
         try {
             return writer.writeValueAsString(siteWithRecentlyModified);

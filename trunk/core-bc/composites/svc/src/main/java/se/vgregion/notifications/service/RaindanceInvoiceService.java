@@ -5,6 +5,7 @@ import org.codehaus.jackson.map.ObjectWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.raindancenotifier.services.RaindanceInvoicesService;
 
@@ -14,6 +15,7 @@ import java.util.List;
 /**
  * @author Patrik Bergström
  */
+@Service
 public class RaindanceInvoiceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaindanceInvoiceService.class);
