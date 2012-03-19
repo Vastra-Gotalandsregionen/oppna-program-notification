@@ -9,7 +9,6 @@
 
   <context:annotation-config/>
   <context:component-scan base-package="se.vgregion.notifications.controller"/>
-  <context:component-scan base-package="se.vgregion.notifications.service"/>
 
   <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">

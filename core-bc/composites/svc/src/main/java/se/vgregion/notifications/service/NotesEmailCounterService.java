@@ -21,9 +21,11 @@ import org.springframework.stereotype.Service;
 import se.vgregion.portal.cs.domain.UserSiteCredential;
 import se.vgregion.portal.cs.service.CredentialService;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Scanner;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,6 +35,8 @@ import java.net.URISyntaxException;
  */
 @Service
 public class NotesEmailCounterService {
+
+    @Resource(name = "iNotesSiteKey")
     private String siteKey;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotesEmailCounterService.class);
@@ -40,19 +44,24 @@ public class NotesEmailCounterService {
     @Autowired
     private CredentialService credentialService;
 
-    public String getCount(final String userId) throws IOException, URISyntaxException {
+    public Integer getCount(final String userId) throws IOException {
         if (userId == null) {
-            return "";
+            return null;
         }
 
         final UserSiteCredential userSiteCredential = getSitePassword(userId, siteKey);
 
         if (userSiteCredential == null) {
-            return "";
+            return null;
         }
 
-        URI uri = new URI("http", "aida.vgregion.se", "/calendar.nsf/unreadcount", "openagent&userid=" +
-                userSiteCredential.getSiteUser(), "");
+        URI uri = null;
+        try {
+            uri = new URI("http", "aida.vgregion.se", "/calendar.nsf/unreadcount", "openagent&userid=" +
+                    userSiteCredential.getSiteUser(), "");
+        } catch (URISyntaxException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
 
         HttpResponse httpResponse = callService(userSiteCredential.getSiteUser(),
                 userSiteCredential.getSitePassword(), uri);
@@ -85,24 +94,30 @@ public class NotesEmailCounterService {
         return httpClient.execute(httpGet, httpContext);
     }
 
-    private String handleResponse(HttpResponse httpResponse) throws IOException {
+    private Integer handleResponse(HttpResponse httpResponse) throws IOException {
         if (httpResponse.getStatusLine().getStatusCode() == 200) {
             String reply = IOUtils.toString(httpResponse.getEntity().getContent());
 
             if (reply == null) {
-                LOGGER.error("Http request failed. Service did not respond.");
-                return "-";
+                LOGGER.error("Http request failed. Service did not respond.", new Exception());
+                return null;
             }
 
             if (reply.contains("DOCTYPE")) {
-                return "-";
+                LOGGER.warn("Http request failed. Unexpected response.", new Exception());
+                return null;
             }
 
-            return reply.toString();
+            Scanner scanner = new Scanner(reply);
+            if (scanner.hasNextInt()) {
+                return scanner.nextInt();
+            } else {
+                return null;
+            } 
         } else {
             LOGGER.error("Http request failed. Response code=" + httpResponse.getStatusLine().getStatusCode() + ". " +
-                    httpResponse.getStatusLine().getReasonPhrase());
-            return "-";
+                    httpResponse.getStatusLine().getReasonPhrase(), new Exception());
+            return null;
         }
     }
 

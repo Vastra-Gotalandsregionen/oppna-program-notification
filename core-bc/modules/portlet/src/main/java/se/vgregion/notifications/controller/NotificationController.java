@@ -8,8 +8,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
 import java.util.concurrent.*;
 
 import javax.annotation.Resource;
@@ -21,37 +19,27 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.hibernate.EhCache;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
-import se.vgregion.alfrescoclient.domain.Document;
 
 import com.liferay.portal.kernel.messaging.Message;
-import com.liferay.portal.kernel.messaging.MessageBusException;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
+import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.notifications.service.NotificationService;
-import se.vgregion.usdservice.domain.Issue;
 
 /**
  * @author simongoransson
  */
 
 @Controller
-//@Scope("session")
 @RequestMapping("VIEW")
 public class NotificationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationController.class);
@@ -76,9 +64,11 @@ public class NotificationController {
 
         Map<String, Integer> systemNoNotifications = getSystemNoNotifications(screenName);
 
-        model.addAttribute("numberNewAlfresco", systemNoNotifications.get("numberNewAlfresco"));
-        model.addAttribute("numberUsdIssues", systemNoNotifications.get("numberUsdIssues"));
-        model.addAttribute("slowRandom", systemNoNotifications.get("slowRandom"));
+        model.addAttribute("alfrescoCount", systemNoNotifications.get("alfrescoCount"));
+        model.addAttribute("usdIssuesCount", systemNoNotifications.get("usdIssuesCount"));
+        model.addAttribute("randomCount", systemNoNotifications.get("randomCount"));
+        model.addAttribute("emailCount", systemNoNotifications.get("emailCount"));
+        model.addAttribute("invoicesCount", systemNoNotifications.get("invoicesCount"));
 
         model.addAttribute("interval", INTERVAL * 1000);
 
@@ -99,16 +89,20 @@ public class NotificationController {
 
     private Map<String, Integer> getSystemNoNotifications(String screenName) {
         try {
-            Future<Integer> numberNewAlfresco = notificationService.getNumberNewAlfresco(screenName);
-            Future<Integer> numberUsd = notificationService.getUsdIssues(screenName);
-            Future<Integer> slowRandom = notificationService.getSlowRandom();
+            Future<Integer> alfrescoCount = notificationService.getAlfrescoCount(screenName);
+            Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(screenName);
+            Future<Integer> randomCount = notificationService.getRandomCount();
+            Future<Integer> emailCount = notificationService.getEmailCount(screenName);
+            Future<Integer> invoicesCount = notificationService.getInvoicesCount(screenName);
 
             Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
 
-            systemNoNotifications.put("numberNewAlfresco", getValue(numberNewAlfresco.get()));
-            systemNoNotifications.put("numberUsdIssues", getValue(numberUsd.get()));
-            systemNoNotifications.put("slowRandom", getValue(slowRandom.get()));
-
+            systemNoNotifications.put("alfrescoCount", getValue(alfrescoCount.get()));
+            systemNoNotifications.put("usdIssuesCount", getValue(usdIssuesCount.get()));
+            systemNoNotifications.put("randomCount", getValue(randomCount.get()));
+            systemNoNotifications.put("emailCount", getValue(emailCount.get()));
+            systemNoNotifications.put("invoicesCount", getValue(invoicesCount.get()));
+            
             return systemNoNotifications;
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
@@ -128,19 +122,31 @@ public class NotificationController {
 
         Map<String, Integer> systemNoNotifications = (Map<String, Integer>) ehCache.get(screenName).getValue();//todo om det inte finns...
 
+        writeJsonObjectToResponse(response, systemNoNotifications);
+    }
+
+    private void writeJsonObjectToResponse(ResourceResponse response, Object object) throws IOException {
         PrintWriter writer = null;
         try {
             response.setContentType("application/json");
 
             writer = response.getWriter();
 
-            new ObjectMapper().writeValue(writer, systemNoNotifications);
+            new ObjectMapper().writeValue(writer, object);
         } finally {
             if (writer != null) {
                 writer.close();
             }
         }
+    }
 
+    @ResourceMapping(value = "alfrescoResource")
+    public void getAlfrescoDocuments(ResourceRequest request, ResourceResponse response) throws IOException {
+        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser().getScreenName();
+
+        List<Document> alfrescoDocuments = notificationService.getAlfrescoDocuments(screenName);
+
+        writeJsonObjectToResponse(response, alfrescoDocuments);
     }
 
     private String getFromMessageBus(String dest, String userId) {

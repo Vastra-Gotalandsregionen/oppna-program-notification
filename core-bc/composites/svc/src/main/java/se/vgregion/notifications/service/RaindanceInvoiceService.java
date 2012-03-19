@@ -27,9 +27,14 @@ public class RaindanceInvoiceService {
         this.invoicesService = invoicesService;
     }
 
-    public String getCount(final String userId) {
-        List<InvoiceNotification> invoices = invoicesService.getInvoices(userId);
-        return invoices.size() + "";
+    public Integer getCount(final String userId) {
+        List<InvoiceNotification> invoices;
+        try {
+            invoices = invoicesService.getInvoices(userId);
+        } catch (RuntimeException ex) {
+            return null;
+        }
+        return invoices.size();
     }
 
     public String getInvoicesJson(final String userId) {

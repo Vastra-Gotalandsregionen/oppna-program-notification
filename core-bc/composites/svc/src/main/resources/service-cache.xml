@@ -23,17 +23,17 @@
 
   <defaultCache maxElementsInMemory="1000"
                 eternal="false"
-                timeToIdleSeconds="900"
-                timeToLiveSeconds="900"
+                timeToIdleSeconds="120"
+                timeToLiveSeconds="120"
                 memoryStoreEvictionPolicy="LRU" />
 
-  <!-- Cache to hold kivws search objects -->
-  <cache name="usersNotificationsCache"
+  <!-- Cache to hold all services' response values -->
+  <cache name="servicesCache"
          maxElementsInMemory="1000"
          eternal="false"
          overflowToDisk="false"
-         timeToIdleSeconds="900"
-         timeToLiveSeconds="900"
+         timeToIdleSeconds="120"
+         timeToLiveSeconds="120"
          memoryStoreEvictionPolicy="LRU" />
 
 </ehcache>

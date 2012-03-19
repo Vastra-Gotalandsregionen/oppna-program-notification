@@ -21,22 +21,30 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
->
+       xmlns:task="http://www.springframework.org/schema/task" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+        >
 
   <!-- This is for commons-util-core-bc-composite-security -->
   <import resource="classpath*:service-configuration.xml"/>
 
   <!-- Enables component scanning -->
+  <context:component-scan base-package="se.vgregion.notifications.service"/>
   <context:component-scan base-package="se.vgregion.raindancenotifier" />
   <context:component-scan base-package="se.vgregion.portal.raindancenotifier" />
-  <!--<context:component-scan base-package="se.vgregion.portal.cs.service" />
-  <context:component-scan base-package="se.vgregion.portal.cs.domain.persistence" />-->
-
 
   <!-- Enables annotations -->
   <context:annotation-config />
+
+  <!-- Enables asynchronous support -->
+  <task:annotation-driven executor="myExecutor"/>
+  <task:executor id="myExecutor" pool-size="10"/>
+
+  <bean id="iNotesSiteKey" class="java.lang.String">
+    <constructor-arg value="iNotes"/>
+  </bean>
 
   <bean id="usdService" class="se.vgregion.usdservice.USDServiceImpl">
     <constructor-arg ref="usdProperties"/>
@@ -53,6 +61,21 @@
   <bean class="se.vgregion.alfrescoclient.service.AlfrescoService">
     <constructor-arg index="0" value="http://alfresco-stage.vgregion.se"/>
     <constructor-arg index="1" value="X-Alfresco-Remote-User"/>
+  </bean>
+
+  <!-- Caching by AOP -->
+  <!-- Enable @AspectJ Support -->
+  <aop:aspectj-autoproxy/>
+
+  <bean id="servicesCacheAspect" class="se.vgregion.notifications.aspect.NotificationsCacheAspect" />
+
+  <bean id="servicesCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+    <property name="configLocation" value="classpath:service-cache.xml"/>
+  </bean>
+
+  <bean id="servicesCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+    <property name="cacheManager" ref="servicesCacheManager"/>
+    <property name="cacheName" value="servicesCache"/>
   </bean>
 
 </beans>

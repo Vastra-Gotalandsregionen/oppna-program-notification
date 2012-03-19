@@ -11,10 +11,7 @@ import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.alfrescoclient.service.AlfrescoService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class AlfrescoDocumentsService {
@@ -23,12 +20,16 @@ public class AlfrescoDocumentsService {
 
     private AlfrescoService alfrescoService;
 
+    public AlfrescoDocumentsService() {
+        // Empty constructor is needed to make CGLIB happy
+    }
+
     @Autowired
     public AlfrescoDocumentsService(AlfrescoService alfrescoService) {
         this.alfrescoService = alfrescoService;
     }
-    
-    public List<Site> getRecentlyModified(final String userId) {
+
+    public List<Site> getRecentlyModified(final String userId, boolean cachedResult) {
         if (userId == null || "".equals(userId)) {
             return new ArrayList<Site>();
         }
@@ -37,14 +38,15 @@ public class AlfrescoDocumentsService {
 
         for (Site site : sitesByUser) {
             List<Document> recentlyModified = alfrescoService.getRecentlyModified(userId, site.getShortName());
+
             site.setRecentModifiedDocuments(recentlyModified);
         }
 
         return sitesByUser;
     }
 
-    public String getRecentlyModifiedJson(final String userId) {
-        List<Site> siteWithRecentlyModified = getRecentlyModified(userId);
+    public String getRecentlyModifiedJson(final String userId, boolean cachedResult) {
+        List<Site> siteWithRecentlyModified = getRecentlyModified(userId, cachedResult);
 
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
         try {
