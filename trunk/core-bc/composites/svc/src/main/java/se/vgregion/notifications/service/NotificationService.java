@@ -11,6 +11,8 @@ import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -28,6 +30,10 @@ public class NotificationService {
     private RaindanceInvoiceService raindanceInvoiceService;
     private UsdIssuesService usdIssuesService;
 
+    public NotificationService() {
+        // Empty constructor is needed to make CGLIB happy
+    }
+
     @Autowired
     public NotificationService(AlfrescoDocumentsService alfrescoDocumentsService,
                                NotesCalendarCounterService notesCalendarCounterService,
@@ -42,24 +48,47 @@ public class NotificationService {
     }
 
     @Async
-    public Future<Integer> getNumberNewAlfresco(String screenName) throws IOException {
-        List<Site> alfrescoResponse = alfrescoDocumentsService.getRecentlyModified(screenName);
+    public Future<Integer> getAlfrescoCount(String screenName) throws IOException {
+        List<Site> alfrescoResponse = alfrescoDocumentsService.getRecentlyModified(screenName, false);
 
-        return new AsyncResult<Integer>(alfrescoResponse.size());
+        int n = 0;
+        for (Site site : alfrescoResponse) {
+            n += site.getRecentModifiedDocuments().size();
+        }
+
+        return new AsyncResult<Integer>(n);
     }
 
     @Async
-    public Future<Integer> getUsdIssues(String screenName) throws IOException {
+    public Future<Integer> getUsdIssuesCount(String screenName) throws IOException {
         List<Issue> issues = usdIssuesService.getUsdIssues(screenName);
 
         return new AsyncResult<Integer>(issues.size());
     }
 
     @Async
-    public Future<Integer> getSlowRandom() throws InterruptedException {
-        Thread.sleep(3000);
+    public Future<Integer> getRandomCount() throws InterruptedException {
         return new AsyncResult<Integer>(new Random().nextInt(10000));
     }
+    
+    @Async
+    public Future<Integer> getEmailCount(String screenName) throws IOException {
+        Integer count = notesEmailCounterService.getCount(screenName);
+        return new AsyncResult<Integer>(count);
+    }
 
-
+    @Async
+    public Future<Integer> getInvoicesCount(String screenName) {
+        Integer count = raindanceInvoiceService.getCount(screenName);
+        return new AsyncResult<Integer>(count);
+    }
+    
+    public List<Document> getAlfrescoDocuments(String screenName) {
+        List<Site> sites = alfrescoDocumentsService.getRecentlyModified(screenName, true);
+        List<Document> documents = new ArrayList<Document>();
+        for (Site site : sites) {
+            documents.addAll(site.getRecentModifiedDocuments());
+        }
+        return documents;
+    }
 }
