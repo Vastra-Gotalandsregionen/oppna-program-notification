@@ -17,6 +17,7 @@
     <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
     <expiration-cache>0</expiration-cache>
 
+
     <supports>
       <mime-type>text/html</mime-type>
       <portlet-mode>VIEW</portlet-mode>
@@ -29,6 +30,13 @@
       <short-title>Mina Notifikationer</short-title>
       <keywords>notifications</keywords>
     </portlet-info>
+
+    <portlet-preferences>
+      <preference>
+        <name>portlet-setup-show-borders</name>
+        <value>false</value>
+      </preference>
+    </portlet-preferences>
   </portlet>
 
 </portlet-app>

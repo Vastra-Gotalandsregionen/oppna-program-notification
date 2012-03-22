@@ -15,7 +15,7 @@
   <name>${project.artifactId}</name>
 
   <build>
-    <finalName>${project.artifactId}</finalName>
+    <finalName>notifications-portlet</finalName>
     <plugins>
       <plugin>
         <!-- Configure eclipse plug-in to generate a context root that does not have the version number on it -->
@@ -119,6 +119,11 @@
       <groupId>net.sf.ehcache</groupId>
       <artifactId>ehcache</artifactId>
       <version>1.6.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
     </dependency>
 
   </dependencies>

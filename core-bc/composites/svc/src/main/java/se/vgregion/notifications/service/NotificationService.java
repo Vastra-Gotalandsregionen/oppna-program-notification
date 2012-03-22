@@ -1,7 +1,5 @@
 package se.vgregion.notifications.service;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -11,10 +9,8 @@ import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Future;
 
@@ -68,7 +64,7 @@ public class NotificationService {
 
     @Async
     public Future<Integer> getRandomCount() throws InterruptedException {
-        return new AsyncResult<Integer>(new Random().nextInt(10000));
+        return new AsyncResult<Integer>(new Random().nextInt(1000));
     }
     
     @Async
