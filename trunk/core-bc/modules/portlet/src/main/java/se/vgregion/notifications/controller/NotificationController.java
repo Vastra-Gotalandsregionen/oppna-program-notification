@@ -5,13 +5,13 @@ package se.vgregion.notifications.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.*;
 import java.util.concurrent.*;
 
 import javax.annotation.Resource;
 import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
@@ -49,7 +49,8 @@ public class NotificationController {
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(20);
 
     @Resource(name = "usersNotificationsCache")
-    private Cache ehCache;
+    private Cache cache;
+    private final String recentlyCheckedSuffix = "RecentlyChecked";
 
     @Autowired
     public NotificationController(NotificationService notificationService) {
@@ -60,23 +61,100 @@ public class NotificationController {
     public String viewNotifications(Model model, RenderRequest request) throws ExecutionException,
             InterruptedException {
 
-        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser().getScreenName();
+        final String screenName = getScreenName(request);
 
-        Map<String, Integer> systemNoNotifications = getSystemNoNotifications(screenName);
+        /*Element element = cache.get(screenName);
+        
+        Map<String, Integer> previousValues = new HashMap<String, Integer>()
+        if (element == null || element.getValue() == null) {
+            // Just instantiate an empty map
+            previousValues = new HashMap<String, Integer>();
+        }*/
+        Element element = cache.get(screenName);
 
-        model.addAttribute("alfrescoCount", systemNoNotifications.get("alfrescoCount"));
-        model.addAttribute("usdIssuesCount", systemNoNotifications.get("usdIssuesCount"));
-        model.addAttribute("randomCount", systemNoNotifications.get("randomCount"));
-        model.addAttribute("emailCount", systemNoNotifications.get("emailCount"));
-        model.addAttribute("invoicesCount", systemNoNotifications.get("invoicesCount"));
+        Map<String, Integer> systemNoNotifications;
+        if (element != null && element.getValue() != null) {
+            systemNoNotifications = (Map<String, Integer>) element.getValue();
+        } else {
+            systemNoNotifications = getSystemNoNotifications(screenName);
+            cache.put(new Element(screenName, systemNoNotifications));
+        }
+
+        Integer alfrescoCount = systemNoNotifications.get("alfrescoCount");
+        Integer usdIssuesCount = systemNoNotifications.get("usdIssuesCount");
+        Integer randomCount = systemNoNotifications.get("randomCount");
+        Integer emailCount = systemNoNotifications.get("emailCount");
+        Integer invoicesCount = systemNoNotifications.get("invoicesCount");
+
+        model.addAttribute("alfrescoCount", alfrescoCount);
+        model.addAttribute("alfrescoDisplayCount", displayCount(screenName, "alfrescoCount", alfrescoCount));
+        model.addAttribute("usdIssuesCount", usdIssuesCount);
+        model.addAttribute("usdIssuesDisplayCount", displayCount(screenName, "usdIssuesCount", usdIssuesCount));
+        model.addAttribute("randomCount", randomCount);
+        model.addAttribute("randomDisplayCount", displayCount(screenName, "randomCount", randomCount));
+        model.addAttribute("emailCount", emailCount);
+        model.addAttribute("emailDisplayCount", displayCount(screenName, "emailCount", emailCount));
+        model.addAttribute("invoicesCount", invoicesCount);
+        model.addAttribute("invoicesDisplayCount", displayCount(screenName, "invoicesCount", invoicesCount));
 
         model.addAttribute("interval", INTERVAL * 1000);
-
-        ehCache.put(new Element(screenName, systemNoNotifications));
 
         executorService.schedule(new CacheUpdater(screenName), INTERVAL, TimeUnit.SECONDS);
 
         return "view";
+    }
+
+    private String getScreenName(RenderRequest request) {
+        return ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
+                .getScreenName();
+    }
+
+
+    // Tests whether the new value already is stored in cache. If no value is stored in cache the value is new.
+    private boolean displayCount(String screenName, String countName, Integer newCount) {
+        Element element = cache.get(screenName);
+
+        // If any of these are null the value is not stored in cache.
+        if (element == null || element.getValue() == null || ((Map<String, Integer>) element.getValue())
+                .get(countName) == null) {
+            return true;
+        } else {
+            // First check whether the user have checked this recently.
+            Element checked = cache.get(screenName + recentlyCheckedSuffix);
+            if (checked == null || checked.getValue() == null || !((Set<String>) checked.getValue())
+                    .contains(countName)) {
+                // The user hasn't checked it recently so we should display the count.
+                return true;
+            } else {
+                // The user has recently checked it so we display it depending on whether the value is new.
+                return !((Map<String, Integer>) element.getValue()).get(countName).equals(newCount);
+            }
+        }
+    }
+
+    @RenderMapping(params = "action=showExpandedNotifications")
+    public String showExpandedNotifications(RenderRequest request, RenderResponse response) {
+
+        final String screenName = getScreenName(request);
+
+        String notificationType = request.getParameter("notificationType");
+
+        String countName = notificationType + "Count";
+
+        Element element = cache.get(screenName + recentlyCheckedSuffix);
+
+        if (element != null && element.getValue() != null) {
+            Set<String> values = (Set<String>) element.getValue();
+            values.add(countName);
+        } else {
+            Set<String> values = new HashSet<String>();
+            values.add(countName);
+            element = new Element(screenName + recentlyCheckedSuffix, values);
+            cache.put(element);
+        }
+
+        System.out.println("hej");
+        return "view_notifications";
     }
 
     private Integer getValue(Integer value) {
@@ -102,7 +180,7 @@ public class NotificationController {
             systemNoNotifications.put("randomCount", getValue(randomCount.get()));
             systemNoNotifications.put("emailCount", getValue(emailCount.get()));
             systemNoNotifications.put("invoicesCount", getValue(invoicesCount.get()));
-            
+
             return systemNoNotifications;
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
@@ -120,7 +198,7 @@ public class NotificationController {
 
         executorService.schedule(new CacheUpdater(screenName), INTERVAL, TimeUnit.SECONDS);
 
-        Map<String, Integer> systemNoNotifications = (Map<String, Integer>) ehCache.get(screenName).getValue();//todo om det inte finns...
+        Map<String, Integer> systemNoNotifications = (Map<String, Integer>) cache.get(screenName).getValue();//todo om det inte finns...
 
         writeJsonObjectToResponse(response, systemNoNotifications);
     }
@@ -142,7 +220,8 @@ public class NotificationController {
 
     @ResourceMapping(value = "alfrescoResource")
     public void getAlfrescoDocuments(ResourceRequest request, ResourceResponse response) throws IOException {
-        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser().getScreenName();
+        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
+                .getScreenName();
 
         List<Document> alfrescoDocuments = notificationService.getAlfrescoDocuments(screenName);
 
@@ -187,7 +266,34 @@ public class NotificationController {
         @Override
         public void run() {
             Map<String, Integer> systemNoNotifications = getSystemNoNotifications(screenName);
-            ehCache.put(new Element(screenName, systemNoNotifications));
+
+            // Compare the new values with the old to see if any value is updated. If so, it should not be considered
+            // recently checked.
+            Element recentlyCheckedSet = cache.get(screenName + recentlyCheckedSuffix);
+            if (recentlyCheckedSet != null) {
+                // If recentlyCheckedSet is null we don't need to do this at all since there will be nothing to remove.
+                Element element = cache.get(screenName);
+                if (element != null && element.getValue() != null) {
+                    Map<String, Integer> cachedValues = (Map<String, Integer>) element.getValue();
+                    for (Map.Entry<String, Integer> countNameValue : cachedValues.entrySet()) {
+                        // Is there a recent check for this key?
+                        String counterName = countNameValue.getKey();
+                        if (recentlyCheckedSet != null && recentlyCheckedSet.getValue() != null) {
+                            if (((Set) recentlyCheckedSet.getValue()).contains(counterName)) {
+                                // If it was recently checked, we compare the new value with the old. If they differ we remove
+                                // the recent check.
+                                Integer oldValue = cachedValues.get(counterName);
+                                Integer newValue = systemNoNotifications.get(counterName);
+                                if (!oldValue.equals(newValue)) {
+                                    ((Set) recentlyCheckedSet.getValue()).remove(counterName);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            cache.put(new Element(screenName, systemNoNotifications));
         }
     }
 
