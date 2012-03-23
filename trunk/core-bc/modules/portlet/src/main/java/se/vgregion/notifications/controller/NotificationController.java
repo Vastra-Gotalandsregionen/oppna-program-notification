@@ -63,6 +63,8 @@ public class NotificationController {
 
         final String screenName = getScreenName(request);
 
+        model.addAttribute("interval", INTERVAL * 1000);
+
         /*Element element = cache.get(screenName);
         
         Map<String, Integer> previousValues = new HashMap<String, Integer>()
@@ -76,8 +78,10 @@ public class NotificationController {
         if (element != null && element.getValue() != null) {
             systemNoNotifications = (Map<String, Integer>) element.getValue();
         } else {
-            systemNoNotifications = getSystemNoNotifications(screenName);
-            cache.put(new Element(screenName, systemNoNotifications));
+//            systemNoNotifications = getSystemNoNotifications(screenName);
+//            cache.put(new Element(screenName, systemNoNotifications));
+            executorService.schedule(new CacheUpdater(screenName), 1, TimeUnit.SECONDS);
+            return "view";
         }
 
         Integer alfrescoCount = systemNoNotifications.get("alfrescoCount");
@@ -97,10 +101,6 @@ public class NotificationController {
         model.addAttribute("invoicesCount", invoicesCount);
         model.addAttribute("invoicesDisplayCount", displayCount(screenName, "invoicesCount", invoicesCount));
 
-        model.addAttribute("interval", INTERVAL * 1000);
-
-        executorService.schedule(new CacheUpdater(screenName), INTERVAL, TimeUnit.SECONDS);
-
         return "view";
     }
 
@@ -113,6 +113,11 @@ public class NotificationController {
     // Tests whether the new value already is stored in cache. If no value is stored in cache the value is new.
     private boolean displayCount(String screenName, String countName, Integer newCount) {
         Element element = cache.get(screenName);
+
+        // If we have no value at the moment we should never display it.
+        if (newCount == null || newCount == 0) {
+            return false;
+        }
 
         // If any of these are null the value is not stored in cache.
         if (element == null || element.getValue() == null || ((Map<String, Integer>) element.getValue())
@@ -133,12 +138,30 @@ public class NotificationController {
     }
 
     @RenderMapping(params = "action=showExpandedNotifications")
-    public String showExpandedNotifications(RenderRequest request, RenderResponse response) {
+    public String showExpandedNotifications(RenderRequest request, RenderResponse response, Model model) {
 
         final String screenName = getScreenName(request);
 
         String notificationType = request.getParameter("notificationType");
 
+        manageRecentlyChecked(screenName, notificationType);
+
+        model.addAttribute("notificationType", upperFirstCase(notificationType));
+        if (notificationType.equals("random")) {
+        }
+
+        return "view_notifications";
+    }
+
+    private String upperFirstCase(String s) {
+        if (s == null || s.length() < 1) {
+            return null;
+        }
+        String firstChar = s.substring(0, 1);
+        return s.replaceFirst(firstChar, firstChar.toUpperCase());
+    }
+
+    private void manageRecentlyChecked(String screenName, String notificationType) {
         String countName = notificationType + "Count";
 
         Element element = cache.get(screenName + recentlyCheckedSuffix);
@@ -152,9 +175,6 @@ public class NotificationController {
             element = new Element(screenName + recentlyCheckedSuffix, values);
             cache.put(element);
         }
-
-        System.out.println("hej");
-        return "view_notifications";
     }
 
     private Integer getValue(Integer value) {
