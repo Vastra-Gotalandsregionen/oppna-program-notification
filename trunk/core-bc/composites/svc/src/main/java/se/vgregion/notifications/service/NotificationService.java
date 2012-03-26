@@ -57,7 +57,7 @@ public class NotificationService {
 
     @Async
     public Future<Integer> getUsdIssuesCount(String screenName) throws IOException {
-        List<Issue> issues = usdIssuesService.getUsdIssues(screenName);
+        List<Issue> issues = usdIssuesService.getUsdIssues(screenName, false);
 
         return new AsyncResult<Integer>(issues.size());
     }
@@ -79,12 +79,16 @@ public class NotificationService {
         return new AsyncResult<Integer>(count);
     }
     
-    public List<Document> getAlfrescoDocuments(String screenName) {
+    public List<Site> getAlfrescoDocuments(String screenName) {
         List<Site> sites = alfrescoDocumentsService.getRecentlyModified(screenName, true);
-        List<Document> documents = new ArrayList<Document>();
-        for (Site site : sites) {
-            documents.addAll(site.getRecentModifiedDocuments());
-        }
-        return documents;
+        return sites;
+    }
+
+    public List<Issue> getUsdIssues(String screenName) {
+        return usdIssuesService.getUsdIssues(screenName, true);
+    }
+
+    public String getBopsId(String userId) {
+        return usdIssuesService.getBopsId(userId);
     }
 }

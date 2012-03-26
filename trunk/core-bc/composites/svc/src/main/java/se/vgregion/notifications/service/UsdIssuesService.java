@@ -24,6 +24,9 @@ public class UsdIssuesService {
 
     private USDService usdService;
 
+    public UsdIssuesService() {
+    }
+
     @Autowired
     public UsdIssuesService(USDService usdService) {
         this.usdService = usdService;
@@ -43,11 +46,15 @@ public class UsdIssuesService {
         }
     }
 
-    public List<Issue> getUsdIssues(String userId) {
+    public List<Issue> getUsdIssues(String userId, boolean cachedResult) {
         List<Issue> issues = usdService.lookupIssues(userId, -1, true);
         if (issues == null) {
             return new ArrayList<Issue>();
         }
         return issues;
+    }
+
+    public String getBopsId(String userId) {
+        return usdService.getBopsId(userId);
     }
 }

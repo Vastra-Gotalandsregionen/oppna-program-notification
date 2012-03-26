@@ -46,24 +46,24 @@ public class NotificationsCacheAspect {
         this.cache = cache;
     }
 
-    /**
-     * Pointcut around KivwsSearchService#searchUnits(java.lang.String, int, java.util.List<java.lang.String>) method.
-     * <p/>
-     * Using Ehcache to cache entries, cache settings (time to live, max elements etc.) are defiend in ehcache.xml.
-     *
-     * @param joinPoint Used to get method parameters value(s)
-     * @return method return value
-     * @throws Throwable If something goes wrong
-     */
     @Around("execution(* se.vgregion.notifications.service.AlfrescoDocumentsService.getRecentlyModified(java.lang.String,boolean))")
-    public Object cacheServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object cacheAlfrescoServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+        return handleRequest(joinPoint);
+    }
+
+    @Around("execution(* se.vgregion.notifications.service.UsdIssuesService.getUsdIssues(java.lang.String,boolean))")
+    public Object cacheUsdIssuesServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+        return handleRequest(joinPoint);
+    }
+
+    private Object handleRequest(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] arguments = joinPoint.getArgs();
-        
+
         Boolean tryCache = (Boolean) arguments[1];
 
         int methodCallHash = joinPoint.getSignature().toLongString().hashCode();
         methodCallHash += arguments[0].hashCode();
-        
+
         if (!tryCache) {
             // Get fresh result
             Object result = joinPoint.proceed();
