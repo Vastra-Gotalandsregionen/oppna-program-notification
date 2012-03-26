@@ -173,7 +173,6 @@ AUI().add('rp-notifications-bar', function (A) {
     }
 );
 
-
 function reloadNotifications(resourceUrl) {
     var items = null;
     a.io.request(resourceUrl, {
@@ -222,22 +221,23 @@ function reloadNotifications(resourceUrl) {
 }
 
 function checkNewValue(value, element) {
-    console.log(element + " " + element.parentNode);
     if (value != element.innerHTML) {
-        // New value -> highlight
-//                element.style.fontWeight = "bold";
-
+        // New value -> highlight if more than zero
+        var classNameLI = element.parentNode.parentNode.parentNode.className;
+        var addition = "";
+        if (classNameLI.indexOf("last") != -1) {
+            addition = " last" //this is the last list item
+        }
         if (value > 0) {
             element.style.fontSize = "1.1em";
-            console.log(element + " " + element.parentNode);
             element.parentNode.className = "count";//('aui-helper-hidden');
+            element.parentNode.parentNode.parentNode.className = "notifications-bar-item notifications-bar-email" + addition;
         } else {
             element.parentNode.className = "count aui-helper-hidden";
+            element.parentNode.parentNode.parentNode.className = "notifications-bar-item notifications-bar-email aui-helper-hidden" + addition;
         }
 
     } else {
-//                element.style.fontWeight = "bold";
         element.style.fontSize = "0.9em";
-//                element.ancestor.className = "count aui-helper-hidden";
     }
 }

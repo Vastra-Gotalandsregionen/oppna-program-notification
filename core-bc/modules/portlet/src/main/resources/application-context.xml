@@ -16,6 +16,7 @@
         <value>classpath*:META-INF/camel.properties</value>
         <value>classpath*:raindance-svc.properties</value>
         <value>classpath*:hibernate.properties</value>
+        <value>classpath*:alfresco-cs-iframe.properties</value>
       </list>
     </property>
   </bean>

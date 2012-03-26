@@ -3,18 +3,8 @@
  */
 package se.vgregion.notifications.controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.*;
-
-import javax.annotation.Resource;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-import javax.portlet.ResourceRequest;
-import javax.portlet.ResourceResponse;
-
+import com.liferay.portal.kernel.messaging.Message;
+import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import net.sf.ehcache.Cache;
@@ -27,13 +17,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
-
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
-
-import com.liferay.portal.kernel.messaging.Message;
-import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import se.vgregion.alfrescoclient.domain.Document;
+import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.service.NotificationService;
+import se.vgregion.usdservice.domain.Issue;
+
+import javax.annotation.Resource;
+import javax.portlet.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * @author simongoransson
@@ -78,8 +73,6 @@ public class NotificationController {
         if (element != null && element.getValue() != null) {
             systemNoNotifications = (Map<String, Integer>) element.getValue();
         } else {
-//            systemNoNotifications = getSystemNoNotifications(screenName);
-//            cache.put(new Element(screenName, systemNoNotifications));
             executorService.schedule(new CacheUpdater(screenName), 1, TimeUnit.SECONDS);
             return "view";
         }
@@ -104,13 +97,13 @@ public class NotificationController {
         return "view";
     }
 
-    private String getScreenName(RenderRequest request) {
+    private String getScreenName(PortletRequest request) {
         return ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
                 .getScreenName();
     }
 
 
-    // Tests whether the new value already is stored in cache. If no value is stored in cache the value is new.
+    // We display the count if there is a value and the user hasn't recently clicked on it.
     private boolean displayCount(String screenName, String countName, Integer newCount) {
         Element element = cache.get(screenName);
 
@@ -148,6 +141,19 @@ public class NotificationController {
 
         model.addAttribute("notificationType", upperFirstCase(notificationType));
         if (notificationType.equals("random")) {
+            Random r = new Random();
+            model.addAttribute("values", Arrays.asList(r.nextInt(), r.nextInt(), r.nextInt(), r.nextInt()));
+            return "view_random";
+        } else if (notificationType.equals("alfresco")) {
+            List<Site> alfrescoSites = notificationService.getAlfrescoDocuments(screenName);
+            model.addAttribute("sites", alfrescoSites);
+            return "view_alfresco";
+        } else if (notificationType.equals("email")) {
+            return "view_email";
+        } else if (notificationType.equals("usdIssues")) {
+            List<Issue> usdIssues = notificationService.getUsdIssues(screenName);
+            model.addAttribute("usdIssues", usdIssues);
+            return "view_usd_issues";
         }
 
         return "view_notifications";
@@ -218,9 +224,40 @@ public class NotificationController {
 
         executorService.schedule(new CacheUpdater(screenName), INTERVAL, TimeUnit.SECONDS);
 
-        Map<String, Integer> systemNoNotifications = (Map<String, Integer>) cache.get(screenName).getValue();//todo om det inte finns...
+        Map<String, Integer> systemNoNotifications = null;
+        Element element = cache.get(screenName);
+        if (element != null) {
+            systemNoNotifications = (Map<String, Integer>) element.getValue();
+        }
+
+        if (systemNoNotifications == null && request.getParameter("onlyCache").equals("false")) {
+            // If we have nothing in cache and do not require cache we can make the "long" request.
+            systemNoNotifications = getSystemNoNotifications(screenName);
+        }
 
         writeJsonObjectToResponse(response, systemNoNotifications);
+    }
+
+    /**
+     * Ajax call method returning shorttime USD Single Sign On key.
+     *
+     * @param request  - ajax request.
+     * @param response - ajax response as json.
+     */
+    @ResourceMapping(value = "lookupBopsId")
+    public void lookupBopsId(ResourceRequest request, ResourceResponse response) {
+        try {
+            String userId = getScreenName(request);
+            String bopsId = notificationService.getBopsId(userId);
+            response.setContentType("application/json");
+            new ObjectMapper().writeValue(response.getPortletOutputStream(), "+BOPSID=" + bopsId);
+        } catch (Exception ex) {
+            try {
+                new ObjectMapper().writeValue(response.getPortletOutputStream(), "");
+            } catch (IOException e) {
+                // Really wrong writing response
+            }
+        }
     }
 
     private void writeJsonObjectToResponse(ResourceResponse response, Object object) throws IOException {
@@ -238,15 +275,6 @@ public class NotificationController {
         }
     }
 
-    @ResourceMapping(value = "alfrescoResource")
-    public void getAlfrescoDocuments(ResourceRequest request, ResourceResponse response) throws IOException {
-        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
-                .getScreenName();
-
-        List<Document> alfrescoDocuments = notificationService.getAlfrescoDocuments(screenName);
-
-        writeJsonObjectToResponse(response, alfrescoDocuments);
-    }
 
     private String getFromMessageBus(String dest, String userId) {
         String msg;
