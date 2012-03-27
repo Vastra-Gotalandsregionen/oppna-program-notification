@@ -3,40 +3,29 @@
 
 <portlet:resourceURL var="bopsIdUrl" id="lookupBopsId" />
 
-<style type="text/css">
-    .notification-list-item {
-        padding: 4px;
-    }
 
-    .notification-list-item:hover {
-        background-color: white;
-    }
-    
-    .notification-list-item a {
-        text-decoration: none;
-    }
-</style>
+<div class="notification-wrap">
+	<h3>USD-ärenden</h3>
+	
+	<ul class="notifications-list usd-issues">
+	    <c:forEach items="${usdIssues}" var="usdIssue" varStatus="iteratorStatus">
+	    	<c:set var="listItemCssClass" value="" scope="page" />
+	    	<c:choose>
+	    		<c:when test="${iteratorStatus.first}">
+	    			<c:set var="listItemCssClass" value="first" scope="page" />
+	    		</c:when>
+	    		<c:when test="${iteratorStatus.last}">
+	    			<c:set var="listItemCssClass" value="last" scope="last" />
+	    		</c:when>
+	    	</c:choose>
+	    
+	    	<li class=""${listItemCssClass}>
+	    		<a href="${usdIssue.url}" target="_blank">${usdIssue.type} - ${usdIssue.summary}</a>
+	    	</li>
+	    </c:forEach>
+	</ul>
 
-<h3>USD-ärenden</h3>
-<%--
-<c:forEach items="${usdIssues}" var="usdIssue">
-    ${usdIssue.summary}</p>
-</c:forEach>
---%>
-
-<%--<ul class="usd-issues-list">--%>
-<div class="usd-issues">
-    <c:forEach items="${usdIssues}" var="usdIssue">
-        <%--<li>--%>
-            <%--<span>--%>
-        <div class="notification-list-item">
-                <a href="${usdIssue.url}" target="_blank">${usdIssue.type} - ${usdIssue.summary}</a>
-        </div>
-            <%--</span>--%>
-        <%--</li>--%>
-    </c:forEach>
 </div>
-<%--</ul>--%>
 
 <script type="text/javascript">
     AUI().ready('io', function(A) {
