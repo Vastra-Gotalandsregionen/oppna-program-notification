@@ -16,6 +16,16 @@ AUI().add('rp-notifications-bar', function (A) {
             NAME = 'rp-notifications-bar',
             NS = 'rp-notifications-bar',
 
+            NODE_ITEM_INVOICES = 'nodeItemInvoices',
+            NODE_ITEM_USD = 'nodeItemUsd',
+            NODE_ITEM_ALFRESCO = 'nodeItemAlfresco',
+            NODE_ITEM_RANDOM = 'nodeItemRandom',
+            NODE_ITEM_EMAIL = 'nodeItemEmail',
+            
+            UPDATE_NOTIFICATIONS_INTERVAL = 'updateNotificationsInterval',
+            UPDATE_NOTIFICATIONS_URL = 'updateNotificationsUrl',
+            UPDATE_NOTIFICATIONS_NO_CACHE_URL = 'updateNotificationsNoCacheUrl',
+
             CSS_ACTIVE = 'active',
             CSS_HIDDEN = 'aui-helper-hidden',
             CSS_NOTIFICATIONS_ITEM = 'notifications-bar-item',
@@ -25,10 +35,41 @@ AUI().add('rp-notifications-bar', function (A) {
         var NotificationsBar = A.Component.create(
             {
                 ATTRS:{
+                	
+                	nodeItemInvoices: {
+                		setter: A.one
+                	},
+                	
+                	nodeItemUsd: {
+                		setter: A.one
+                	},
+                	
+                	nodeItemAlfresco: {
+                		setter: A.one
+                	},
+                	
+                	nodeItemRandom: {
+                		setter: A.one
+                	},
+                	
+                	nodeItemEmail: {
+                		setter: A.one
+                	},
 
-                    notificationsListNode:{
-                        value:'#notificationsList',
-                        setter:A.one
+                    notificationsListNode: {
+                        setter: A.one
+                    },
+                    
+                    updateNotificationsInterval: {
+                    	value: 10000
+                    },
+                    
+                    updateNotificationsUrl: {
+                    	value: ''
+                    },
+                    
+                    updateNotificationsNoCacheUrl: {
+                    	value: ''
                     }
 
                 },
@@ -37,17 +78,23 @@ AUI().add('rp-notifications-bar', function (A) {
                 NS:NS,
 
                 notificationOverlays:null,
+                updateNotificationsIO: null,
 
                 prototype:{
 
                     initializer:function (config) {
                         var instance = this;
-
+                        
+                        instance.notificationOverlays = null;
+                        instance.updateNotificationsIO = null;
                     },
 
                     renderUI:function () {
                         var instance = this;
-
+                        
+                        //instance._initConsole();
+                        
+                        instance._initNotificationsUpdate();
                         instance._initNotificationOverlays();
                     },
 
@@ -59,6 +106,17 @@ AUI().add('rp-notifications-bar', function (A) {
                         notificationLinks.on('click', function (e) {
                             e.preventDefault();
                         });
+                    },
+                    
+                    _initConsole: function() {
+                    	var instance = this;
+                    	
+                    	var consoleSettings = {
+	            	        newestOnTop: true,
+	            	        visible: true,
+                    	};
+                    	
+                    	var console =  new A.Console(consoleSettings).render();
                     },
 
                     _initNotificationOverlays:function () {
@@ -73,7 +131,6 @@ AUI().add('rp-notifications-bar', function (A) {
                         listItemNodes.each(function (node, index, list) {
 
                             var nodeLink = node.one('a');
-//                    		var nodeLinkHtml = nodeLink.html();
 
                             var overlay = new A.OverlayContextPanel({
                                 align:{
@@ -112,7 +169,14 @@ AUI().add('rp-notifications-bar', function (A) {
                         });
 
                         instance.notificationOverlays = notificationOverlays;
-
+                    },
+                    
+                    _initNotificationsUpdate: function() {
+                    	var instance = this;
+                    	
+                    	instance._updateNotifications(instance.get(UPDATE_NOTIFICATIONS_NO_CACHE_URL));
+                    	
+                    	A.later(instance.get(UPDATE_NOTIFICATIONS_INTERVAL), instance, instance._updateNotifications, [], true);
                     },
 
                     _onNotificationOverlayHide:function (e) {
@@ -138,7 +202,7 @@ AUI().add('rp-notifications-bar', function (A) {
                         triggers.each(function (item, index, list) {
                             var listItem = item.ancestor('.' + CSS_NOTIFICATIONS_ITEM);
                             listItem.addClass(CSS_ACTIVE);
-                            item.one('span').hide(); //todo erik får granska
+                            item.one('.count').hide();
                         });
 
                         A.Array.each(instance.notificationOverlays, function (object, index, list) {
@@ -147,9 +211,78 @@ AUI().add('rp-notifications-bar', function (A) {
                         });
 
                         overlay.io.start();
+                    },
+                    
+                    _onUpdateNotificationsSuccess: function(event, id, xhr) {
+                    	
+                    	var instance = this;
+                    	
+                    	var responseJSON = A.JSON.parse(xhr.responseText);
+                    	
+                    	var alfrescoCount = responseJSON['alfrescoCount'];
+                    	var usdIssuesCount = responseJSON['usdIssuesCount'];
+                    	var emailCount = responseJSON['emailCount'];
+                    	var randomCount = responseJSON['randomCount'];
+                    	var invoicesCount = responseJSON['invoicesCount'];
+                    	
+                    	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount);
+                    	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount);
+                    	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount);
+                    	instance._updateCounterHtml(instance.get(NODE_ITEM_RANDOM), randomCount);
+                    	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount);
+                    },
+                    
+                    _updateCounterHtml: function(listNode, value) {
+                    	var instance = this;
+                    	
+                    	var countWrapperNode = listNode.one('.count');
+                    	var countNode = countWrapperNode.one('span');
+                    	var countNodeValueStr = countNode.html();
+                    	var countNodeValue = parseInt(countNodeValueStr);
+                    	
+                    	if(isNull(value) || value <= 0) {
+                    		countWrapperNode.hide();
+                    	}
+                    	else if(value == countNodeValue) {
+                    		// Do nothing
+                    	}
+                    	else {
+                    		countNode.html(value);
+                    		countWrapperNode.show();
+                    		listNode.show();
+                    	}
+                    },
+                    
+                    _updateNotifications: function(updateUrl) {
+                    	var instance = this;
+                    	
+                    	if(updateUrl == '' || isNull(updateUrl) || isUndefined(updateUrl)) {
+                    		updateUrl = instance.get(UPDATE_NOTIFICATIONS_URL);
+                    	}
+                    	
+                    	if(isNull(instance.updateNotificationsIO)) {
 
-                        // Hide the counter
-
+                    		instance.updateNotificationsIO = new A.io.request(updateUrl, {
+                            	autoLoad: false,
+                                cache: false,
+                                sync: true,
+                                timeout: 1000,
+                                dataType: 'json',
+                                method: 'GET'
+                            });
+                            
+                        	// Success handler
+                    		instance.updateNotificationsIO.on('success', instance._onUpdateNotificationsSuccess, instance);
+                    	}
+                    	else {
+                    		instance.updateNotificationsIO.stop();
+                    		
+							// Update io data params
+                    		instance.updateNotificationsIO.set('uri', updateUrl);
+                    		
+                    	}
+                    	
+                    	instance.updateNotificationsIO.start();
                     },
 
                     _someFunction:function () {
@@ -168,76 +301,8 @@ AUI().add('rp-notifications-bar', function (A) {
             'aui-io',
             'aui-loading-mask',
             'aui-overlay',
+            'console',
             'substitute'
         ]
     }
 );
-
-function reloadNotifications(resourceUrl) {
-    var items = null;
-    a.io.request(resourceUrl, {
-        cache:false,
-        sync:true,
-        timeout:1000,
-        dataType:'json',
-        method:'get',
-        on:{
-            success:function () {
-                console.log("success");
-                items = this.get('responseData');
-                console.log("success2");
-
-                var element = document.getElementById('alfresco-count');
-                var value = items['alfrescoCount'];
-                checkNewValue(value, element);
-                element.innerHTML = value;
-
-                var element = document.getElementById('usd-issues-count');
-                var value = items['usdIssuesCount'];
-                checkNewValue(value, element);
-                element.innerHTML = value;
-
-                var element = document.getElementById('email-count');
-                var value = items['emailCount'];
-                checkNewValue(value, element);
-                element.innerHTML = value;
-
-                var element = document.getElementById('random-count');
-                var value = items['randomCount'];
-                console.log(value + " " + element.innerHTML);
-                checkNewValue(value, element);
-                element.innerHTML = value;
-
-                var element = document.getElementById('invoices-count');
-                var value = items['invoicesCount'];
-                checkNewValue(value, element);
-                element.innerHTML = value;
-
-            },
-            failure:function () {
-            }
-        }
-    });
-}
-
-function checkNewValue(value, element) {
-    if (value != element.innerHTML) {
-        // New value -> highlight if more than zero
-        var classNameLI = element.parentNode.parentNode.parentNode.className;
-        var addition = "";
-        if (classNameLI.indexOf("last") != -1) {
-            addition = " last" //this is the last list item
-        }
-        if (value > 0) {
-            element.style.fontSize = "1.1em";
-            element.parentNode.className = "count";//('aui-helper-hidden');
-            element.parentNode.parentNode.parentNode.className = "notifications-bar-item notifications-bar-email" + addition;
-        } else {
-            element.parentNode.className = "count aui-helper-hidden";
-            element.parentNode.parentNode.parentNode.className = "notifications-bar-item notifications-bar-email aui-helper-hidden" + addition;
-        }
-
-    } else {
-        element.style.fontSize = "0.9em";
-    }
-}

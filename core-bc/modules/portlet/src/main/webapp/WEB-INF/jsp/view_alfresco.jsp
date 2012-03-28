@@ -14,7 +14,7 @@
 		    			<c:set var="listItemCssClass" value="first" scope="page" />
 		    		</c:when>
 		    		<c:when test="${sitesIteratorStatus.last and documentsIteratorStatus.last}">
-		    			<c:set var="listItemCssClass" value="last" scope="last" />
+		    			<c:set var="listItemCssClass" value="last" scope="page" />
 		    		</c:when>
 		    	</c:choose>
 		    	

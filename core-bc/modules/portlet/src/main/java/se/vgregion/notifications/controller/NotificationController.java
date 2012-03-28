@@ -9,7 +9,11 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
+
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,8 @@ import javax.annotation.Resource;
 import javax.portlet.*;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -182,7 +188,7 @@ public class NotificationController {
             cache.put(element);
         }
     }
-
+    
     private Integer getValue(Integer value) {
         if (value != null && value > 0) {
             return value;
@@ -190,29 +196,43 @@ public class NotificationController {
             return null;
         }
     }
+    
+    private Integer getValue(Future<Integer> count) {
+		try {
+			Integer value = count.get();
+			
+			return value;
+		} catch (InterruptedException e) {
+			return null;
+		} catch (ExecutionException e) {
+			return null;
+		}
+    }
+    
 
     private Map<String, Integer> getSystemNoNotifications(String screenName) {
+    	
         try {
             Future<Integer> alfrescoCount = notificationService.getAlfrescoCount(screenName);
             Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(screenName);
             Future<Integer> randomCount = notificationService.getRandomCount();
             Future<Integer> emailCount = notificationService.getEmailCount(screenName);
             Future<Integer> invoicesCount = notificationService.getInvoicesCount(screenName);
-
+            
             Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
-
-            systemNoNotifications.put("alfrescoCount", getValue(alfrescoCount.get()));
-            systemNoNotifications.put("usdIssuesCount", getValue(usdIssuesCount.get()));
-            systemNoNotifications.put("randomCount", getValue(randomCount.get()));
-            systemNoNotifications.put("emailCount", getValue(emailCount.get()));
-            systemNoNotifications.put("invoicesCount", getValue(invoicesCount.get()));
+            
+            systemNoNotifications.put("alfrescoCount", getValue(alfrescoCount));
+            systemNoNotifications.put("usdIssuesCount", getValue(usdIssuesCount));
+            systemNoNotifications.put("randomCount", getValue(randomCount));
+            systemNoNotifications.put("emailCount", getValue(emailCount));
+            systemNoNotifications.put("invoicesCount", getValue(invoicesCount));
 
             return systemNoNotifications;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
-        } catch (InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
-        } catch (ExecutionException e) {
+        }
+        catch (InterruptedException e) {
             LOGGER.error(e.getMessage(), e);
         }
         return new HashMap<String, Integer>();
@@ -231,6 +251,9 @@ public class NotificationController {
         }
 
         if (systemNoNotifications == null && request.getParameter("onlyCache").equals("false")) {
+        	
+        	System.out.println("SYSO - NotificationController - pollNotification - will take the long route");
+        	
             // If we have nothing in cache and do not require cache we can make the "long" request.
             systemNoNotifications = getSystemNoNotifications(screenName);
         }
@@ -261,20 +284,21 @@ public class NotificationController {
     }
 
     private void writeJsonObjectToResponse(ResourceResponse response, Object object) throws IOException {
+    	
         PrintWriter writer = null;
         try {
             response.setContentType("application/json");
 
             writer = response.getWriter();
-
-            new ObjectMapper().writeValue(writer, object);
+            ObjectMapper objectMapper = new ObjectMapper();
+            
+            objectMapper.writeValue(writer, object);
         } finally {
             if (writer != null) {
                 writer.close();
             }
         }
     }
-
 
     private String getFromMessageBus(String dest, String userId) {
         String msg;
@@ -319,9 +343,11 @@ public class NotificationController {
             // recently checked.
             Element recentlyCheckedSet = cache.get(screenName + recentlyCheckedSuffix);
             if (recentlyCheckedSet != null) {
+            	
                 // If recentlyCheckedSet is null we don't need to do this at all since there will be nothing to remove.
                 Element element = cache.get(screenName);
                 if (element != null && element.getValue() != null) {
+                	
                     Map<String, Integer> cachedValues = (Map<String, Integer>) element.getValue();
                     for (Map.Entry<String, Integer> countNameValue : cachedValues.entrySet()) {
                         // Is there a recent check for this key?
