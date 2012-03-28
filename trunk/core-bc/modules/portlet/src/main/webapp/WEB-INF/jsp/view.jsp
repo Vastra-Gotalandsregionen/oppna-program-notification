@@ -7,134 +7,128 @@
     <portlet:param name="onlyCache" value="false"/>
 </portlet:resourceURL>
 
+<c:set var="cssClassHidden" value="aui-helper-hidden" scope="page" />
+
 <ul id="<portlet:namespace />notificationsBarList" class="notfications-bar-list clearfix">
+
     <c:if test="${!(invoicesCount > 0)}">
-        <c:set var="hiddenClass" value="aui-helper-hidden"/>
+        <c:set var="cssClassHiddenInvoices" value="${cssClassHidden}"/>
     </c:if>
-    <li class="notifications-bar-item notifications-bar-invoices first ${hiddenClass}" title="Fakturor">
+    <li id="<portlet:namespace />itemInvoices" class="notifications-bar-item notifications-bar-invoices first ${cssClassHiddenInvoices}" title="Fakturor">
         <portlet:renderURL var="invoicesURL">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="invoices"/>
         </portlet:renderURL>
         <a href="${invoicesURL}">
-            <c:choose>
-                <c:when test="${invoicesDisplayCount}">
-                    <span id="invoices-count-wrapper" class="count"><span
-                            id="invoices-count">${invoicesCount}</span></span>
-                </c:when>
-                <c:otherwise>
-                    <span id="invoices-count-wrapper" class="count aui-helper-hidden"><span
-                            id="invoices-count">${invoicesCount}</span></span>
-                </c:otherwise>
-            </c:choose>
+		    <c:if test="${!(invoicesDisplayCount)}">
+		        <c:set var="cssClassCountWrapperInvoices" value="${cssClassHidden}"/>
+		    </c:if>
+            <span class="count ${cssClassCountWrapperInvoices}">
+				<span>${invoicesCount}</span>
+            </span>
             <span class="title">Mina fakturor</span>
         </a>
     </li>
-    <c:if test="${!(usdIssuesCount > 0)}">
-        <c:set var="hiddenClass" value="aui-helper-hidden"/>
+    
+    <c:if test="${!(invoicesCount > 0)}">
+        <c:set var="cssClassHiddenUsd" value="${cssClassHidden}"/>
     </c:if>
-    <li class="notifications-bar-item notifications-bar-usd" title="USD">
+    <li id="<portlet:namespace />itemUsd" class="notifications-bar-item notifications-bar-usd ${cssClassHiddenUsd}" title="USD">
         <portlet:renderURL var="usdURL">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="usdIssues"/>
         </portlet:renderURL>
         <a href="${usdURL}">
-            <c:choose>
-                <c:when test="${usdIssuesDisplayCount}">
-                    <span id="usd-issues-count-wrapper" class="count"><span
-                            id="usd-issues-count">${usdIssuesCount}</span></span>
-                </c:when>
-                <c:otherwise>
-                    <span id="usd-issues-count-wrapper" class="count aui-helper-hidden"><span
-                            id="usd-issues-count">${usdIssuesCount}</span></span>
-                </c:otherwise>
-            </c:choose>
+		    <c:if test="${!(usdIssuesDisplayCount)}">
+		        <c:set var="cssClassCountWrapperUsd" value="${cssClassHidden}"/>
+		    </c:if>
+            <span class="count ${cssClassCountWrapperUsd}">
+				<span>${usdIssuesDisplayCount}</span>
+            </span>
             <span class="title">Mina USD-&auml;renden</span>
         </a>
     </li>
+    
     <c:if test="${!(alfrescoCount > 0)}">
-        <c:set var="hiddenClass" value="aui-helper-hidden"/>
+        <c:set var="cssClassHiddenAlfresco" value="${cssClassHidden}"/>
     </c:if>
-    <li class="notifications-bar-item notifications-bar-documents" title="Alfresco">
+    <li id="<portlet:namespace />itemAlfresco" class="notifications-bar-item notifications-bar-documents ${cssClassHiddenAlfresco}" title="Alfresco">
         <portlet:renderURL var="alfrescoUrl">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="alfresco"/>
         </portlet:renderURL>
         <a href="${alfrescoUrl}">
-            <c:choose>
-                <c:when test="${alfrescoDisplayCount}">
-                    <span id="alfresco-count-wrapper" class="count"><span
-                            id="alfresco-count">${alfrescoCount}</span></span>
-                </c:when>
-                <c:otherwise>
-                    <span id="alfresco-count-wrapper" class="count aui-helper-hidden"><span
-                            id="alfresco-count">${alfrescoCount}</span></span>
-                </c:otherwise>
-            </c:choose>
+		    <c:if test="${!(alfrescoDisplayCount)}">
+		        <c:set var="cssClassCountWrapperAlfresco" value="${cssClassHidden}"/>
+		    </c:if>
+            <span class="count ${cssClassCountWrapperAlfresco}">
+				<span>${alfrescoCount}</span>
+            </span>
             <span class="title">Dokument</span>
         </a>
     </li>
+
     <c:if test="${!(randomCount > 0)}">
-        <c:set var="hiddenClass" value="aui-helper-hidden"/>
+        <c:set var="cssClassHiddenRandom" value="${cssClassHidden}"/>
     </c:if>
-    <li class="notifications-bar-item notifications-bar-documents" title="Random">
+    <li id="<portlet:namespace />itemRandom" class="notifications-bar-item notifications-bar-documents ${cssClassHiddenRandom}" title="Random">
         <portlet:renderURL var="randomUrl">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="random"/>
         </portlet:renderURL>
         <a href="${randomUrl}">
-            <c:choose>
-                <c:when test="${randomDisplayCount}">
-                    <span id="random-count-wrapper" class="count"><span id="random-count">${randomCount}</span></span>
-                </c:when>
-                <c:otherwise>
-                    <span id="random-count-wrapper" class="count aui-helper-hidden"><span
-                            id="random-count">${randomCount}</span></span>
-                </c:otherwise>
-            </c:choose>
+		    <c:if test="${!(randomDisplayCount)}">
+		        <c:set var="cssClassCountWrapperRandom" value="${cssClassHidden}"/>
+		    </c:if>
+            <span class="count ${cssClassCountWrapperRandom}">
+				<span>${randomCount}</span>
+            </span>
             <span class="title">Random</span>
         </a>
     </li>
+
     <c:if test="${!(emailCount > 0)}">
-        <c:set var="hiddenClass" value="aui-helper-hidden"/>
+        <c:set var="cssClassHiddenEmail" value="${cssClassHiddenEmail}"/>
     </c:if>
-    <li class="notifications-bar-item notifications-bar-email last" title="E-post">
+    <li id="<portlet:namespace />nodeItemEmail" class="notifications-bar-item notifications-bar-email last ${cssClassHiddenEmail}" title="E-post">
         <portlet:renderURL var="emailURL">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="email"/>
         </portlet:renderURL>
         <a href="${emailURL}">
-            <c:choose>
-                <c:when test="${emailDisplayCount}">
-                    <span id="email-count-wrapper" class="count"><span id="email-count">${emailCount}</span></span>
-                </c:when>
-                <c:otherwise>
-                    <span id="email-count-wrapper" class="count aui-helper-hidden"><span
-                            id="email-count">${emailCount}</span></span>
-                </c:otherwise>
-            </c:choose>
-            <span class="title">Epost</span>
+		    <c:if test="${!(emailDisplayCount)}">
+		        <c:set var="cssClassCountWrapperEmail" value="${cssClassHidden}"/>
+		    </c:if>
+            <span class="count ${cssClassCountWrapperEmail}">
+				<span>${emailCount}</span>
+            </span>
+            <span class="title">E-post</span>
         </a>
     </li>
+    
 </ul>
 
 <liferay-util:html-bottom>
     <script type="text/javascript" src="<%= request.getContextPath() %>/js/notifications-bar.js"></script>
     <script type="text/javascript">
 
-        var a; //TODO finns det bättre sätt?
-
         AUI().ready('aui-base', 'rp-notifications-bar', function (A) {
 
             var notificationsBar = new A.NotificationsBar({
-                notificationsListNode:'#<portlet:namespace />notificationsBarList'
+            	
+            	nodeItemInvoices: '#<portlet:namespace />itemInvoices',
+            	nodeItemUsd: '#<portlet:namespace />itemUsd',
+            	nodeItemAlfresco: '#<portlet:namespace />itemAlfresco',
+            	nodeItemRandom: '#<portlet:namespace />itemRandom',
+            	nodeItemEmail: '#<portlet:namespace />itemEmail',            	
+            	
+                notificationsListNode:'#<portlet:namespace />notificationsBarList',
+                updateNotificationsInterval: ${interval},
+                updateNotificationsUrl: '${resourceUrl}',
+                updateNotificationsNoCacheUrl: '${resourceUrlNoCache}'
             });
 
             notificationsBar.render();
-
-            a = A;
-            window.setInterval("reloadNotifications('${resourceUrl}')", ${interval});
-            reloadNotifications('${resourceUrlNoCache}');
         });
 
     </script>
