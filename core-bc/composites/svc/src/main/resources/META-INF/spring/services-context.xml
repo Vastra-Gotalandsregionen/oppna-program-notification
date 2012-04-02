@@ -39,8 +39,8 @@
   <context:annotation-config />
 
   <!-- Enables asynchronous support -->
-  <task:annotation-driven executor="myExecutor"/>
-  <task:executor id="myExecutor" pool-size="10"/>
+  <task:annotation-driven executor="notificationsExecutor"/>
+  <task:executor id="notificationsExecutor" pool-size="10"/>
 
   <bean id="iNotesSiteKey" class="java.lang.String">
     <constructor-arg value="iNotes"/>

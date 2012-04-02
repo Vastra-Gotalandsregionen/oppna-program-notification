@@ -22,19 +22,23 @@ public class RaindanceInvoiceService {
 
     private RaindanceInvoicesService invoicesService;
 
+    public RaindanceInvoiceService() {
+        // Empty constructor is needed to make CGLIB happy
+    }
+
     @Autowired
     public RaindanceInvoiceService(RaindanceInvoicesService invoicesService) {
         this.invoicesService = invoicesService;
     }
 
-    public Integer getCount(final String userId) {
+    public List<InvoiceNotification> getInvoices(final String userId, boolean cachedResult) {
         List<InvoiceNotification> invoices;
         try {
             invoices = invoicesService.getInvoices(userId);
         } catch (RuntimeException ex) {
             return null;
         }
-        return invoices.size();
+        return invoices;
     }
 
     public String getInvoicesJson(final String userId) {

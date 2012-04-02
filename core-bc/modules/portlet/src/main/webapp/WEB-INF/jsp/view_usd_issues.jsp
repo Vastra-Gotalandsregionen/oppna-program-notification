@@ -19,7 +19,7 @@
 	    		</c:when>
 	    	</c:choose>
 	    
-	    	<li class=""${listItemCssClass}>
+	    	<li class="${listItemCssClass}">
 	    		<a href="${usdIssue.url}" target="_blank">${usdIssue.type} - ${usdIssue.summary}</a>
 	    	</li>
 	    </c:forEach>

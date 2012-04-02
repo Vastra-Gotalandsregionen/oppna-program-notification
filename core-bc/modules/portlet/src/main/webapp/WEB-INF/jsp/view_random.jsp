@@ -16,7 +16,7 @@
 	    		</c:when>
 	    	</c:choose>
 	    
-	    	<li class=""${listItemCssClass}>
+	    	<li class="${listItemCssClass}">
 	    		<span>${value}</span>
 	    	</li>
 	    </c:forEach>
