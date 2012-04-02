@@ -21,7 +21,7 @@
             <portlet:param name="notificationType" value="invoices"/>
         </portlet:renderURL>
         <a href="${invoicesURL}">
-		    <c:if test="${invoicesHighlight}">
+		    <c:if test="${invoicesHighlightCount}">
 		        <c:set var="cssClassCountWrapperInvoices" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperInvoices}">
@@ -40,7 +40,7 @@
             <portlet:param name="notificationType" value="usdIssues"/>
         </portlet:renderURL>
         <a href="${usdURL}">
-		    <c:if test="${usdIssuesHighlight}">
+		    <c:if test="${usdIssuesHighlightCount}">
 		        <c:set var="cssClassCountWrapperUsd" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperUsd}">
@@ -59,7 +59,7 @@
             <portlet:param name="notificationType" value="alfresco"/>
         </portlet:renderURL>
         <a href="${alfrescoUrl}">
-		    <c:if test="${alfrescoHighlight}">
+		    <c:if test="${alfrescoHighlightCount}">
 		        <c:set var="cssClassCountWrapperAlfresco" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperAlfresco}">
@@ -78,7 +78,7 @@
             <portlet:param name="notificationType" value="random"/>
         </portlet:renderURL>
         <a href="${randomUrl}">
-		    <c:if test="${randomHighlight}">
+		    <c:if test="${randomHighlightCount}">
 		        <c:set var="cssClassCountWrapperRandom" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperRandom}">
@@ -97,7 +97,7 @@
             <portlet:param name="notificationType" value="email"/>
         </portlet:renderURL>
         <a href="${emailURL}">
-		    <c:if test="${emailHighlight}">
+		    <c:if test="${emailHighlightCount}">
 		        <c:set var="cssClassCountWrapperEmail" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperEmail}">
