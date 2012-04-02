@@ -3,8 +3,6 @@
  */
 package se.vgregion.notifications.controller;
 
-import com.liferay.portal.kernel.messaging.Message;
-import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import net.sf.ehcache.Cache;
@@ -45,7 +43,7 @@ public class NotificationController {
     private static final int INTERVAL = 10;
 
     private NotificationService notificationService;
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
+    private final ScheduledExecutorService executorService;// = Executors.newScheduledThreadPool(10, Executors.defaultThreadFactory());   
 
     @Resource(name = "usersNotificationsCache")
     private Cache cache;
@@ -54,6 +52,17 @@ public class NotificationController {
     @Autowired
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
+
+        // Initialize executorService with a proper thread factory
+        final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
+        executorService = Executors.newScheduledThreadPool(10, new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = defaultThreadFactory.newThread(r);
+                thread.setDaemon(true); // We don't want these threads to block a shutdown of the JVM
+                return thread;
+            }
+        });
     }
     
     @PreDestroy
@@ -93,15 +102,15 @@ public class NotificationController {
         Integer invoicesCount = systemNoNotifications.get("invoicesCount");
 
         model.addAttribute("alfrescoCount", alfrescoCount);
-        model.addAttribute("alfrescoDisplayCount", displayCount(screenName, "alfrescoCount", alfrescoCount));
+        model.addAttribute("alfrescoHighlightCount", highlightCount(screenName, "alfrescoCount", alfrescoCount));
         model.addAttribute("usdIssuesCount", usdIssuesCount);
-        model.addAttribute("usdIssuesDisplayCount", displayCount(screenName, "usdIssuesCount", usdIssuesCount));
+        model.addAttribute("usdIssuesHighlightCount", highlightCount(screenName, "usdIssuesCount", usdIssuesCount));
         model.addAttribute("randomCount", randomCount);
-        model.addAttribute("randomDisplayCount", displayCount(screenName, "randomCount", randomCount));
+        model.addAttribute("randomHighlightCount", highlightCount(screenName, "randomCount", randomCount));
         model.addAttribute("emailCount", emailCount);
-        model.addAttribute("emailDisplayCount", displayCount(screenName, "emailCount", emailCount));
+        model.addAttribute("emailHighlightCount", highlightCount(screenName, "emailCount", emailCount));
         model.addAttribute("invoicesCount", invoicesCount);
-        model.addAttribute("invoicesDisplayCount", displayCount(screenName, "invoicesCount", invoicesCount));
+        model.addAttribute("invoicesHighlightCount", highlightCount(screenName, "invoicesCount", invoicesCount));
 
         return "view";
     }
@@ -112,8 +121,8 @@ public class NotificationController {
     }
 
 
-    // We display the count if there is a value and the user hasn't recently clicked on it.
-    private boolean displayCount(String screenName, String countName, Integer newCount) {
+    // We highlight the count if there is a value and the user hasn't recently clicked on it.
+    private boolean highlightCount(String screenName, String countName, Integer newCount) {
         Element element = cache.get(screenName);
 
         // If we have no value at the moment we should never display it.
