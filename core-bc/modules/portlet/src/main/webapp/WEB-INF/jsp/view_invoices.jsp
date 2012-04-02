@@ -20,15 +20,26 @@
 	    	</c:choose>
 	    
 	    	<li class="${listItemCssClass}">
-                <c:choose>
-                    <c:when test="${invoice.type eq 'O'}">
-                        <img class="rd-${invoice.type}" width="12px" height="12px" src="/regionportalen-theme/images/red22x22.png" alt="overdue">
-                    </c:when>
-                    <c:when test="${invoice.type eq 'U'}">
-                        <img class="rd-${invoice.type}" width="12px" height="12px" src="/regionportalen-theme/images/yellow22x22.png" alt="overdue">
-                    </c:when>
-                </c:choose>
-	    		<a href="/group/vgregion/pub-ekonomi" target="_blank">${invoice.supplierName}</a>
+	    			<a href="/group/vgregion/pub-ekonomi" target="_blank" class="clearfix">
+		    			<span class="notification-types notification-usd-types">
+		    				<c:set var="notificationTypeCssClass" value="" scope="page" />
+		    				<c:choose>
+		    					<c:when test="${invoice.type == 'O'}">
+		    						<c:set var="notificationTypeCssClass" value="notification-type-1" scope="page" />
+		    					</c:when>
+		    					<c:when test="${invoice.type == 'U'}">
+		    						<c:set var="notificationTypeCssClass" value="notification-type-2" scope="page" />
+		    					</c:when>
+		    					<c:otherwise>
+		    						<c:set var="notificationTypeCssClass" value="" scope="page" />
+		    					</c:otherwise>
+		    				</c:choose>
+		    				<span class="notification-type ${notificationTypeCssClass}">
+		    					${invoice.type}
+		    				</span>
+	    				</span>
+		    			<span class="notification-summary">${invoice.supplierName}</span>
+	    			</a>
 	    	</li>
 	    </c:forEach>
 	</ul>
