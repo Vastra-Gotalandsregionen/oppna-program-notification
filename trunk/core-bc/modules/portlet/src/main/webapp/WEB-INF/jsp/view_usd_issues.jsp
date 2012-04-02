@@ -3,7 +3,6 @@
 
 <portlet:resourceURL var="bopsIdUrl" id="lookupBopsId" />
 
-
 <div class="notification-wrap">
 	<h3>USD-ärenden</h3>
 	
@@ -20,7 +19,23 @@
 	    	</c:choose>
 	    
 	    	<li class="${listItemCssClass}">
-	    		<a href="${usdIssue.url}" target="_blank">${usdIssue.type} - ${usdIssue.summary}</a>
+	    		<a href="${usdIssue.url}" target="_blank" class="clearfix">
+	    			<span class="notification-types notification-usd-types">
+	    				<c:set var="notificationTypeCssClass" value="" scope="page" />
+	    				<c:choose>
+	    					<c:when test="${usdIssue.type == 'A'}">
+	    					<c:set var="notificationTypeCssClass" value="notification-usd-type-warning" scope="page" />
+	    					</c:when>
+	    					<c:otherwise>
+	    						<c:set var="notificationTypeCssClass" value="" scope="page" />
+	    					</c:otherwise>
+	    				</c:choose>
+	    				<span class="notification-type notification-usd-type ${notificationTypeCssClass}">
+	    					${usdIssue.type}
+	    				</span>
+    				</span>
+	    			<span class="notification-summary notification-usd-summary">${usdIssue.summary}</span>
+    			</a>
 	    	</li>
 	    </c:forEach>
 	</ul>

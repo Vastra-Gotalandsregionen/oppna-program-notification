@@ -28,6 +28,7 @@ AUI().add('rp-notifications-bar', function (A) {
 
             CSS_ACTIVE = 'active',
             CSS_HIDDEN = 'aui-helper-hidden',
+            CSS_COUNT_HIGHLIGHT = 'count-highlight',
             CSS_NOTIFICATIONS_ITEM = 'notifications-bar-item',
             CSS_NOTIFICATIONS_OVERLAY = 'notifications-overlay'
             ;
@@ -104,7 +105,7 @@ AUI().add('rp-notifications-bar', function (A) {
                         var listNode = instance.get(NOTIFICATIONS_LIST_NODE);
                         var notificationLinks = listNode.all('.' + CSS_NOTIFICATIONS_ITEM + ' a');
                         notificationLinks.on('click', function (e) {
-                            e.preventDefault();
+                        	e.halt(true);
                         });
                     },
                     
@@ -113,12 +114,12 @@ AUI().add('rp-notifications-bar', function (A) {
                     	
                     	var consoleSettings = {
 	            	        newestOnTop: true,
-	            	        visible: true,
+	            	        visible: true
                     	};
                     	
                     	var console =  new A.Console(consoleSettings).render();
                     },
-
+                    
                     _initNotificationOverlays:function () {
                         var instance = this;
 
@@ -202,7 +203,7 @@ AUI().add('rp-notifications-bar', function (A) {
                         triggers.each(function (item, index, list) {
                             var listItem = item.ancestor('.' + CSS_NOTIFICATIONS_ITEM);
                             listItem.addClass(CSS_ACTIVE);
-                            item.one('.count').hide();
+                            item.one('.count').removeClass(CSS_COUNT_HIGHLIGHT);
                         });
 
                         A.Array.each(instance.notificationOverlays, function (object, index, list) {
@@ -219,17 +220,19 @@ AUI().add('rp-notifications-bar', function (A) {
                     	
                     	var responseJSON = A.JSON.parse(xhr.responseText);
                     	
-                    	var alfrescoCount = responseJSON['alfrescoCount'];
-                    	var usdIssuesCount = responseJSON['usdIssuesCount'];
-                    	var emailCount = responseJSON['emailCount'];
-                    	var randomCount = responseJSON['randomCount'];
-                    	var invoicesCount = responseJSON['invoicesCount'];
-                    	
-                    	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount);
-                    	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount);
-                    	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount);
-                    	instance._updateCounterHtml(instance.get(NODE_ITEM_RANDOM), randomCount);
-                    	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount);
+                    	if(!isNull(responseJSON)) {
+                        	var alfrescoCount = responseJSON['alfrescoCount'];
+                        	var usdIssuesCount = responseJSON['usdIssuesCount'];
+                        	var emailCount = responseJSON['emailCount'];
+                        	var randomCount = responseJSON['randomCount'];
+                        	var invoicesCount = responseJSON['invoicesCount'];
+                        	
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_RANDOM), randomCount);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount);
+                    	}
                     },
                     
                     _updateCounterHtml: function(listNode, value) {
@@ -248,7 +251,7 @@ AUI().add('rp-notifications-bar', function (A) {
                     	}
                     	else {
                     		countNode.html(value);
-                    		countWrapperNode.show();
+                    		countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
                     		listNode.show();
                     	}
                     },
@@ -265,8 +268,8 @@ AUI().add('rp-notifications-bar', function (A) {
                     		instance.updateNotificationsIO = new A.io.request(updateUrl, {
                             	autoLoad: false,
                                 cache: false,
-                                sync: true,
-                                timeout: 1000,
+                                sync: false,
+                                timeout: instance.get(UPDATE_NOTIFICATIONS_INTERVAL),
                                 dataType: 'json',
                                 method: 'GET'
                             });
@@ -275,11 +278,13 @@ AUI().add('rp-notifications-bar', function (A) {
                     		instance.updateNotificationsIO.on('success', instance._onUpdateNotificationsSuccess, instance);
                     	}
                     	else {
-                    		instance.updateNotificationsIO.stop();
+                    		
+                    		if(instance.updateNotificationsIO.get('active')) {
+                    			instance.updateNotificationsIO.stop();
+                    		}
                     		
 							// Update io data params
                     		instance.updateNotificationsIO.set('uri', updateUrl);
-                    		
                     	}
                     	
                     	instance.updateNotificationsIO.start();

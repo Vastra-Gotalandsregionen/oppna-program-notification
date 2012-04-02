@@ -8,6 +8,7 @@
 </portlet:resourceURL>
 
 <c:set var="cssClassHidden" value="aui-helper-hidden" scope="page" />
+<c:set var="cssClassCountHighlight" value="count-highlight" scope="page" />
 
 <ul id="<portlet:namespace />notificationsBarList" class="notfications-bar-list clearfix">
 
@@ -20,8 +21,8 @@
             <portlet:param name="notificationType" value="invoices"/>
         </portlet:renderURL>
         <a href="${invoicesURL}">
-		    <c:if test="${!(invoicesDisplayCount)}">
-		        <c:set var="cssClassCountWrapperInvoices" value="${cssClassHidden}"/>
+		    <c:if test="${invoicesHighlight}">
+		        <c:set var="cssClassCountWrapperInvoices" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperInvoices}">
 				<span>${invoicesCount}</span>
@@ -39,11 +40,11 @@
             <portlet:param name="notificationType" value="usdIssues"/>
         </portlet:renderURL>
         <a href="${usdURL}">
-		    <c:if test="${!(usdIssuesDisplayCount)}">
-		        <c:set var="cssClassCountWrapperUsd" value="${cssClassHidden}"/>
+		    <c:if test="${usdIssuesHighlight}">
+		        <c:set var="cssClassCountWrapperUsd" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperUsd}">
-				<span>${usdIssuesDisplayCount}</span>
+				<span>${usdIssuesCount}</span>
             </span>
             <span class="title">Mina USD-&auml;renden</span>
         </a>
@@ -58,8 +59,8 @@
             <portlet:param name="notificationType" value="alfresco"/>
         </portlet:renderURL>
         <a href="${alfrescoUrl}">
-		    <c:if test="${!(alfrescoDisplayCount)}">
-		        <c:set var="cssClassCountWrapperAlfresco" value="${cssClassHidden}"/>
+		    <c:if test="${alfrescoHighlight}">
+		        <c:set var="cssClassCountWrapperAlfresco" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperAlfresco}">
 				<span>${alfrescoCount}</span>
@@ -77,8 +78,8 @@
             <portlet:param name="notificationType" value="random"/>
         </portlet:renderURL>
         <a href="${randomUrl}">
-		    <c:if test="${!(randomDisplayCount)}">
-		        <c:set var="cssClassCountWrapperRandom" value="${cssClassHidden}"/>
+		    <c:if test="${randomHighlight}">
+		        <c:set var="cssClassCountWrapperRandom" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperRandom}">
 				<span>${randomCount}</span>
@@ -88,16 +89,16 @@
     </li>
 
     <c:if test="${!(emailCount > 0)}">
-        <c:set var="cssClassHiddenEmail" value="${cssClassHiddenEmail}"/>
+        <c:set var="cssClassHiddenEmail" value="${cssClassHidden}"/>
     </c:if>
-    <li id="<portlet:namespace />nodeItemEmail" class="notifications-bar-item notifications-bar-email last ${cssClassHiddenEmail}" title="E-post">
+    <li id="<portlet:namespace />itemEmail" class="notifications-bar-item notifications-bar-email last ${cssClassHiddenEmail}" title="E-post">
         <portlet:renderURL var="emailURL">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="email"/>
         </portlet:renderURL>
         <a href="${emailURL}">
-		    <c:if test="${!(emailDisplayCount)}">
-		        <c:set var="cssClassCountWrapperEmail" value="${cssClassHidden}"/>
+		    <c:if test="${emailHighlight}">
+		        <c:set var="cssClassCountWrapperEmail" value="${cssClassCountHighlight}"/>
 		    </c:if>
             <span class="count ${cssClassCountWrapperEmail}">
 				<span>${emailCount}</span>
@@ -107,7 +108,7 @@
     </li>
     
 </ul>
-
+<%--  --%>
 <liferay-util:html-bottom>
     <script type="text/javascript" src="<%= request.getContextPath() %>/js/notifications-bar.js"></script>
     <script type="text/javascript">
