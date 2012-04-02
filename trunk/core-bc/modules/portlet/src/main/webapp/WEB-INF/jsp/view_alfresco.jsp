@@ -18,7 +18,7 @@
 		    		</c:when>
 		    	</c:choose>
 		    	
-		    	<li class=""${listItemCssClass}>
+		    	<li class="${listItemCssClass}">
 		    		<a href="${site.shareUrl}">${document.fileName}</a>
 		    	</li>
 	    	

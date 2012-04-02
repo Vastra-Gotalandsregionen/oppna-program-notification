@@ -56,6 +56,11 @@ public class NotificationsCacheAspect {
         return handleRequest(joinPoint);
     }
 
+    @Around("execution(* se.vgregion.notifications.service.RaindanceInvoiceService.getInvoices(java.lang.String,boolean))")
+    public Object cacheRaindanceInvoiceServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+        return handleRequest(joinPoint);
+    }
+
     private Object handleRequest(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] arguments = joinPoint.getArgs();
 

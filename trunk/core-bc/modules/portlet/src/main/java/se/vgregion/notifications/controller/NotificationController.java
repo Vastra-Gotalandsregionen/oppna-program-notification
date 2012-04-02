@@ -22,6 +22,7 @@ import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.service.NotificationService;
+import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
 import javax.annotation.PreDestroy;
@@ -57,7 +58,7 @@ public class NotificationController {
     
     @PreDestroy
     public void destroy() {
-        LOGGER.debug("Shutdown executorService.");
+        LOGGER.debug("Shutting down executorService.");
         executorService.shutdown();
     }
     
@@ -162,6 +163,10 @@ public class NotificationController {
             List<Issue> usdIssues = notificationService.getUsdIssues(screenName);
             model.addAttribute("usdIssues", usdIssues);
             return "view_usd_issues";
+        } else if (notificationType.equals("invoices")) {
+            List<InvoiceNotification> invoices = notificationService.getInvoices(screenName);
+            model.addAttribute("invoices", invoices);
+            return "view_invoices";
         }
 
         return "view_notifications";
@@ -301,33 +306,6 @@ public class NotificationController {
             }
         }
     }
-
-    private String getFromMessageBus(String dest, String userId) {
-        String msg;
-        Message message = new Message();
-        message.setPayload(userId == null ? "" : userId);
-
-        Object response;
-        try {
-            LOGGER.info("message send");
-            response = MessageBusUtil.sendSynchronousMessage(dest, message, 10000);
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage(), e);
-            response = "-";
-        }
-
-        if (response instanceof String) {
-            msg = response.toString();
-        } else {
-            if (response instanceof Exception) {
-                Exception e = ((Exception) response);
-                LOGGER.error(e.getMessage(), e);
-            }
-            msg = "-";
-        }
-        return msg;
-    }
-
 
     private class CacheUpdater implements Runnable {
 

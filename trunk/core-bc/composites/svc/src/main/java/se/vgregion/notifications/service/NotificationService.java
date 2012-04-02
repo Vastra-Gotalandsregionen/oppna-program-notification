@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
@@ -75,8 +76,8 @@ public class NotificationService {
 
     @Async
     public Future<Integer> getInvoicesCount(String screenName) {
-        Integer count = raindanceInvoiceService.getCount(screenName);
-        return new AsyncResult<Integer>(count);
+        List<InvoiceNotification> invoices = raindanceInvoiceService.getInvoices(screenName, false);
+        return new AsyncResult<Integer>(invoices.size());
     }
     
     public List<Site> getAlfrescoDocuments(String screenName) {
@@ -90,5 +91,9 @@ public class NotificationService {
 
     public String getBopsId(String userId) {
         return usdIssuesService.getBopsId(userId);
+    }
+
+    public List<InvoiceNotification> getInvoices(String screenName) {
+        return raindanceInvoiceService.getInvoices(screenName, true);
     }
 }
