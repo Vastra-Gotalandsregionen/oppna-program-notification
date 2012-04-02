@@ -9,30 +9,26 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
-
-import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.SerializationConfig.Feature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
-import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.service.NotificationService;
 import se.vgregion.usdservice.domain.Issue;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.portlet.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -42,12 +38,13 @@ import java.util.concurrent.*;
 
 @Controller
 @RequestMapping("VIEW")
+@ManagedResource
 public class NotificationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationController.class);
     private static final int INTERVAL = 10;
 
     private NotificationService notificationService;
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(20);
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
 
     @Resource(name = "usersNotificationsCache")
     private Cache cache;
@@ -56,6 +53,18 @@ public class NotificationController {
     @Autowired
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
+    }
+    
+    @PreDestroy
+    public void destroy() {
+        LOGGER.debug("Shutdown executorService.");
+        executorService.shutdown();
+    }
+    
+    @ManagedOperation
+    public void resetCache() {
+        LOGGER.debug("Resetting cache.");
+        cache.removeAll();
     }
 
     @RenderMapping
@@ -66,13 +75,6 @@ public class NotificationController {
 
         model.addAttribute("interval", INTERVAL * 1000);
 
-        /*Element element = cache.get(screenName);
-        
-        Map<String, Integer> previousValues = new HashMap<String, Integer>()
-        if (element == null || element.getValue() == null) {
-            // Just instantiate an empty map
-            previousValues = new HashMap<String, Integer>();
-        }*/
         Element element = cache.get(screenName);
 
         Map<String, Integer> systemNoNotifications;
