@@ -4,7 +4,7 @@
 <portlet:resourceURL var="bopsIdUrl" id="lookupBopsId" />
 
 <div class="notification-wrap">
-	<h3>USD-ärenden</h3>
+	<h3>&Auml;renden i Navet</h3>
 	
 	<ul class="notifications-list usd-issues">
 	    <c:forEach items="${usdIssues}" var="usdIssue" varStatus="iteratorStatus">
