@@ -36,6 +36,7 @@ public class RaindanceInvoiceService {
         try {
             invoices = invoicesService.getInvoices(userId);
         } catch (RuntimeException ex) {
+            LOGGER.error(ex.getMessage(), ex);
             return null;
         }
         return invoices;

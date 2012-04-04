@@ -31,10 +31,10 @@
         </a>
     </li>
     
-    <c:if test="${!(invoicesCount > 0)}">
+    <c:if test="${!(usdIssuesCount > 0)}">
         <c:set var="cssClassHiddenUsd" value="${cssClassHidden}"/>
     </c:if>
-    <li id="<portlet:namespace />itemUsd" class="notifications-bar-item notifications-bar-usd ${cssClassHiddenUsd}" title="USD">
+    <li id="<portlet:namespace />itemUsd" class="notifications-bar-item notifications-bar-usd ${cssClassHiddenUsd}" title="Navet">
         <portlet:renderURL var="usdURL">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="usdIssues"/>
@@ -46,7 +46,7 @@
             <span class="count ${cssClassCountWrapperUsd}">
 				<span>${usdIssuesCount}</span>
             </span>
-            <span class="title">Mina USD-&auml;renden</span>
+            <span class="title">&Auml;renden i Navet</span>
         </a>
     </li>
     

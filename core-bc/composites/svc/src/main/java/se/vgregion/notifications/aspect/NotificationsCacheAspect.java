@@ -28,11 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.List;
 
 /**
- * Aspect handling caching of KivwsSearchService#searchUnits(java.lang.String, int, java.util.List<java.lang.String>).
+ * Aspect handling caching for various services.
  */
 @Aspect
 public class NotificationsCacheAspect {

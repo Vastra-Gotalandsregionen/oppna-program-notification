@@ -40,13 +40,13 @@
     <dependency>
       <groupId>se.vgregion.alfresco-client</groupId>
       <artifactId>alfresco-client-core-bc-composite-svc</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>se.vgregion.raindancenotifier</groupId>
       <artifactId>raindancenotifier-core-composite-svc</artifactId>
-      <version>1.1</version>
+      <version>1.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -60,7 +60,7 @@
       <artifactId>spring-aspects</artifactId>
     </dependency>
 
-    <dependency>
+    <!--<dependency>
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-core</artifactId>
       <version>${camel-version}</version>
@@ -70,7 +70,7 @@
       <groupId>org.apache.camel</groupId>
       <artifactId>camel-restlet</artifactId>
       <version>${camel-version}</version>
-    </dependency>
+    </dependency>-->
 
     <dependency>
       <groupId>org.springframework</groupId>

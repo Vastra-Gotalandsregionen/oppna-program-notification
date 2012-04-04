@@ -1,7 +1,5 @@
 package se.vgregion.notifications.service;
 
-import org.apache.camel.*;
-import org.apache.camel.builder.xml.XPathBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -10,9 +8,14 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.*;
+import org.w3c.dom.Document;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,7 +33,7 @@ public class NotesCalendarCounterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotesCalendarCounterService.class);
 
-    public String getCount(final String userId, CamelContext context) throws URISyntaxException, IOException {
+    public String getCount(final String userId) throws URISyntaxException, IOException {
         if (userId == null || "".equals(userId)) return "";
 
         Calendar now = Calendar.getInstance();
@@ -40,7 +43,7 @@ public class NotesCalendarCounterService {
 
         HttpResponse httpResponse = callService(uri);
 
-        return handleResponse(context, httpResponse);
+        return handleResponse(httpResponse);
     }
 
     private HttpResponse callService(URI uri) throws IOException {
@@ -54,7 +57,7 @@ public class NotesCalendarCounterService {
         return httpClient.execute(httpGet);
     }
 
-    private String handleResponse(CamelContext context, HttpResponse httpResponse) throws IOException {
+    private String handleResponse(HttpResponse httpResponse) throws IOException {
         if (httpResponse.getStatusLine().getStatusCode() == 200) {
             String reply = IOUtils.toString(httpResponse.getEntity().getContent());
 
@@ -64,12 +67,18 @@ public class NotesCalendarCounterService {
             }
 
             try {
-                String status = XPathBuilder.xpath("/calendarItems/status/text()").evaluate(context, reply,
-                        String.class);
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(new ByteArrayInputStream(reply.getBytes()));
+                XPathFactory xPathfactory = XPathFactory.newInstance();
+                XPath xpath = xPathfactory.newXPath();
+
+                XPathExpression expr = xpath.compile("/calendarItems/status/text()");
+
+                String status = expr.evaluate(doc);
 
                 if ("PROCESSED".equals(status)) {
-                    String res = XPathBuilder.xpath("/calendarItems/total/text()").evaluate(context, reply,
-                            String.class);
+                    String res = xpath.compile("/calendarItems/total/text()").evaluate(doc);
                     return res;
                 } else {
                     return ""; //The user does not have any notes calendar and should receive nothing.

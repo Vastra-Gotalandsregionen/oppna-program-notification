@@ -43,7 +43,7 @@ public class NotificationController {
     private static final int INTERVAL = 10;
 
     private NotificationService notificationService;
-    private final ScheduledExecutorService executorService;// = Executors.newScheduledThreadPool(10, Executors.defaultThreadFactory());   
+    private final ScheduledExecutorService executorService;
 
     @Resource(name = "usersNotificationsCache")
     private Cache cache;
@@ -91,7 +91,7 @@ public class NotificationController {
         if (element != null && element.getValue() != null) {
             systemNoNotifications = (Map<String, Integer>) element.getValue();
         } else {
-            executorService.schedule(new CacheUpdater(screenName), 1, TimeUnit.SECONDS);
+            executorService.schedule(new CacheUpdater(screenName), 10, TimeUnit.MILLISECONDS);
             return "view";
         }
 
@@ -125,7 +125,7 @@ public class NotificationController {
     private boolean highlightCount(String screenName, String countName, Integer newCount) {
         Element element = cache.get(screenName);
 
-        // If we have no value at the moment we should never display it.
+        // If we have no value at the moment we should never highlight it.
         if (newCount == null || newCount == 0) {
             return false;
         }
@@ -139,10 +139,10 @@ public class NotificationController {
             Element checked = cache.get(screenName + recentlyCheckedSuffix);
             if (checked == null || checked.getValue() == null || !((Set<String>) checked.getValue())
                     .contains(countName)) {
-                // The user hasn't checked it recently so we should display the count.
+                // The user hasn't checked it recently so we should highlight the count.
                 return true;
             } else {
-                // The user has recently checked it so we display it depending on whether the value is new.
+                // The user has recently checked it so we highlight it depending on whether the value is new.
                 return !((Map<String, Integer>) element.getValue()).get(countName).equals(newCount);
             }
         }
@@ -176,9 +176,9 @@ public class NotificationController {
             List<InvoiceNotification> invoices = notificationService.getInvoices(screenName);
             model.addAttribute("invoices", invoices);
             return "view_invoices";
+        } else {
+            throw new IllegalArgumentException("NotificationType [" + notificationType + "] is unknown.");
         }
-
-        return "view_notifications";
     }
 
     private String upperFirstCase(String s) {
@@ -205,23 +205,17 @@ public class NotificationController {
         }
     }
     
-    private Integer getValue(Integer value) {
-        if (value != null && value > 0) {
-            return value;
-        } else {
-            return null;
-        }
-    }
-    
     private Integer getValue(Future<Integer> count) {
 		try {
 			Integer value = count.get();
 			
 			return value;
 		} catch (InterruptedException e) {
+            LOGGER.error(e.getMessage(), e);
 			return null;
 		} catch (ExecutionException e) {
-			return null;
+            LOGGER.error(e.getMessage(), e);
+            return null;
 		}
     }
     
@@ -267,9 +261,6 @@ public class NotificationController {
         }
 
         if (systemNoNotifications == null && request.getParameter("onlyCache").equals("false")) {
-        	
-        	System.out.println("SYSO - NotificationController - pollNotification - will take the long route");
-        	
             // If we have nothing in cache and do not require cache we can make the "long" request.
             systemNoNotifications = getSystemNoNotifications(screenName);
         }
