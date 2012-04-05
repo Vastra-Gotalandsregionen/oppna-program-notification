@@ -6,14 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 /**
- * User: pabe
- * Date: 2011-08-02
- * Time: 10:06
+ * Class which exposes methods as REST service methods.
+ *
+ * @author Patrik Bergström
  */
 
 @Path("/n")
@@ -22,6 +20,14 @@ public class TestService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestService.class);
 
+    /**
+     * Get recently modified {@link se.vgregion.alfrescoclient.domain.Document}s for a user in a list of
+     * {@link se.vgregion.alfrescoclient.domain.Site}s.
+     *
+     * @param userId the user id
+     * @return the list {@link se.vgregion.alfrescoclient.domain.Site}s with recently modified
+     * {@link se.vgregion.alfrescoclient.domain.Site}s in JSON format
+     */
     @Path("/alfresco/{userId}")
     @GET
     public String getAlfresco(@PathParam("userId") String userId) {
@@ -29,6 +35,12 @@ public class TestService {
         return msg;
     }
 
+    /**
+     * Get the number Raindance invoices for a user.
+     *
+     * @param userId the user id
+     * @return the number of invoices
+     */
     @Path("/invoices/{userId}")
     @GET
     public String getInvoices(@PathParam("userId") String userId) {
@@ -36,6 +48,12 @@ public class TestService {
         return msg;
     }
 
+    /**
+     * Get the Raindance invoices for a user.
+     *
+     * @param userId the user id
+     * @return the invoices in JSON format
+     */
     @Path("/invoices/json/{userId}")
     @Produces("application/json")
     @GET
@@ -44,6 +62,12 @@ public class TestService {
         return msg;
     }
 
+    /**
+     * Get the number of unread emails for a user.
+     *
+     * @param userId the user id
+     * @return the number of unread emails
+     */
     @Path("/mail/{userId}")
     @GET
     public String getMail(@PathParam("userId") String userId) {
@@ -52,6 +76,12 @@ public class TestService {
         return msg;
     }
 
+    /**
+     * Get the number of calendar events for the current day for a user.
+     *
+     * @param userId the user id
+     * @return number of calendar events
+     */
     @Path("/calendar/{userId}")
     @GET
     public String getCalendar(@PathParam("userId") String userId) {
@@ -59,6 +89,12 @@ public class TestService {
         return msg;
     }
 
+    /**
+     * Get the USD issues for a user.
+     *
+     * @param userId the user id
+     * @return the USD issues in JSON format
+     */
     @Path("/usd/{userId}")
     @GET
     public String getUsd(@PathParam("userId") String userId) {
@@ -74,7 +110,8 @@ public class TestService {
         Object response;
         try {
             LOGGER.info("message send");
-            response = MessageBusUtil.sendSynchronousMessage(dest, message, 10000);
+            final int timeout = 10000;
+            response = MessageBusUtil.sendSynchronousMessage(dest, message, timeout);
         } catch (Exception e) {
             LOGGER.warn(e.getMessage(), e);
             response = "-";
@@ -93,9 +130,15 @@ public class TestService {
 
     private String getRandomNumber() {
         Random random = new Random();
-        return random.nextInt(100) + "";
+        final int n = 100;
+        return random.nextInt(n) + "";
     }
 
+    /**
+     * Get a random number.
+     *
+     * @return a random number
+     */
     @POST
     public String getRandom() {
         String msg = get();
@@ -103,6 +146,11 @@ public class TestService {
         return msg;
     }
 
+    /**
+     * Get a random number.
+     *
+     * @return a random number
+     */
     @GET
     public String random() {
         String msg = get();
@@ -112,6 +160,7 @@ public class TestService {
 
     private String get() {
         Random random = new Random();
-        return random.nextInt(100) + "";
+        final int n = 100;
+        return random.nextInt(n) + "";
     }
 }

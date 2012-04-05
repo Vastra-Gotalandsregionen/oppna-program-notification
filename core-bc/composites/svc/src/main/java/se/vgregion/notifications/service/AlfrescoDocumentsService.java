@@ -11,31 +11,47 @@ import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.alfrescoclient.service.AlfrescoService;
 
-import javax.validation.Valid;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
-public class AlfrescoDocumentsService {
+class AlfrescoDocumentsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoDocumentsService.class);
 
     private AlfrescoService alfrescoService;
-    
+
     @Value("${portlet-instance}")
     private String portletInstance;
     @Value("${csiframe-page}")
     private String csiframePage;
 
+    /**
+     * Constructor.
+     */
     public AlfrescoDocumentsService() {
         // Empty constructor is needed to make CGLIB happy
     }
 
+    /**
+     * Constructor.
+     *
+     * @param alfrescoService the {@link AlfrescoService}
+     */
     @Autowired
     public AlfrescoDocumentsService(AlfrescoService alfrescoService) {
         this.alfrescoService = alfrescoService;
     }
 
+    /**
+     * Get recently modified {@link Document}s in a list of {@link Site}s. The {@link Document}s are accessible by
+     * calling {@link se.vgregion.alfrescoclient.domain.Site#getRecentModifiedDocuments()}.
+     *
+     * @param userId       the user id
+     * @param cachedResult whether cached results are allowed
+     * @return a list of {@link Site}s containing the recently modified {@link Document}s
+     */
     public List<Site> getRecentlyModified(final String userId, boolean cachedResult) {
         if (userId == null || "".equals(userId)) {
             return new ArrayList<Site>();
@@ -52,8 +68,16 @@ public class AlfrescoDocumentsService {
         return sitesByUser;
     }
 
-    public String getRecentlyModifiedJson(final String userId, boolean cachedResult) {
-        List<Site> siteWithRecentlyModified = getRecentlyModified(userId, cachedResult);
+    /**
+     * Like {@link AlfrescoDocumentsService#getRecentlyModified(java.lang.String, boolean)} except that the response
+     * is returned as JSON. Also, caching is not implemented.
+     *
+     * @param userId the user id
+     * @return a list of {@link Site}s containing the recently modified {@link Document}s as a JSON string
+     */
+    public String getRecentlyModifiedJson(final String userId) {
+        // The caching aspect won't work here anyway, since we make a call within the same class, so set false
+        List<Site> siteWithRecentlyModified = getRecentlyModified(userId, false);
 
         ObjectWriter writer = new ObjectMapper().writerWithDefaultPrettyPrinter();
         try {

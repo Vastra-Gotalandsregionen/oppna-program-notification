@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 /**
+ * An embedded Jetty Server.
+ * <p/>
  * User: pabe
  * Date: 2011-08-02
  * Time: 09:58
@@ -19,14 +21,18 @@ public class JettyServer {
 
     private Server server;
 
+    /**
+     * Constructor.
+     */
     public JettyServer() {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans-jetty.xml");
         server = (Server) context.getBean("server");
         server.addHandler(new AbstractHandler() {
             @Override
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
+            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+                    throws IOException, ServletException {
                 Enumeration headerNames = request.getHeaderNames();
-                while(headerNames.hasMoreElements()) {
+                while (headerNames.hasMoreElements()) {
                     Object name = headerNames.nextElement();
                     String header = request.getHeader((String) name);
                     System.out.println(name + ": " + header);
@@ -38,14 +44,30 @@ public class JettyServer {
         });
     }
 
+    /**
+     * Starts the server.
+     *
+     * @throws Exception Exception
+     */
     public void startServer() throws Exception {
         server.start();
     }
 
+    /**
+     * Stops the server.
+     *
+     * @throws Exception Exception
+     */
     public void stopServer() throws Exception {
         server.stop();
     }
 
+    /**
+     * Main method that creates and starts a server.
+     *
+     * @param args args
+     * @throws Exception Exception
+     */
     public static void main(String[] args) throws Exception {
         JettyServer server = new JettyServer();
         server.startServer();

@@ -2,7 +2,6 @@ package se.vgregion.notifications.service;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import java.util.List;
  * @author Patrik Bergström
  */
 @Service
-public class UsdIssuesService {
+class UsdIssuesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UsdIssuesService.class);
 
@@ -33,7 +32,7 @@ public class UsdIssuesService {
     }
 
 
-    public String getUsdIssuesJson(String userId){
+    public String getUsdIssuesJson(String userId) {
 
         List<Issue> issues = usdService.lookupIssues(userId, -1, true);
 
@@ -46,6 +45,7 @@ public class UsdIssuesService {
         }
     }
 
+    // The cachedResult is used by NotificationsCacheAspect
     public List<Issue> getUsdIssues(String userId, boolean cachedResult) {
         List<Issue> issues = usdService.lookupIssues(userId, -1, true);
         if (issues == null) {

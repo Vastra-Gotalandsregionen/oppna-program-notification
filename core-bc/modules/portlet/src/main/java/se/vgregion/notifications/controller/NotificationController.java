@@ -32,7 +32,10 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
+ * Controller class for managing views and cache related to the notifications GUI.
+ *
  * @author simongoransson
+ * @author Patrik Bergström
  */
 
 @Controller
@@ -40,7 +43,7 @@ import java.util.concurrent.*;
 @ManagedResource
 public class NotificationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationController.class);
-    private static final int INTERVAL = 10;
+    private static final int INTERVAL = 10; // Seconds
 
     private NotificationService notificationService;
     private final ScheduledExecutorService executorService;
@@ -49,13 +52,19 @@ public class NotificationController {
     private Cache cache;
     private final String recentlyCheckedSuffix = "RecentlyChecked";
 
+    /**
+     * Constructor.
+     *
+     * @param notificationService the {@link NotificationService}
+     */
     @Autowired
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
 
         // Initialize executorService with a proper thread factory
         final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
-        executorService = Executors.newScheduledThreadPool(10, new ThreadFactory() {
+        final int poolSize = 10;
+        executorService = Executors.newScheduledThreadPool(poolSize, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 Thread thread = defaultThreadFactory.newThread(r);
@@ -64,26 +73,41 @@ public class NotificationController {
             }
         });
     }
-    
+
+    /**
+     * When the controller is destroyed. It shuts down the executorService.
+     */
     @PreDestroy
     public void destroy() {
         LOGGER.debug("Shutting down executorService.");
         executorService.shutdown();
     }
-    
+
+    /**
+     * Method which is accessible by a JMX agent like e.g. jconsole. It resets the cache.
+     */
     @ManagedOperation
     public void resetCache() {
         LOGGER.debug("Resetting cache.");
         cache.removeAll();
     }
 
+    /**
+     * The method which as accessed as the browser refreshes the page. This method will never make a long synchronous
+     * call to fetch the count values. Instead it uses the cache and if there is nothing cached it will schedule a cache
+     * update to execute directly.
+     *
+     * @param model   model
+     * @param request request
+     * @return a view
+     */
     @RenderMapping
-    public String viewNotifications(Model model, RenderRequest request) throws ExecutionException,
-            InterruptedException {
+    public String viewNotifications(Model model, RenderRequest request) {
 
         final String screenName = getScreenName(request);
 
-        model.addAttribute("interval", INTERVAL * 1000);
+        final int millisInSecond = 1000;
+        model.addAttribute("interval", INTERVAL * millisInSecond);
 
         Element element = cache.get(screenName);
 
@@ -91,7 +115,8 @@ public class NotificationController {
         if (element != null && element.getValue() != null) {
             systemNoNotifications = (Map<String, Integer>) element.getValue();
         } else {
-            executorService.schedule(new CacheUpdater(screenName), 10, TimeUnit.MILLISECONDS);
+            final int delay = 10;
+            executorService.schedule(new CacheUpdater(screenName), delay, TimeUnit.MILLISECONDS);
             return "view";
         }
 
@@ -148,6 +173,15 @@ public class NotificationController {
         }
     }
 
+    /**
+     * This method is called when a detailed view of respective notification type is requested. It checks which type of
+     * notification which is wanted and places content into the model.
+     *
+     * @param request  request
+     * @param response response
+     * @param model    model
+     * @return a view
+     */
     @RenderMapping(params = "action=showExpandedNotifications")
     public String showExpandedNotifications(RenderRequest request, RenderResponse response, Model model) {
 
@@ -204,53 +238,54 @@ public class NotificationController {
             cache.put(element);
         }
     }
-    
+
     private Integer getValue(Future<Integer> count) {
-		try {
-			Integer value = count.get();
-			
-			return value;
-		} catch (InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
-			return null;
-		} catch (ExecutionException e) {
+        try {
+            Integer value = count.get();
+
+            return value;
+        } catch (InterruptedException e) {
             LOGGER.error(e.getMessage(), e);
             return null;
-		}
+        } catch (ExecutionException e) {
+            LOGGER.error(e.getMessage(), e);
+            return null;
+        }
     }
-    
+
 
     private Map<String, Integer> getSystemNoNotifications(String screenName) {
-    	
-        try {
-            Future<Integer> alfrescoCount = notificationService.getAlfrescoCount(screenName);
-            Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(screenName);
-            Future<Integer> randomCount = notificationService.getRandomCount();
-            Future<Integer> emailCount = notificationService.getEmailCount(screenName);
-            Future<Integer> invoicesCount = notificationService.getInvoicesCount(screenName);
-            
-            Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
-            
-            systemNoNotifications.put("alfrescoCount", getValue(alfrescoCount));
-            systemNoNotifications.put("usdIssuesCount", getValue(usdIssuesCount));
-            systemNoNotifications.put("randomCount", getValue(randomCount));
-            systemNoNotifications.put("emailCount", getValue(emailCount));
-            systemNoNotifications.put("invoicesCount", getValue(invoicesCount));
 
-            return systemNoNotifications;
-        }
-        catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        catch (InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return new HashMap<String, Integer>();
+        Future<Integer> alfrescoCount = notificationService.getAlfrescoCount(screenName);
+        Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(screenName);
+        Future<Integer> randomCount = notificationService.getRandomCount();
+        Future<Integer> emailCount = notificationService.getEmailCount(screenName);
+        Future<Integer> invoicesCount = notificationService.getInvoicesCount(screenName);
+
+        Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
+
+        systemNoNotifications.put("alfrescoCount", getValue(alfrescoCount));
+        systemNoNotifications.put("usdIssuesCount", getValue(usdIssuesCount));
+        systemNoNotifications.put("randomCount", getValue(randomCount));
+        systemNoNotifications.put("emailCount", getValue(emailCount));
+        systemNoNotifications.put("invoicesCount", getValue(invoicesCount));
+
+        return systemNoNotifications;
     }
 
+    /**
+     * This method is called when the client makes an ajax request to poll for notifications. The method gets the
+     * notification counts only from cache to provide fast responses. When a poll request is made for a given screen
+     * name a cache update is scheduled with the given interval. This means that the
+     *
+     * @param request  request
+     * @param response response
+     * @throws IOException IOException
+     */
     @ResourceMapping
     public void pollNotifications(ResourceRequest request, ResourceResponse response) throws IOException {
-        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser().getScreenName();
+        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
+                .getScreenName();
 
         executorService.schedule(new CacheUpdater(screenName), INTERVAL, TimeUnit.SECONDS);
 
@@ -266,6 +301,8 @@ public class NotificationController {
         }
 
         writeJsonObjectToResponse(response, systemNoNotifications);
+
+        response.addProperty("Cache-control", "no-cache");
     }
 
     /**
@@ -285,20 +322,20 @@ public class NotificationController {
             try {
                 new ObjectMapper().writeValue(response.getPortletOutputStream(), "");
             } catch (IOException e) {
-                // Really wrong writing response
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
 
     private void writeJsonObjectToResponse(ResourceResponse response, Object object) throws IOException {
-    	
+
         PrintWriter writer = null;
         try {
             response.setContentType("application/json");
 
             writer = response.getWriter();
             ObjectMapper objectMapper = new ObjectMapper();
-            
+
             objectMapper.writeValue(writer, object);
         } finally {
             if (writer != null) {
@@ -307,11 +344,11 @@ public class NotificationController {
         }
     }
 
-    private class CacheUpdater implements Runnable {
+    class CacheUpdater implements Runnable {
 
         private String screenName;
 
-        private CacheUpdater(String screenName) {
+        CacheUpdater(String screenName) {
             this.screenName = screenName;
         }
 
@@ -323,19 +360,19 @@ public class NotificationController {
             // recently checked.
             Element recentlyCheckedSet = cache.get(screenName + recentlyCheckedSuffix);
             if (recentlyCheckedSet != null) {
-            	
+
                 // If recentlyCheckedSet is null we don't need to do this at all since there will be nothing to remove.
                 Element element = cache.get(screenName);
                 if (element != null && element.getValue() != null) {
-                	
+
                     Map<String, Integer> cachedValues = (Map<String, Integer>) element.getValue();
                     for (Map.Entry<String, Integer> countNameValue : cachedValues.entrySet()) {
                         // Is there a recent check for this key?
                         String counterName = countNameValue.getKey();
                         if (recentlyCheckedSet != null && recentlyCheckedSet.getValue() != null) {
                             if (((Set) recentlyCheckedSet.getValue()).contains(counterName)) {
-                                // If it was recently checked, we compare the new value with the old. If they differ we remove
-                                // the recent check.
+                                // If it was recently checked, we compare the new value with the old. If they differ we
+                                // remove the recent check.
                                 Integer oldValue = cachedValues.get(counterName);
                                 Integer newValue = systemNoNotifications.get(counterName);
                                 if (!oldValue.equals(newValue)) {

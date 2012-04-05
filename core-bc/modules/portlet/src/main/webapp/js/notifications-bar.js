@@ -158,7 +158,8 @@ AUI().add('rp-notifications-bar', function (A) {
 
                             overlay.plug(A.Plugin.IO, {
                                 autoLoad:false,
-                                method:'GET',
+                                cache:false,
+                                method:'POST', // Need to post to avoid caching in IE
                                 uri:loadURL,
                                 type:'Widget'
                             });
@@ -258,11 +259,11 @@ AUI().add('rp-notifications-bar', function (A) {
                     
                     _updateNotifications: function(updateUrl) {
                     	var instance = this;
-                    	
+
                     	if(updateUrl == '' || isNull(updateUrl) || isUndefined(updateUrl)) {
                     		updateUrl = instance.get(UPDATE_NOTIFICATIONS_URL);
                     	}
-                    	
+
                     	if(isNull(instance.updateNotificationsIO)) {
 
                     		instance.updateNotificationsIO = new A.io.request(updateUrl, {
@@ -273,7 +274,7 @@ AUI().add('rp-notifications-bar', function (A) {
                                 dataType: 'json',
                                 method: 'GET'
                             });
-                            
+
                         	// Success handler
                     		instance.updateNotificationsIO.on('success', instance._onUpdateNotificationsSuccess, instance);
                     	}

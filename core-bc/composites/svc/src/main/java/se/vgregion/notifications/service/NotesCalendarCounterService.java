@@ -28,13 +28,23 @@ import java.util.Calendar;
  * Time: 12:11
  */
 @org.springframework.stereotype.Service
-public class NotesCalendarCounterService {
+class NotesCalendarCounterService {
     private int period = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotesCalendarCounterService.class);
 
+    /**
+     * Get the number of events for the current day for a user.
+     *
+     * @param userId the user id
+     * @return the number of events as a string
+     * @throws URISyntaxException URISyntaxException
+     * @throws IOException IOException
+     */
     public String getCount(final String userId) throws URISyntaxException, IOException {
-        if (userId == null || "".equals(userId)) return "";
+        if (userId == null || "".equals(userId)) {
+            return "";
+        }
 
         Calendar now = Calendar.getInstance();
 
@@ -51,14 +61,16 @@ public class NotesCalendarCounterService {
         HttpGet httpGet = new HttpGet(uri);
 
         HttpParams params = httpClient.getParams();
-        HttpConnectionParams.setConnectionTimeout(params, 10000);
-        HttpConnectionParams.setSoTimeout(params, 10000);
+        final int timeout = 10000;
+        HttpConnectionParams.setConnectionTimeout(params, timeout);
+        HttpConnectionParams.setSoTimeout(params, timeout);
 
         return httpClient.execute(httpGet);
     }
 
     private String handleResponse(HttpResponse httpResponse) throws IOException {
-        if (httpResponse.getStatusLine().getStatusCode() == 200) {
+        final int ok = 200;
+        if (httpResponse.getStatusLine().getStatusCode() == ok) {
             String reply = IOUtils.toString(httpResponse.getEntity().getContent());
 
             if (reply == null) {
@@ -90,8 +102,8 @@ public class NotesCalendarCounterService {
 
             return "-";
         } else {
-            LOGGER.error("Http request failed. Response code=" + httpResponse.getStatusLine().getStatusCode() + ". " +
-                    httpResponse.getStatusLine().getReasonPhrase());
+            LOGGER.error("Http request failed. Response code=" + httpResponse.getStatusLine().getStatusCode() + ". "
+                    + httpResponse.getStatusLine().getReasonPhrase());
             return "-";
         }
     }

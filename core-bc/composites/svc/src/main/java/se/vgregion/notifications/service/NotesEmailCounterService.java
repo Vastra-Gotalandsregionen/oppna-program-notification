@@ -28,13 +28,14 @@ import java.net.URISyntaxException;
 import java.util.Scanner;
 
 /**
- * Created by IntelliJ IDEA.
+ * Class for getting the number of unread emails.
+ *
  * User: david
  * Date: 8/8-11
  * Time: 14:55
  */
 @Service
-public class NotesEmailCounterService {
+class NotesEmailCounterService {
 
     @Resource(name = "iNotesSiteKey")
     private String siteKey;
@@ -44,12 +45,19 @@ public class NotesEmailCounterService {
     @Autowired
     private CredentialService credentialService;
 
+    /**
+     * Get the number of unread emails for a user.
+     *
+     * @param userId user id which is the same as screen name
+     * @return the number or unread emails
+     * @throws IOException IOException
+     */
     public Integer getCount(final String userId) throws IOException {
         if (userId == null) {
             return null;
         }
 
-        final UserSiteCredential userSiteCredential = getSitePassword(userId, siteKey);
+        final UserSiteCredential userSiteCredential = getSitePassword(userId);
 
         if (userSiteCredential == null) {
             return null;
@@ -57,8 +65,8 @@ public class NotesEmailCounterService {
 
         URI uri = null;
         try {
-            uri = new URI("http", "aida.vgregion.se", "/calendar.nsf/unreadcount", "openagent&userid=" +
-                    userSiteCredential.getSiteUser(), "");
+            uri = new URI("http", "aida.vgregion.se", "/calendar.nsf/unreadcount", "openagent&userid="
+                    + userSiteCredential.getSiteUser(), "");
         } catch (URISyntaxException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -88,14 +96,16 @@ public class NotesEmailCounterService {
         httpClient.addRequestInterceptor(new PreemptiveAuth(), 0);
 
         HttpParams params = httpClient.getParams();
-        HttpConnectionParams.setConnectionTimeout(params, 10000);
-        HttpConnectionParams.setSoTimeout(params, 10000);
+        final int timeout = 10000;
+        HttpConnectionParams.setConnectionTimeout(params, timeout);
+        HttpConnectionParams.setSoTimeout(params, timeout);
 
         return httpClient.execute(httpGet, httpContext);
     }
 
     private Integer handleResponse(HttpResponse httpResponse) throws IOException {
-        if (httpResponse.getStatusLine().getStatusCode() == 200) {
+        final int ok = 200;
+        if (httpResponse.getStatusLine().getStatusCode() == ok) {
             String reply = IOUtils.toString(httpResponse.getEntity().getContent());
 
             if (reply == null) {
@@ -115,13 +125,13 @@ public class NotesEmailCounterService {
                 return null;
             } 
         } else {
-            LOGGER.error("Http request failed. Response code=" + httpResponse.getStatusLine().getStatusCode() + ". " +
-                    httpResponse.getStatusLine().getReasonPhrase(), new Exception());
+            LOGGER.error("Http request failed. Response code=" + httpResponse.getStatusLine().getStatusCode() + ". "
+                    + httpResponse.getStatusLine().getReasonPhrase(), new Exception());
             return null;
         }
     }
 
-    private UserSiteCredential getSitePassword(String userId, String siteKey) {
+    private UserSiteCredential getSitePassword(String userId) {
         try {
             return credentialService.getUserSiteCredential(userId, siteKey);
         } catch (Exception ex) {
