@@ -16,7 +16,7 @@ import java.util.List;
  * @author Patrik Bergström
  */
 @Service
-public class RaindanceInvoiceService {
+class RaindanceInvoiceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaindanceInvoiceService.class);
 

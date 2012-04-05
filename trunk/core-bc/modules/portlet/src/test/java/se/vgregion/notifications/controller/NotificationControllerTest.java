@@ -34,14 +34,15 @@ public class NotificationControllerTest {
 
     private NotificationController controller;
     private final static String SOME_SCREEN_NAME = "someScreenName";
+    private final int SERVICES_RETURNED_COUNT = 2;
 
     private <T extends PortletRequest> T setUp(Class<T> clazz) throws IOException, InterruptedException {
         NotificationService notificationService = mock(NotificationService.class);
-        when(notificationService.getAlfrescoCount(anyString())).thenReturn(new AsyncResult<Integer>(2));
-        when(notificationService.getEmailCount(anyString())).thenReturn(new AsyncResult<Integer>(2));
-        when(notificationService.getInvoicesCount(anyString())).thenReturn(new AsyncResult<Integer>(2));
-        when(notificationService.getUsdIssuesCount(anyString())).thenReturn(new AsyncResult<Integer>(2));
-        when(notificationService.getRandomCount()).thenReturn(new AsyncResult<Integer>(2));
+        when(notificationService.getAlfrescoCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        when(notificationService.getEmailCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        when(notificationService.getInvoicesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        when(notificationService.getUsdIssuesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        when(notificationService.getRandomCount()).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
 
         if (controller == null) {
             controller = new NotificationController(notificationService);
@@ -254,8 +255,36 @@ public class NotificationControllerTest {
     }
 
     @Test
-    public void testCacheUpdater() {
+    public void testCacheUpdater() throws IOException, InterruptedException {
 
+        // Given
+        setUp(RenderRequest.class);
 
+        Cache cache = new Cache("asdf", 100, false, false, 10, 10);
+        CacheManager manager = new CacheManager();
+        manager.addCache(cache);
+
+        Map<String, Integer> values = new HashMap<String, Integer>();
+        values.put("alfrescoCount", 1);
+        values.put("emailCount", SERVICES_RETURNED_COUNT);
+
+        Set<String> recentlyChecked = new HashSet<String>(Arrays.asList("alfrescoCount", "emailCount"));
+
+        cache.put(new Element(SOME_SCREEN_NAME, values));
+        cache.put(new Element(SOME_SCREEN_NAME + "RecentlyChecked", recentlyChecked));
+        ReflectionTestUtils.setField(controller, "cache", cache);
+
+        NotificationController.CacheUpdater updater = controller.new CacheUpdater(SOME_SCREEN_NAME);
+
+        // When
+        updater.run();
+
+        // Then (since the cached alfrescoCount differs from what the alfresco service returns it should have been
+        // removed as a recently checked value, but we will still have the emailCount as recently checked since that
+        // value doesn't change)
+        recentlyChecked = (Set<String>) cache.get(SOME_SCREEN_NAME + "RecentlyChecked").getValue();
+
+        assertEquals(1, recentlyChecked.size());
+        assertEquals("emailCount", recentlyChecked.iterator().next());
     }
 }

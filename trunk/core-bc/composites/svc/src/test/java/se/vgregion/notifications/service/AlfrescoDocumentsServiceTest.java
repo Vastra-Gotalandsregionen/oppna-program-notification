@@ -73,7 +73,7 @@ public class AlfrescoDocumentsServiceTest {
 
     @Test
     public void testGetRecentlyModifiedJson() throws Exception {
-        String recentlyModifiedJson = alfrescoDocumentsService.getRecentlyModifiedJson("userId", false);
+        String recentlyModifiedJson = alfrescoDocumentsService.getRecentlyModifiedJson("userId");
         ObjectMapper mapper = new ObjectMapper();
         List<Site> list = new ArrayList<Site>();
         List<Site> recentlyModified = mapper.readValue(recentlyModifiedJson, new TypeReference<List<Site>>() {});

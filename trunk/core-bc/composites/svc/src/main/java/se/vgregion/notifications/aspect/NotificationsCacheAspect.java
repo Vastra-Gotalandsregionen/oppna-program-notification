@@ -44,17 +44,41 @@ public class NotificationsCacheAspect {
         this.cache = cache;
     }
 
-    @Around("execution(* se.vgregion.notifications.service.AlfrescoDocumentsService.getRecentlyModified(java.lang.String,boolean))")
+    /**
+     * Around advice for caching Alfresco documents.
+     *
+     * @param joinPoint joinPoint
+     * @return a cached or non-cached response
+     * @throws Throwable Throwable
+     */
+    @Around("execution(* se.vgregion.notifications.service.AlfrescoDocumentsService.getRecentlyModified("
+            + "java.lang.String,boolean))")
     public Object cacheAlfrescoServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {
         return handleRequest(joinPoint);
     }
 
-    @Around("execution(* se.vgregion.notifications.service.UsdIssuesService.getUsdIssues(java.lang.String,boolean))")
+    /**
+     * Around advice for caching USD issues.
+     *
+     * @param joinPoint joinPoint
+     * @return a cached or non-cached response
+     * @throws Throwable Throwable
+     */
+    @Around("execution(* se.vgregion.notifications.service.UsdIssuesService.getUsdIssues("
+            + "java.lang.String,boolean))")
     public Object cacheUsdIssuesServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {
         return handleRequest(joinPoint);
     }
 
-    @Around("execution(* se.vgregion.notifications.service.RaindanceInvoiceService.getInvoices(java.lang.String,boolean))")
+    /**
+     * Around advice for caching Raindance invoices.
+     *
+     * @param joinPoint joinPoint
+     * @return a cached or non-cached response
+     * @throws Throwable Throwable
+     */
+    @Around("execution(* se.vgregion.notifications.service.RaindanceInvoiceService.getInvoices("
+            + "java.lang.String,boolean))")
     public Object cacheRaindanceInvoiceServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {
         return handleRequest(joinPoint);
     }

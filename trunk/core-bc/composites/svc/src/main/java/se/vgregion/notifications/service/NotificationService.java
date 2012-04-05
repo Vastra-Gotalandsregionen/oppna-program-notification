@@ -1,25 +1,30 @@
 package se.vgregion.notifications.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
-import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Future;
 
 /**
+ * Service class which aggregates the functionality of other services. The methods that return a certain count are
+ * annotated with @{@link Async} to enable asynchronous processing.
+ *
  * @author Patrik Bergström
  */
 @Service
 public class NotificationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationService.class);
 
     private AlfrescoDocumentsService alfrescoDocumentsService;
     private NotesCalendarCounterService notesCalendarCounterService;
@@ -27,10 +32,22 @@ public class NotificationService {
     private RaindanceInvoiceService raindanceInvoiceService;
     private UsdIssuesService usdIssuesService;
 
+    /**
+     * Constructor.
+     */
     public NotificationService() {
         // Empty constructor is needed to make CGLIB happy
     }
 
+    /**
+     * Constructor.
+     *
+     * @param alfrescoDocumentsService alfrescoDocumentsService
+     * @param notesCalendarCounterService notesCalendarCounterService
+     * @param notesEmailCounterService notesEmailCounterService
+     * @param raindanceInvoiceService raindanceInvoiceService
+     * @param usdIssuesService usdIssuesService
+     */
     @Autowired
     public NotificationService(AlfrescoDocumentsService alfrescoDocumentsService,
                                NotesCalendarCounterService notesCalendarCounterService,
@@ -44,8 +61,15 @@ public class NotificationService {
         this.usdIssuesService = usdIssuesService;
     }
 
+    /**
+     * Get the number of recently modified Alfresco {@link se.vgregion.alfrescoclient.domain.Document}s for all
+     * {@link Site}s a user is a member of.
+     *
+     * @param screenName the user's screen name
+     * @return the count wrapped in a {@link Future}
+     */
     @Async
-    public Future<Integer> getAlfrescoCount(String screenName) throws IOException {
+    public Future<Integer> getAlfrescoCount(String screenName) {
         List<Site> alfrescoResponse = alfrescoDocumentsService.getRecentlyModified(screenName, false);
 
         int n = 0;
@@ -56,43 +80,100 @@ public class NotificationService {
         return new AsyncResult<Integer>(n);
     }
 
+    /**
+     * Get the number of USD issues for a user.
+     *
+     * @param screenName the user's screen name
+     * @return the count wrapped in a {@link Future}
+     */
     @Async
-    public Future<Integer> getUsdIssuesCount(String screenName) throws IOException {
+    public Future<Integer> getUsdIssuesCount(String screenName) {
         List<Issue> issues = usdIssuesService.getUsdIssues(screenName, false);
 
         return new AsyncResult<Integer>(issues.size());
     }
 
+    /**
+     * Get a random number between 0 and 1000.
+     *
+     * @return random number
+     */
     @Async
-    public Future<Integer> getRandomCount() throws InterruptedException {
-        return new AsyncResult<Integer>(new Random().nextInt(1000));
+    public Future<Integer> getRandomCount() {
+        final int n = 1000;
+        return new AsyncResult<Integer>(new Random().nextInt(n));
     }
-    
+
+    /**
+     * Get the number of unread emails for a user.
+     *
+     * @param screenName the user's screen name
+     * @return the count wrapped in a {@link Future}
+     */
     @Async
-    public Future<Integer> getEmailCount(String screenName) throws IOException {
-        Integer count = notesEmailCounterService.getCount(screenName);
+    public Future<Integer> getEmailCount(String screenName) {
+        Integer count = null;
+        try {
+            count = notesEmailCounterService.getCount(screenName);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
         return new AsyncResult<Integer>(count);
     }
 
+    /**
+     * Get the number of invoices for a user.
+     *
+     * @param screenName the user's screen name
+     * @return the count wrapped in a {@link Future}
+     */
     @Async
     public Future<Integer> getInvoicesCount(String screenName) {
         List<InvoiceNotification> invoices = raindanceInvoiceService.getInvoices(screenName, false);
         return new AsyncResult<Integer>(invoices.size());
     }
-    
+
+    /**
+     * Get recently modified {@link se.vgregion.alfrescoclient.domain.Document}s in a list of {@link Site}s. The
+     * {@link se.vgregion.alfrescoclient.domain.Document}s are accessible by calling
+     * {@link se.vgregion.alfrescoclient.domain.Site#getRecentModifiedDocuments()}.
+     *
+     * @param screenName the user's screen name
+     * @return a list of {@link Site}s containing the recently modified
+     * {@link se.vgregion.alfrescoclient.domain.Document}s
+     */
     public List<Site> getAlfrescoDocuments(String screenName) {
         List<Site> sites = alfrescoDocumentsService.getRecentlyModified(screenName, true);
         return sites;
     }
 
+    /**
+     * Get the USD issues for a user.
+     *
+     * @param screenName the user's screen name
+     * @return a list of {@link Issue}s
+     */
     public List<Issue> getUsdIssues(String screenName) {
         return usdIssuesService.getUsdIssues(screenName, true);
     }
 
+    /**
+     * Get a bops id for a user.
+     *
+     * @param userId the user id
+     * @return a bops id
+     * @see se.vgregion.usdservice.USDServiceImpl#getBopsId(java.lang.String)
+     */
     public String getBopsId(String userId) {
         return usdIssuesService.getBopsId(userId);
     }
 
+    /**
+     * Get the invoices for a user.
+     *
+     * @param screenName the user's screen name
+     * @return a list of {@link InvoiceNotification}s
+     */
     public List<InvoiceNotification> getInvoices(String screenName) {
         return raindanceInvoiceService.getInvoices(screenName, true);
     }
