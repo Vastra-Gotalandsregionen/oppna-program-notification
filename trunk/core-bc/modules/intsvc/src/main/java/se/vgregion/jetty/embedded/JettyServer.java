@@ -27,21 +27,7 @@ public class JettyServer {
     public JettyServer() {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans-jetty.xml");
         server = (Server) context.getBean("server");
-        server.addHandler(new AbstractHandler() {
-            @Override
-            public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
-                    throws IOException, ServletException {
-                Enumeration headerNames = request.getHeaderNames();
-                while (headerNames.hasMoreElements()) {
-                    Object name = headerNames.nextElement();
-                    String header = request.getHeader((String) name);
-                    System.out.println(name + ": " + header);
-                }
-                String requestURI = request.getRequestURI();
-                System.out.println("requestURI:" + requestURI);
-                System.out.println("=============================================");
-            }
-        });
+        server.addHandler(new SimpleLoggingHandler());
     }
 
     /**
@@ -71,5 +57,21 @@ public class JettyServer {
     public static void main(String[] args) throws Exception {
         JettyServer server = new JettyServer();
         server.startServer();
+    }
+
+    private static class SimpleLoggingHandler extends AbstractHandler {
+        @Override
+        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
+                throws IOException, ServletException {
+            Enumeration headerNames = request.getHeaderNames();
+            while (headerNames.hasMoreElements()) {
+                Object name = headerNames.nextElement();
+                String header = request.getHeader((String) name);
+                System.out.println(name + ": " + header);
+            }
+            String requestURI = request.getRequestURI();
+            System.out.println("requestURI:" + requestURI);
+            System.out.println("=============================================");
+        }
     }
 }

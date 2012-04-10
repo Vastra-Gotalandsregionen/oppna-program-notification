@@ -128,12 +128,6 @@ public class TestService {
         return msg;
     }
 
-    private String getRandomNumber() {
-        Random random = new Random();
-        final int n = 100;
-        return random.nextInt(n) + "";
-    }
-
     /**
      * Get a random number.
      *

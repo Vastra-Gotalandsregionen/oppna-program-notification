@@ -49,7 +49,7 @@ public class NotificationController {
     private final ScheduledExecutorService executorService;
 
     @Resource(name = "usersNotificationsCache")
-    private Cache cache;
+    protected Cache cache; // Protected access to make access from CacheUpdater more efficient (see Findbugs)
     private final String recentlyCheckedSuffix = "RecentlyChecked";
 
     /**
@@ -62,16 +62,8 @@ public class NotificationController {
         this.notificationService = notificationService;
 
         // Initialize executorService with a proper thread factory
-        final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
         final int poolSize = 10;
-        executorService = Executors.newScheduledThreadPool(poolSize, new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thread = defaultThreadFactory.newThread(r);
-                thread.setDaemon(true); // We don't want these threads to block a shutdown of the JVM
-                return thread;
-            }
-        });
+        executorService = Executors.newScheduledThreadPool(poolSize, new DaemonThreadFactory());
     }
 
     /**
@@ -144,7 +136,6 @@ public class NotificationController {
         return ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
                 .getScreenName();
     }
-
 
     // We highlight the count if there is a value and the user hasn't recently clicked on it.
     private boolean highlightCount(String screenName, String countName, Integer newCount) {
@@ -220,7 +211,7 @@ public class NotificationController {
             return null;
         }
         String firstChar = s.substring(0, 1);
-        return s.replaceFirst(firstChar, firstChar.toUpperCase());
+        return s.replaceFirst(firstChar, firstChar.toUpperCase(Locale.getDefault()));
     }
 
     private void manageRecentlyChecked(String screenName, String notificationType) {
@@ -252,7 +243,6 @@ public class NotificationController {
             return null;
         }
     }
-
 
     private Map<String, Integer> getSystemNoNotifications(String screenName) {
 
@@ -344,6 +334,17 @@ public class NotificationController {
         }
     }
 
+    private static class DaemonThreadFactory implements ThreadFactory {
+        private final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = defaultThreadFactory.newThread(r);
+            thread.setDaemon(true); // We don't want these threads to block a shutdown of the JVM
+            return thread;
+        }
+    }
+
     class CacheUpdater implements Runnable {
 
         private String screenName;
@@ -369,7 +370,7 @@ public class NotificationController {
                     for (Map.Entry<String, Integer> countNameValue : cachedValues.entrySet()) {
                         // Is there a recent check for this key?
                         String counterName = countNameValue.getKey();
-                        if (recentlyCheckedSet != null && recentlyCheckedSet.getValue() != null) {
+                        if (recentlyCheckedSet.getValue() != null) {
                             if (((Set) recentlyCheckedSet.getValue()).contains(counterName)) {
                                 // If it was recently checked, we compare the new value with the old. If they differ we
                                 // remove the recent check.
