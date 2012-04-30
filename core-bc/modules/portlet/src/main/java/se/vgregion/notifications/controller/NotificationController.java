@@ -128,17 +128,21 @@ public class NotificationController {
 
 
         model.addAttribute("alfrescoCount", alfrescoCount);
-        model.addAttribute("alfrescoHighlightCount", highlightCount(user.getScreenName(), "alfrescoCount", alfrescoCount));
+        model.addAttribute("alfrescoHighlightCount", highlightCount(user.getScreenName(), "alfrescoCount",
+                alfrescoCount));
         model.addAttribute("usdIssuesCount", usdIssuesCount);
-        model.addAttribute("usdIssuesHighlightCount", highlightCount(user.getScreenName(), "usdIssuesCount", usdIssuesCount));
+        model.addAttribute("usdIssuesHighlightCount", highlightCount(user.getScreenName(), "usdIssuesCount",
+                usdIssuesCount));
         model.addAttribute("randomCount", randomCount);
         model.addAttribute("randomHighlightCount", highlightCount(user.getScreenName(), "randomCount", randomCount));
         model.addAttribute("emailCount", emailCount);
         model.addAttribute("emailHighlightCount", highlightCount(user.getScreenName(), "emailCount", emailCount));
         model.addAttribute("invoicesCount", invoicesCount);
-        model.addAttribute("invoicesHighlightCount", highlightCount(user.getScreenName(), "invoicesCount", invoicesCount));
+        model.addAttribute("invoicesHighlightCount", highlightCount(user.getScreenName(), "invoicesCount",
+                invoicesCount));
         model.addAttribute("socialRequestCount", socialRequestCount);
-        model.addAttribute("socialRequestHighlightCount", highlightCount(user.getScreenName(), "socialRequestCount", socialRequestCount));
+        model.addAttribute("socialRequestHighlightCount", highlightCount(user.getScreenName(), "socialRequestCount",
+                socialRequestCount));
 
         return "view";
     }
@@ -148,7 +152,8 @@ public class NotificationController {
             executorService.schedule(new CacheUpdater(user), delay, TimeUnit.MILLISECONDS);
             currentlyScheduledUpdates.add(user.getScreenName());
         } else {
-            LOGGER.warn("Skipped cache update since user has ongoing update");
+            LOGGER.warn("Skipped cache update since user has ongoing update. This is a sign that the update takes "
+                    + "time.");
         }
     }
 
@@ -214,7 +219,17 @@ public class NotificationController {
             return "view_email";
         } else if (notificationType.equals("usdIssues")) {
             List<Issue> usdIssues = notificationService.getUsdIssues(user.getScreenName());
-            model.addAttribute("usdIssues", usdIssues);
+            List<Issue> myUsdIssues = new ArrayList<Issue>();
+            List<Issue> groupUsdIssues = new ArrayList<Issue>();
+            for (Issue usdIssue : usdIssues) {
+                if ("A".equals(usdIssue.getAssociated())) {
+                    myUsdIssues.add(usdIssue);
+                } else if ("G".equals(usdIssue.getAssociated())) {
+                    groupUsdIssues.add(usdIssue);
+                }
+            }
+            model.addAttribute("myUsdIssues", myUsdIssues);
+            model.addAttribute("groupUsdIssues", groupUsdIssues);
             return "view_usd_issues";
         } else if (notificationType.equals("invoices")) {
             List<InvoiceNotification> invoices = notificationService.getInvoices(user.getScreenName());
