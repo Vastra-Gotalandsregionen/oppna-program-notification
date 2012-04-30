@@ -248,7 +248,8 @@ public class NotificationControllerTest {
         when(renderRequest.getParameter("notificationType")).thenReturn("usdIssues");
         view = controller.showExpandedNotifications(renderRequest, mock(RenderResponse.class), model);
         assertEquals("view_usd_issues", view);
-        verify(model).addAttribute(eq("usdIssues"), anyListOf(Issue.class));
+        verify(model).addAttribute(eq("myUsdIssues"), anyListOf(Issue.class));
+        verify(model).addAttribute(eq("groupUsdIssues"), anyListOf(Issue.class));
 
         // Invoices
         when(renderRequest.getParameter("notificationType")).thenReturn("invoices");
