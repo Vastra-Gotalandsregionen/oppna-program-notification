@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="init.jsp" %>
 
 <portlet:resourceURL var="resourceUrl" escapeXml="false">
@@ -91,7 +92,7 @@
     <c:if test="${!(emailCount > 0)}">
         <c:set var="cssClassHiddenEmail" value="${cssClassHidden}"/>
     </c:if>
-    <li id="<portlet:namespace />itemEmail" class="notifications-bar-item notifications-bar-email last ${cssClassHiddenEmail}" title="E-post">
+    <li id="<portlet:namespace />itemEmail" class="notifications-bar-item notifications-bar-email ${cssClassHiddenEmail}" title="E-post">
         <portlet:renderURL var="emailURL">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="email"/>
@@ -107,6 +108,25 @@
         </a>
     </li>
     
+    <c:if test="${!(socialRequestCount > 0)}">
+        <c:set var="cssClassHiddenRequests" value="${cssClassHidden}"/>
+    </c:if>
+    <li id="<portlet:namespace />itemSocialRequests" class="notifications-bar-item notifications-bar-social-requests last ${cssClassHiddenRequests}" title="Vänförfrågningar">
+        <portlet:renderURL var="socialRequestsURL">
+            <portlet:param name="action" value="showExpandedNotifications"/>
+            <portlet:param name="notificationType" value="socialRequests"/>
+        </portlet:renderURL>
+        <a href="${socialRequestsURL}">
+		    <c:if test="${socialRequestHighlightCount}">
+		        <c:set var="cssClassCountWrapperSocialRequests" value="${cssClassCountHighlight}"/>
+		    </c:if>
+            <span class="count ${cssClassCountWrapperSocialRequests}">
+				<span>${socialRequestCount}</span>
+            </span>
+            <span class="title">Vänförfrågningar</span>
+        </a>
+    </li>
+
 </ul>
 <%--  --%>
 <liferay-util:html-bottom>
@@ -122,7 +142,8 @@
             	nodeItemAlfresco: '#<portlet:namespace />itemAlfresco',
             	nodeItemRandom: '#<portlet:namespace />itemRandom',
             	nodeItemEmail: '#<portlet:namespace />itemEmail',            	
-            	
+            	nodeItemSocialRequest: '#<portlet:namespace />itemSocialRequests',
+
                 notificationsListNode:'#<portlet:namespace />notificationsBarList',
                 updateNotificationsInterval: ${interval},
                 updateNotificationsUrl: '${resourceUrl}',

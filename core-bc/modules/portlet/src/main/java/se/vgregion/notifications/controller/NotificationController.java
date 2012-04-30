@@ -4,7 +4,9 @@
 package se.vgregion.notifications.controller;
 
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portlet.social.model.SocialRequest;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -16,9 +18,11 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.notifications.NotificationException;
 import se.vgregion.notifications.service.NotificationService;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
@@ -27,6 +31,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.portlet.*;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.*;
@@ -51,6 +56,7 @@ public class NotificationController {
     @Resource(name = "usersNotificationsCache")
     protected Cache cache; // Protected access to make access from CacheUpdater more efficient (see Findbugs)
     private final String recentlyCheckedSuffix = "RecentlyChecked";
+    private final Set<String> currentlyScheduledUpdates = Collections.synchronizedSet(new HashSet<String>());
 
     /**
      * Constructor.
@@ -96,19 +102,19 @@ public class NotificationController {
     @RenderMapping
     public String viewNotifications(Model model, RenderRequest request) {
 
-        final String screenName = getScreenName(request);
+        final User user = getUser(request);
 
         final int millisInSecond = 1000;
         model.addAttribute("interval", INTERVAL * millisInSecond);
 
-        Element element = cache.get(screenName);
+        Element element = cache.get(user.getScreenName());
 
         Map<String, Integer> systemNoNotifications;
         if (element != null && element.getValue() != null) {
             systemNoNotifications = (Map<String, Integer>) element.getValue();
         } else {
             final int delay = 10;
-            executorService.schedule(new CacheUpdater(screenName), delay, TimeUnit.MILLISECONDS);
+            scheduleCacheUpdate(user, delay);
             return "view";
         }
 
@@ -117,24 +123,37 @@ public class NotificationController {
         Integer randomCount = systemNoNotifications.get("randomCount");
         Integer emailCount = systemNoNotifications.get("emailCount");
         Integer invoicesCount = systemNoNotifications.get("invoicesCount");
+        // Do this synchronously due to a problem with liferay's services when using separate threads
+        Integer socialRequestCount = getValue(notificationService.getSocialRequestCount(user));
+
 
         model.addAttribute("alfrescoCount", alfrescoCount);
-        model.addAttribute("alfrescoHighlightCount", highlightCount(screenName, "alfrescoCount", alfrescoCount));
+        model.addAttribute("alfrescoHighlightCount", highlightCount(user.getScreenName(), "alfrescoCount", alfrescoCount));
         model.addAttribute("usdIssuesCount", usdIssuesCount);
-        model.addAttribute("usdIssuesHighlightCount", highlightCount(screenName, "usdIssuesCount", usdIssuesCount));
+        model.addAttribute("usdIssuesHighlightCount", highlightCount(user.getScreenName(), "usdIssuesCount", usdIssuesCount));
         model.addAttribute("randomCount", randomCount);
-        model.addAttribute("randomHighlightCount", highlightCount(screenName, "randomCount", randomCount));
+        model.addAttribute("randomHighlightCount", highlightCount(user.getScreenName(), "randomCount", randomCount));
         model.addAttribute("emailCount", emailCount);
-        model.addAttribute("emailHighlightCount", highlightCount(screenName, "emailCount", emailCount));
+        model.addAttribute("emailHighlightCount", highlightCount(user.getScreenName(), "emailCount", emailCount));
         model.addAttribute("invoicesCount", invoicesCount);
-        model.addAttribute("invoicesHighlightCount", highlightCount(screenName, "invoicesCount", invoicesCount));
+        model.addAttribute("invoicesHighlightCount", highlightCount(user.getScreenName(), "invoicesCount", invoicesCount));
+        model.addAttribute("socialRequestCount", socialRequestCount);
+        model.addAttribute("socialRequestHighlightCount", highlightCount(user.getScreenName(), "socialRequestCount", socialRequestCount));
 
         return "view";
     }
 
-    private String getScreenName(PortletRequest request) {
-        return ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
-                .getScreenName();
+    private void scheduleCacheUpdate(User user, int delay) {
+        if (!currentlyScheduledUpdates.contains(user.getScreenName())) {
+            executorService.schedule(new CacheUpdater(user), delay, TimeUnit.MILLISECONDS);
+            currentlyScheduledUpdates.add(user.getScreenName());
+        } else {
+            LOGGER.warn("Skipped cache update since user has ongoing update");
+        }
+    }
+
+    private User getUser(PortletRequest request) {
+        return ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser();
     }
 
     // We highlight the count if there is a value and the user hasn't recently clicked on it.
@@ -176,11 +195,11 @@ public class NotificationController {
     @RenderMapping(params = "action=showExpandedNotifications")
     public String showExpandedNotifications(RenderRequest request, RenderResponse response, Model model) {
 
-        final String screenName = getScreenName(request);
+        final User user = getUser(request);
 
         String notificationType = request.getParameter("notificationType");
 
-        manageRecentlyChecked(screenName, notificationType);
+        manageRecentlyChecked(user.getScreenName(), notificationType);
 
         model.addAttribute("notificationType", upperFirstCase(notificationType));
         if (notificationType.equals("random")) {
@@ -188,19 +207,23 @@ public class NotificationController {
             model.addAttribute("values", Arrays.asList(r.nextInt(), r.nextInt(), r.nextInt(), r.nextInt()));
             return "view_random";
         } else if (notificationType.equals("alfresco")) {
-            List<Site> alfrescoSites = notificationService.getAlfrescoDocuments(screenName);
+            List<Site> alfrescoSites = notificationService.getAlfrescoDocuments(user.getScreenName());
             model.addAttribute("sites", alfrescoSites);
             return "view_alfresco";
         } else if (notificationType.equals("email")) {
             return "view_email";
         } else if (notificationType.equals("usdIssues")) {
-            List<Issue> usdIssues = notificationService.getUsdIssues(screenName);
+            List<Issue> usdIssues = notificationService.getUsdIssues(user.getScreenName());
             model.addAttribute("usdIssues", usdIssues);
             return "view_usd_issues";
         } else if (notificationType.equals("invoices")) {
-            List<InvoiceNotification> invoices = notificationService.getInvoices(screenName);
+            List<InvoiceNotification> invoices = notificationService.getInvoices(user.getScreenName());
             model.addAttribute("invoices", invoices);
             return "view_invoices";
+        } else if (notificationType.equals("socialRequests")) {
+            Map<SocialRequest, User> socialRequests = notificationService.getSocialRequestsWithRespectiveUser(user);
+            model.addAttribute("socialRequests", socialRequests);
+            return "view_social_requests";
         } else {
             throw new IllegalArgumentException("NotificationType [" + notificationType + "] is unknown.");
         }
@@ -232,7 +255,7 @@ public class NotificationController {
 
     private Integer getValue(Future<Integer> count) {
         try {
-            Integer value = count.get();
+            Integer value = count.get(5, TimeUnit.SECONDS);
 
             return value;
         } catch (InterruptedException e) {
@@ -241,16 +264,21 @@ public class NotificationController {
         } catch (ExecutionException e) {
             LOGGER.error(e.getMessage(), e);
             return null;
+        } catch (TimeoutException e) {
+            LOGGER.error(e.getMessage(), e);
+            return null;
         }
     }
 
-    private Map<String, Integer> getSystemNoNotifications(String screenName) {
+    private Map<String, Integer> getSystemNoNotifications(User user) {
 
-        Future<Integer> alfrescoCount = notificationService.getAlfrescoCount(screenName);
-        Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(screenName);
+        Future<Integer> alfrescoCount = notificationService.getAlfrescoCount(user.getScreenName());
+        Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(user.getScreenName());
         Future<Integer> randomCount = notificationService.getRandomCount();
-        Future<Integer> emailCount = notificationService.getEmailCount(screenName);
-        Future<Integer> invoicesCount = notificationService.getInvoicesCount(screenName);
+        Future<Integer> emailCount = notificationService.getEmailCount(user.getScreenName());
+        Future<Integer> invoicesCount = notificationService.getInvoicesCount(user.getScreenName());
+        // Should getSocialRequestCount here if we can work around the problem or the problem has been solved
+//        Future<Integer> socialRequestCount = notificationService.getSocialRequestCount(user);
 
         Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
 
@@ -259,6 +287,7 @@ public class NotificationController {
         systemNoNotifications.put("randomCount", getValue(randomCount));
         systemNoNotifications.put("emailCount", getValue(emailCount));
         systemNoNotifications.put("invoicesCount", getValue(invoicesCount));
+//        systemNoNotifications.put("socialRequestCount", getValue(socialRequestCount));
 
         return systemNoNotifications;
     }
@@ -274,20 +303,25 @@ public class NotificationController {
      */
     @ResourceMapping
     public void pollNotifications(ResourceRequest request, ResourceResponse response) throws IOException {
-        final String screenName = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser()
-                .getScreenName();
+        final User user = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser();
 
-        executorService.schedule(new CacheUpdater(screenName), INTERVAL, TimeUnit.SECONDS);
+        scheduleCacheUpdate(user, INTERVAL);
 
         Map<String, Integer> systemNoNotifications = null;
-        Element element = cache.get(screenName);
+        Element element = cache.get(user.getScreenName());
         if (element != null) {
             systemNoNotifications = (Map<String, Integer>) element.getValue();
         }
 
         if (systemNoNotifications == null && request.getParameter("onlyCache").equals("false")) {
             // If we have nothing in cache and do not require cache we can make the "long" request.
-            systemNoNotifications = getSystemNoNotifications(screenName);
+            systemNoNotifications = getSystemNoNotifications(user);
+        }
+
+        // Do this synchronously for now
+        if (systemNoNotifications != null) {
+            Integer socialRequestCount = getValue(notificationService.getSocialRequestCount(user));
+            systemNoNotifications.put("socialRequestCount", socialRequestCount);
         }
 
         writeJsonObjectToResponse(response, systemNoNotifications);
@@ -304,7 +338,7 @@ public class NotificationController {
     @ResourceMapping(value = "lookupBopsId")
     public void lookupBopsId(ResourceRequest request, ResourceResponse response) {
         try {
-            String userId = getScreenName(request);
+            String userId = getUser(request).getScreenName();
             String bopsId = notificationService.getBopsId(userId);
             response.setContentType("application/json");
             new ObjectMapper().writeValue(response.getPortletOutputStream(), "+BOPSID=" + bopsId);
@@ -313,6 +347,34 @@ public class NotificationController {
                 new ObjectMapper().writeValue(response.getPortletOutputStream(), "");
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    @ResourceMapping(value = "confirmRequest")
+    public void confirmRequest(ResourceRequest request, ResourceResponse response) throws NotificationException,
+            IOException {
+        Long requestId = Long.valueOf(request.getParameter("requestId"));
+        notificationService.confirmRequest(requestId);
+        writeMessageToResponse(response, "Du har accepterat denna förfrågan.");
+    }
+
+    @ResourceMapping(value = "rejectRequest")
+    public void rejectRequest(ResourceRequest request, ResourceResponse response) throws NotificationException,
+            IOException {
+        Long requestId = Long.valueOf(request.getParameter("requestId"));
+        notificationService.rejectRequest(requestId);
+        writeMessageToResponse(response, "Du har ignorerat denna förfrågan.");
+    }
+
+    private void writeMessageToResponse(ResourceResponse response, String message) throws IOException {
+        OutputStream output = null;
+        try {
+            output = response.getPortletOutputStream(); // Use outputStream so we can decide encoding.
+            output.write(message.getBytes("UTF-8"));
+        } finally {
+            if (output != null) {
+                output.close();
             }
         }
     }
@@ -340,6 +402,7 @@ public class NotificationController {
         @Override
         public Thread newThread(Runnable r) {
             Thread thread = defaultThreadFactory.newThread(r);
+            thread.setName("notificationCacheUpdater-" + thread.getName());
             thread.setDaemon(true); // We don't want these threads to block a shutdown of the JVM
             return thread;
         }
@@ -347,23 +410,23 @@ public class NotificationController {
 
     class CacheUpdater implements Runnable {
 
-        private String screenName;
+        private User user;
 
-        CacheUpdater(String screenName) {
-            this.screenName = screenName;
+        CacheUpdater(User user) {
+            this.user = user;
         }
 
         @Override
         public void run() {
-            Map<String, Integer> systemNoNotifications = getSystemNoNotifications(screenName);
+            Map<String, Integer> systemNoNotifications = getSystemNoNotifications(user);
 
             // Compare the new values with the old to see if any value is updated. If so, it should not be considered
             // recently checked.
-            Element recentlyCheckedSet = cache.get(screenName + recentlyCheckedSuffix);
+            Element recentlyCheckedSet = cache.get(user.getScreenName() + recentlyCheckedSuffix);
             if (recentlyCheckedSet != null) {
 
                 // If recentlyCheckedSet is null we don't need to do this at all since there will be nothing to remove.
-                Element element = cache.get(screenName);
+                Element element = cache.get(user.getScreenName());
                 if (element != null && element.getValue() != null) {
 
                     Map<String, Integer> cachedValues = (Map<String, Integer>) element.getValue();
@@ -385,7 +448,10 @@ public class NotificationController {
                 }
             }
 
-            cache.put(new Element(screenName, systemNoNotifications));
+            cache.put(new Element(user.getScreenName(), systemNoNotifications));
+
+            // Finished the cache update so remove it from currentlyScheduledUpdates
+            currentlyScheduledUpdates.remove(user.getScreenName());
         }
     }
 

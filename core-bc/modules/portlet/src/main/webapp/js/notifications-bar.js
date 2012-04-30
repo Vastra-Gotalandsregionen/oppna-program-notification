@@ -21,7 +21,8 @@ AUI().add('rp-notifications-bar', function (A) {
             NODE_ITEM_ALFRESCO = 'nodeItemAlfresco',
             NODE_ITEM_RANDOM = 'nodeItemRandom',
             NODE_ITEM_EMAIL = 'nodeItemEmail',
-            
+            NODE_ITEM_SOCIAL_REQUEST = 'nodeItemSocialRequest',
+
             UPDATE_NOTIFICATIONS_INTERVAL = 'updateNotificationsInterval',
             UPDATE_NOTIFICATIONS_URL = 'updateNotificationsUrl',
             UPDATE_NOTIFICATIONS_NO_CACHE_URL = 'updateNotificationsNoCacheUrl',
@@ -54,6 +55,10 @@ AUI().add('rp-notifications-bar', function (A) {
                 	},
                 	
                 	nodeItemEmail: {
+                		setter: A.one
+                	},
+
+                    nodeItemSocialRequest: {
                 		setter: A.one
                 	},
 
@@ -218,8 +223,14 @@ AUI().add('rp-notifications-bar', function (A) {
                     _onUpdateNotificationsSuccess: function(event, id, xhr) {
                     	
                     	var instance = this;
-                    	
-                    	var responseJSON = A.JSON.parse(xhr.responseText);
+
+                        var responseText = xhr.responseText;
+
+                        if (responseText.hasOwnProperty('length') && responseText.length < 1) {
+                            return;
+                        }
+
+                        var responseJSON = A.JSON.parse(responseText);
                     	
                     	if(!isNull(responseJSON)) {
                         	var alfrescoCount = responseJSON['alfrescoCount'];
@@ -227,12 +238,14 @@ AUI().add('rp-notifications-bar', function (A) {
                         	var emailCount = responseJSON['emailCount'];
                         	var randomCount = responseJSON['randomCount'];
                         	var invoicesCount = responseJSON['invoicesCount'];
-                        	
+                        	var socialRequestCount = responseJSON['socialRequestCount'];
+
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_RANDOM), randomCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount);
                     	}
                     },
                     
@@ -251,10 +264,11 @@ AUI().add('rp-notifications-bar', function (A) {
                     		// Do nothing
                     	}
                     	else {
-                    		countNode.html(value);
-                    		countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
-                    		listNode.show();
-                    	}
+                            listNode.show();
+                            countWrapperNode.show();
+                            countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
+                            countNode.html(value);
+                        }
                     },
                     
                     _updateNotifications: function(updateUrl) {
@@ -272,7 +286,7 @@ AUI().add('rp-notifications-bar', function (A) {
                                 sync: false,
                                 timeout: instance.get(UPDATE_NOTIFICATIONS_INTERVAL),
                                 dataType: 'json',
-                                method: 'GET'
+                                method: 'POST'  // Need to post to avoid caching in IE
                             });
 
                         	// Success handler
