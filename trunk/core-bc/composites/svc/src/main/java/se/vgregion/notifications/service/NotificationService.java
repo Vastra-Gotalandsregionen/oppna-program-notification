@@ -1,5 +1,9 @@
 package se.vgregion.notifications.service;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.model.User;
+import com.liferay.portlet.social.model.SocialRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,11 +11,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.notifications.NotificationException;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Future;
 
@@ -31,6 +37,7 @@ public class NotificationService {
     private NotesEmailCounterService notesEmailCounterService;
     private RaindanceInvoiceService raindanceInvoiceService;
     private UsdIssuesService usdIssuesService;
+    private SocialRelationService socialRelationService;
 
     /**
      * Constructor.
@@ -42,23 +49,25 @@ public class NotificationService {
     /**
      * Constructor.
      *
-     * @param alfrescoDocumentsService alfrescoDocumentsService
+     * @param alfrescoDocumentsService    alfrescoDocumentsService
      * @param notesCalendarCounterService notesCalendarCounterService
-     * @param notesEmailCounterService notesEmailCounterService
-     * @param raindanceInvoiceService raindanceInvoiceService
-     * @param usdIssuesService usdIssuesService
+     * @param notesEmailCounterService    notesEmailCounterService
+     * @param raindanceInvoiceService     raindanceInvoiceService
+     * @param usdIssuesService            usdIssuesService
      */
     @Autowired
     public NotificationService(AlfrescoDocumentsService alfrescoDocumentsService,
                                NotesCalendarCounterService notesCalendarCounterService,
                                NotesEmailCounterService notesEmailCounterService,
                                RaindanceInvoiceService raindanceInvoiceService,
-                               UsdIssuesService usdIssuesService) {
+                               UsdIssuesService usdIssuesService,
+                               SocialRelationService socialRelationService) {
         this.alfrescoDocumentsService = alfrescoDocumentsService;
         this.notesCalendarCounterService = notesCalendarCounterService;
         this.notesEmailCounterService = notesEmailCounterService;
         this.raindanceInvoiceService = raindanceInvoiceService;
         this.usdIssuesService = usdIssuesService;
+        this.socialRelationService = socialRelationService;
     }
 
     /**
@@ -133,6 +142,13 @@ public class NotificationService {
         return new AsyncResult<Integer>(invoices.size());
     }
 
+
+//    @Async // Can't have this Async due to a bug. Some cached and potentially wrong value will be returned. Possibly
+    //related to http://issues.liferay.com/browse/LPS-26465.
+    public Future<Integer> getSocialRequestCount(User user) {
+        return new AsyncResult<Integer>(socialRelationService.getUserRequests(user, false).size());
+    }
+
     /**
      * Get recently modified {@link se.vgregion.alfrescoclient.domain.Document}s in a list of {@link Site}s. The
      * {@link se.vgregion.alfrescoclient.domain.Document}s are accessible by calling
@@ -140,7 +156,7 @@ public class NotificationService {
      *
      * @param screenName the user's screen name
      * @return a list of {@link Site}s containing the recently modified
-     * {@link se.vgregion.alfrescoclient.domain.Document}s
+     *         {@link se.vgregion.alfrescoclient.domain.Document}s
      */
     public List<Site> getAlfrescoDocuments(String screenName) {
         List<Site> sites = alfrescoDocumentsService.getRecentlyModified(screenName, true);
@@ -176,5 +192,33 @@ public class NotificationService {
      */
     public List<InvoiceNotification> getInvoices(String screenName) {
         return raindanceInvoiceService.getInvoices(screenName, true);
+    }
+
+    public List<SocialRequest> getSocialRequests(User user) {
+        return socialRelationService.getUserRequests(user, true);
+    }
+
+    public Map<SocialRequest, User> getSocialRequestsWithRespectiveUser(User user) {
+        return socialRelationService.getUserRequestsWithUser(user, true);
+    }
+
+    public void confirmRequest(Long requestId) throws NotificationException {
+        try {
+            socialRelationService.confirmRequest(requestId);
+        } catch (SystemException e) {
+            throw new NotificationException(e);
+        } catch (PortalException e) {
+            throw new NotificationException(e);
+        }
+    }
+
+    public void rejectRequest(Long requestId) throws NotificationException {
+        try {
+            socialRelationService.rejectRequest(requestId);
+        } catch (SystemException e) {
+            throw new NotificationException(e);
+        } catch (PortalException e) {
+            throw new NotificationException(e);
+        }
     }
 }

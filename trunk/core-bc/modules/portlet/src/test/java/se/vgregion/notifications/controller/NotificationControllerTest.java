@@ -35,14 +35,22 @@ public class NotificationControllerTest {
     private NotificationController controller;
     private final static String SOME_SCREEN_NAME = "someScreenName";
     private final int SERVICES_RETURNED_COUNT = 2;
+    private int numberOfServices = 0; // This number is used to verify several tests
 
     private <T extends PortletRequest> T setUp(Class<T> clazz) throws IOException, InterruptedException {
         NotificationService notificationService = mock(NotificationService.class);
         when(notificationService.getAlfrescoCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        numberOfServices++;
         when(notificationService.getEmailCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        numberOfServices++;
         when(notificationService.getInvoicesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        numberOfServices++;
         when(notificationService.getUsdIssuesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        numberOfServices++;
         when(notificationService.getRandomCount()).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        numberOfServices++;
+        when(notificationService.getSocialRequestCount(any(User.class))).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        numberOfServices++;
 
         if (controller == null) {
             controller = new NotificationController(notificationService);
@@ -84,7 +92,7 @@ public class NotificationControllerTest {
 
         Map<String, Integer> cachedMap = (Map) cache.get(SOME_SCREEN_NAME).getValue();
 
-        assertEquals(5, cachedMap.size());
+        assertEquals(numberOfServices - 1, cachedMap.size()); // -1 since socialRequestsCount is not cached
     }
 
     @Test
@@ -111,7 +119,7 @@ public class NotificationControllerTest {
         controller.viewNotifications(model, renderRequest);
 
         // Then
-        verify(model, times(2)).addAttribute(anyString(), eq(true)); // *HighlightCount will be added two times
+        verify(model, times(3)).addAttribute(anyString(), eq(true)); // *HighlightCount will be added three times
         verify(model, times(2)).addAttribute(anyString(), eq(THE_COUNT)); // The respective counts will be added two times
     }
 
@@ -146,7 +154,7 @@ public class NotificationControllerTest {
 
         HashMap hashMap = objectMapper.readValue(out.toByteArray(), HashMap.class);
 
-        assertEquals(2, hashMap.size()); // only the cached counts should be shown
+        assertEquals(3, hashMap.size()); // only the cached counts + socialRequestCount should be shown
 
     }
 
@@ -175,7 +183,7 @@ public class NotificationControllerTest {
 
         HashMap hashMap = objectMapper.readValue(out.toByteArray(), HashMap.class);
 
-        assertEquals(5, hashMap.size());
+        assertEquals(numberOfServices, hashMap.size());
 
     }
 
@@ -204,8 +212,8 @@ public class NotificationControllerTest {
         controller.viewNotifications(model, renderRequest);
 
         // Then
-        verify(model, times(0)).addAttribute(anyString(), eq(true)); // Both the alfresco and email count should not be highlighted since both are recently checked so zero number here
-        verify(model, times(5)).addAttribute(anyString(), eq(false));// All *HighlightCount are instead false so five here
+        verify(model, times(1)).addAttribute(anyString(), eq(true)); // Both the alfresco and email count should not be highlighted since both are recently, but socialRequests make it one
+        verify(model, times(numberOfServices - 1)).addAttribute(anyString(), eq(false));// All *HighlightCount, except socialRequestCount, are instead false so five here
     }
 
     @Test
@@ -258,7 +266,7 @@ public class NotificationControllerTest {
     public void testCacheUpdater() throws IOException, InterruptedException {
 
         // Given
-        setUp(RenderRequest.class);
+        RenderRequest request = setUp(RenderRequest.class);
 
         Cache cache = new Cache("asdf", 100, false, false, 10, 10);
         CacheManager manager = new CacheManager();
@@ -274,7 +282,8 @@ public class NotificationControllerTest {
         cache.put(new Element(SOME_SCREEN_NAME + "RecentlyChecked", recentlyChecked));
         ReflectionTestUtils.setField(controller, "cache", cache);
 
-        NotificationController.CacheUpdater updater = controller.new CacheUpdater(SOME_SCREEN_NAME);
+        NotificationController.CacheUpdater updater = controller.new CacheUpdater(((ThemeDisplay) request
+                .getAttribute(WebKeys.THEME_DISPLAY)).getUser());
 
         // When
         updater.run();
