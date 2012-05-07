@@ -10,6 +10,7 @@ import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.raindancenotifier.services.RaindanceInvoicesService;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,10 +37,19 @@ class RaindanceInvoiceService {
         try {
             invoices = invoicesService.getInvoices(userId);
         } catch (RuntimeException ex) {
-            LOGGER.error(ex.getMessage(), ex);
-            return null;
+            LOGGER.error(ex.getMessage()); // Do it this way since the logs would be full with stacktraces otherwise
+            logCause(ex);
+            return Collections.emptyList();
         }
         return invoices;
+    }
+
+    private void logCause(Throwable ex) {
+        Throwable cause = ex.getCause();
+        if (cause != null) {
+            LOGGER.error("Cause: " + cause.getMessage());
+            logCause(cause);
+        }
     }
 
     public String getInvoicesJson(final String userId) {

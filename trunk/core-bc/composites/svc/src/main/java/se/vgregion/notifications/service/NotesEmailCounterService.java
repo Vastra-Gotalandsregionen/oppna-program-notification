@@ -114,7 +114,12 @@ class NotesEmailCounterService {
             }
 
             if (reply.contains("DOCTYPE")) {
-                LOGGER.warn("Http request failed. Unexpected response.", new Exception());
+                // Log this way to avoid too much stacktraces in the log files.
+                StackTraceElement stackTraceElement = new Exception().getStackTrace()[0];
+                String stackTraceElementString = stackTraceElement.getClassName() + "." + stackTraceElement
+                        .getMethodName() + "(" + stackTraceElement.getFileName() + ":" + stackTraceElement
+                        .getLineNumber() + ")";
+                LOGGER.warn("Http request failed. Unexpected response - " + stackTraceElementString);
                 return null;
             }
 
@@ -171,5 +176,13 @@ class NotesEmailCounterService {
                 }
             }
         }
+    }
+
+    public static void main(String[] args) {
+        Exception exception = new Exception();
+        StackTraceElement stackTraceElement = exception.getStackTrace()[0];
+        String x = stackTraceElement.getClassName() + "." + stackTraceElement.getMethodName() + "(" + stackTraceElement.getFileName() + ":" + stackTraceElement.getLineNumber() + ")";
+        System.out.println(x);
+//        at se.vgregion.notifications.service.NotesEmailCounterService.handleResponse(NotesEmailCounterService.java:117)
     }
 }

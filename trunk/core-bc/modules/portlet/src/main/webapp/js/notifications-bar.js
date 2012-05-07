@@ -261,8 +261,8 @@ AUI().add('rp-notifications-bar', function (A) {
                     		countWrapperNode.hide();
                     	}
                     	else if(value == countNodeValue) {
-                    		// Do nothing
-                    	}
+                            countWrapperNode.show(); // In some cases this is needed even though it shouldn't be
+                        }
                     	else {
                             listNode.show();
                             countWrapperNode.show();
