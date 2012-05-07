@@ -46,7 +46,6 @@ public class SocialRelationService {
         try {
             List<SocialRequest> receiverUserRequests = socialRequestLocalService.getReceiverUserRequests(user.getUserId(),
                     SocialRequestConstants.STATUS_PENDING, 0, getUserRequestsCount(user, SocialRequestConstants.STATUS_PENDING));
-            System.out.println("requests: " + receiverUserRequests.size());
             return receiverUserRequests;
         } catch (SystemException e) {
             LOGGER.error(e.getMessage(), e);
