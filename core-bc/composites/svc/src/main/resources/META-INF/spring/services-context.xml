@@ -40,7 +40,7 @@
 
   <!-- Enables asynchronous support -->
   <task:annotation-driven executor="notificationsExecutor"/>
-  <task:executor id="notificationsExecutor" pool-size="10"/>
+  <task:executor id="notificationsExecutor" pool-size="20"/>
 
   <bean id="iNotesSiteKey" class="java.lang.String">
     <constructor-arg value="iNotes"/>
@@ -59,7 +59,7 @@
   </bean>
 
   <bean class="se.vgregion.alfrescoclient.service.AlfrescoService">
-    <constructor-arg index="0" value="http://alfresco-stage.vgregion.se"/>
+    <constructor-arg index="0" value="${alfresco-host]"/>
     <constructor-arg index="1" value="X-Alfresco-Remote-User"/>
   </bean>
 

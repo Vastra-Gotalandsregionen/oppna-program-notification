@@ -48,7 +48,7 @@ import java.util.concurrent.*;
 @ManagedResource
 public class NotificationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationController.class);
-    private static final int INTERVAL = 10; // Seconds
+    private static final int INTERVAL = 30; // Seconds
 
     private NotificationService notificationService;
     private final ScheduledExecutorService executorService;
@@ -68,7 +68,7 @@ public class NotificationController {
         this.notificationService = notificationService;
 
         // Initialize executorService with a proper thread factory
-        final int poolSize = 10;
+        final int poolSize = 20;
         executorService = Executors.newScheduledThreadPool(poolSize, new DaemonThreadFactory());
     }
 
@@ -120,7 +120,6 @@ public class NotificationController {
 
         Integer alfrescoCount = systemNoNotifications.get("alfrescoCount");
         Integer usdIssuesCount = systemNoNotifications.get("usdIssuesCount");
-        Integer randomCount = systemNoNotifications.get("randomCount");
         Integer emailCount = systemNoNotifications.get("emailCount");
         Integer invoicesCount = systemNoNotifications.get("invoicesCount");
         // Do this synchronously due to a problem with liferay's services when using separate threads
@@ -133,8 +132,6 @@ public class NotificationController {
         model.addAttribute("usdIssuesCount", usdIssuesCount);
         model.addAttribute("usdIssuesHighlightCount", highlightCount(user.getScreenName(), "usdIssuesCount",
                 usdIssuesCount));
-        model.addAttribute("randomCount", randomCount);
-        model.addAttribute("randomHighlightCount", highlightCount(user.getScreenName(), "randomCount", randomCount));
         model.addAttribute("emailCount", emailCount);
         model.addAttribute("emailHighlightCount", highlightCount(user.getScreenName(), "emailCount", emailCount));
         model.addAttribute("invoicesCount", invoicesCount);
@@ -289,17 +286,14 @@ public class NotificationController {
 
         Future<Integer> alfrescoCount = notificationService.getAlfrescoCount(user.getScreenName());
         Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(user.getScreenName());
-        Future<Integer> randomCount = notificationService.getRandomCount();
         Future<Integer> emailCount = notificationService.getEmailCount(user.getScreenName());
         Future<Integer> invoicesCount = notificationService.getInvoicesCount(user.getScreenName());
         // Should getSocialRequestCount here if we can work around the problem or the problem has been solved
-//        Future<Integer> socialRequestCount = notificationService.getSocialRequestCount(user);
 
         Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
 
         systemNoNotifications.put("alfrescoCount", getValue(alfrescoCount));
         systemNoNotifications.put("usdIssuesCount", getValue(usdIssuesCount));
-        systemNoNotifications.put("randomCount", getValue(randomCount));
         systemNoNotifications.put("emailCount", getValue(emailCount));
         systemNoNotifications.put("invoicesCount", getValue(invoicesCount));
 //        systemNoNotifications.put("socialRequestCount", getValue(socialRequestCount));

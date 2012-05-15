@@ -47,8 +47,6 @@ public class NotificationControllerTest {
         numberOfServices++;
         when(notificationService.getUsdIssuesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
         numberOfServices++;
-        when(notificationService.getRandomCount()).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
-        numberOfServices++;
         when(notificationService.getSocialRequestCount(any(User.class))).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
         numberOfServices++;
 
