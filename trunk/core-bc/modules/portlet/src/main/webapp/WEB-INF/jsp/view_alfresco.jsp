@@ -2,7 +2,7 @@
 <%@ include file="init.jsp" %>
 
 <div class="notification-wrap">
-	<h3>Alfresco</h3>
+	<h3>Alfresco - senaste &auml;ndrade</h3>
 	
 	<ul class="notifications-list alfresco">
 	    <c:forEach items="${sites}" var="site" varStatus="sitesIteratorStatus">

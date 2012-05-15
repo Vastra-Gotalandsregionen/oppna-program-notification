@@ -40,7 +40,7 @@
 	    </c:forEach>
 	</ul>
 
-	<h3>Mina gruppers &auml;renden i navet</h3>
+	<h3>Mina gruppers &auml;renden i Navet</h3>
 
 	<ul class="notifications-list usd-issues">
 	    <c:forEach items="${groupUsdIssues}" var="usdIssue" varStatus="iteratorStatus">
