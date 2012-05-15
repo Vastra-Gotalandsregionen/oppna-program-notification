@@ -19,7 +19,6 @@ AUI().add('rp-notifications-bar', function (A) {
             NODE_ITEM_INVOICES = 'nodeItemInvoices',
             NODE_ITEM_USD = 'nodeItemUsd',
             NODE_ITEM_ALFRESCO = 'nodeItemAlfresco',
-            NODE_ITEM_RANDOM = 'nodeItemRandom',
             NODE_ITEM_EMAIL = 'nodeItemEmail',
             NODE_ITEM_SOCIAL_REQUEST = 'nodeItemSocialRequest',
 
@@ -47,10 +46,6 @@ AUI().add('rp-notifications-bar', function (A) {
                 	},
                 	
                 	nodeItemAlfresco: {
-                		setter: A.one
-                	},
-                	
-                	nodeItemRandom: {
                 		setter: A.one
                 	},
                 	
@@ -236,14 +231,12 @@ AUI().add('rp-notifications-bar', function (A) {
                         	var alfrescoCount = responseJSON['alfrescoCount'];
                         	var usdIssuesCount = responseJSON['usdIssuesCount'];
                         	var emailCount = responseJSON['emailCount'];
-                        	var randomCount = responseJSON['randomCount'];
                         	var invoicesCount = responseJSON['invoicesCount'];
                         	var socialRequestCount = responseJSON['socialRequestCount'];
 
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_RANDOM), randomCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount);
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount);
                     	}

@@ -70,25 +70,6 @@
         </a>
     </li>
 
-    <c:if test="${!(randomCount > 0)}">
-        <c:set var="cssClassHiddenRandom" value="${cssClassHidden}"/>
-    </c:if>
-    <li id="<portlet:namespace />itemRandom" class="notifications-bar-item notifications-bar-documents ${cssClassHiddenRandom}" title="Random">
-        <portlet:renderURL var="randomUrl">
-            <portlet:param name="action" value="showExpandedNotifications"/>
-            <portlet:param name="notificationType" value="random"/>
-        </portlet:renderURL>
-        <a href="${randomUrl}">
-		    <c:if test="${randomHighlightCount}">
-		        <c:set var="cssClassCountWrapperRandom" value="${cssClassCountHighlight}"/>
-		    </c:if>
-            <span class="count ${cssClassCountWrapperRandom}">
-				<span>${randomCount}</span>
-            </span>
-            <span class="title">Random</span>
-        </a>
-    </li>
-
     <c:if test="${!(emailCount > 0)}">
         <c:set var="cssClassHiddenEmail" value="${cssClassHidden}"/>
     </c:if>
@@ -140,8 +121,7 @@
             	nodeItemInvoices: '#<portlet:namespace />itemInvoices',
             	nodeItemUsd: '#<portlet:namespace />itemUsd',
             	nodeItemAlfresco: '#<portlet:namespace />itemAlfresco',
-            	nodeItemRandom: '#<portlet:namespace />itemRandom',
-            	nodeItemEmail: '#<portlet:namespace />itemEmail',            	
+            	nodeItemEmail: '#<portlet:namespace />itemEmail',
             	nodeItemSocialRequest: '#<portlet:namespace />itemSocialRequests',
 
                 notificationsListNode:'#<portlet:namespace />notificationsBarList',
