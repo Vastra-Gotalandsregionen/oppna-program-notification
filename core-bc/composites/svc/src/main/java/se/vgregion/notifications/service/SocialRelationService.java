@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Service class for managing social relations.
+ *
  * @author Patrik Bergström
  */
 @Service
@@ -32,6 +34,9 @@ public class SocialRelationService {
     private SocialRequestLocalService socialRequestLocalService;
     private UserLocalService userLocalService;
 
+    /**
+     * Default constructor taking no arguments. The dependencies are thus looked up by the constructor itself.
+     */
     public SocialRelationService() {
         this.socialRelationLocalService = SocialRelationLocalServiceUtil.getService();
         this.socialRequestLocalService = SocialRequestLocalServiceUtil.getService();
@@ -42,10 +47,20 @@ public class SocialRelationService {
         return socialRequestLocalService.getReceiverUserRequestsCount(user.getUserId(), status);
     }
 
+    /**
+     * Get {@link SocialRequest}s where the given {@link User} is the user who is asked to establish a relation by the
+     * requesting part.
+     *
+     * @param user         the requested {@link User}
+     * @param cachedResult whether a cached result is acceptable
+     * @return a list of {@link SocialRequest}s
+     */
+    // Note: the cachedResult parameter is handled by NotificationsCacheAspect
     public List<SocialRequest> getUserRequests(User user, boolean cachedResult) {
         try {
-            List<SocialRequest> receiverUserRequests = socialRequestLocalService.getReceiverUserRequests(user.getUserId(),
-                    SocialRequestConstants.STATUS_PENDING, 0, getUserRequestsCount(user, SocialRequestConstants.STATUS_PENDING));
+            List<SocialRequest> receiverUserRequests = socialRequestLocalService.getReceiverUserRequests(
+                    user.getUserId(), SocialRequestConstants.STATUS_PENDING, 0, getUserRequestsCount(
+                    user, SocialRequestConstants.STATUS_PENDING));
             return receiverUserRequests;
         } catch (SystemException e) {
             LOGGER.error(e.getMessage(), e);
@@ -53,11 +68,20 @@ public class SocialRelationService {
         }
     }
 
+    /**
+     * Like {@link SocialRelationService#getUserRequests(com.liferay.portal.model.User, boolean)} but where each
+     * {@link SocialRequest} is mapped to a requesting {@link User} object for easy access to ditto.
+     *
+     * @param user         the requested {@link User}
+     * @param cachedResult whether a cached result is acceptable
+     * @return a map of {@link SocialRequest}s mapped to the requesting {@link User}
+     */
     public Map<SocialRequest, User> getUserRequestsWithUser(User user, boolean cachedResult) {
         Map<SocialRequest, User> socialRequestUserMap = new HashMap<SocialRequest, User>();
         try {
-            List<SocialRequest> receiverUserRequests = socialRequestLocalService.getReceiverUserRequests(user.getUserId(),
-                    SocialRequestConstants.STATUS_PENDING, 0, getUserRequestsCount(user, SocialRequestConstants.STATUS_PENDING));
+            List<SocialRequest> receiverUserRequests = socialRequestLocalService.getReceiverUserRequests(
+                    user.getUserId(), SocialRequestConstants.STATUS_PENDING, 0, getUserRequestsCount(
+                    user, SocialRequestConstants.STATUS_PENDING));
 
             for (SocialRequest request : receiverUserRequests) {
                 User requestingUser = userLocalService.getUserById(request.getUserId());
@@ -74,6 +98,13 @@ public class SocialRelationService {
     }
 
 
+    /**
+     * Confirm a {@link SocialRequest} to establish a relation between the {@link User}s.
+     *
+     * @param requestId the id of the {@link SocialRequest}
+     * @throws SystemException SystemException
+     * @throws PortalException PortalException
+     */
     public void confirmRequest(Long requestId) throws SystemException, PortalException {
         SocialRequest socialRequest = socialRequestLocalService.getSocialRequest(requestId);
         addFriendRelation(socialRequest.getUserId(), socialRequest.getReceiverUserId());
@@ -86,6 +117,13 @@ public class SocialRelationService {
         socialRelationLocalService.addRelation(userId, receiverUserId, SocialRelationConstants.TYPE_BI_FRIEND);
     }
 
+    /**
+     * Reject a {@link SocialRequest}.
+     *
+     * @param requestId the id of the {@link SocialRequest}
+     * @throws SystemException SystemException
+     * @throws PortalException PortalException
+     */
     public void rejectRequest(Long requestId) throws SystemException, PortalException {
         SocialRequest socialRequest = socialRequestLocalService.getSocialRequest(requestId);
         socialRequest.setStatus(SocialRequestConstants.STATUS_IGNORE);

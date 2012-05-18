@@ -83,6 +83,13 @@ public class NotificationsCacheAspect {
         return handleRequest(joinPoint);
     }
 
+    /**
+     * Around advice for caching social requests.
+     *
+     * @param joinPoint joinPoint
+     * @return a cached or non-cached response
+     * @throws Throwable Throwable
+     */
     @Around("execution(* se.vgregion.notifications.service.SocialRelationService.getUserRequests("
             + "com.liferay.portal.model.User,boolean))")
     public Object cacheSocialRelationServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {

@@ -18,7 +18,6 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.portlet.bind.annotation.ActionMapping;
 import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import se.vgregion.alfrescoclient.domain.Site;
@@ -267,7 +266,8 @@ public class NotificationController {
 
     private Integer getValue(Future<Integer> count) {
         try {
-            Integer value = count.get(5, TimeUnit.SECONDS);
+            final int timeout = 5;
+            Integer value = count.get(timeout, TimeUnit.SECONDS);
 
             return value;
         } catch (InterruptedException e) {
@@ -360,6 +360,14 @@ public class NotificationController {
         }
     }
 
+    /**
+     * Method to confirm a friend request.
+     *
+     * @param request  request
+     * @param response response
+     * @throws NotificationException NotificationException
+     * @throws IOException           IOException
+     */
     @ResourceMapping(value = "confirmRequest")
     public void confirmRequest(ResourceRequest request, ResourceResponse response) throws NotificationException,
             IOException {
@@ -368,6 +376,13 @@ public class NotificationController {
         writeMessageToResponse(response, "Du har accepterat denna förfrågan.");
     }
 
+    /**
+     * Method to reject a friend request.
+     * @param request request
+     * @param response response
+     * @throws NotificationException NotificationException
+     * @throws IOException IOException
+     */
     @ResourceMapping(value = "rejectRequest")
     public void rejectRequest(ResourceRequest request, ResourceResponse response) throws NotificationException,
             IOException {
