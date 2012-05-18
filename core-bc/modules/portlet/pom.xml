@@ -81,7 +81,7 @@
     <dependency>
       <groupId>se.vgregion.alfresco-client</groupId>
       <artifactId>alfresco-client-core-bc-composite-svc</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
 
     <!-- We use a Servlet Filter from spring-web to control UTF-8 encodings. Facelets doesn't do this for us. -->
