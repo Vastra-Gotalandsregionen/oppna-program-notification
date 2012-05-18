@@ -19,10 +19,6 @@
   <version>1.0-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   
-  <properties>
-	<liferay.version>6.0.6</liferay.version>
-  </properties>
-
   <modules>
     <module>core-bc</module>
   </modules>
@@ -30,8 +26,8 @@
   <!--NB! SCM config below assumes system name equals VGR subversion/googlecode project name! -->
   <!-- Open Source repo -->
   <scm>
-    <developerConnection>scm:svn:https://notifications.googlecode.com/svn/trunk</developerConnection>
-    <url>http://notifications.googlecode.com/svn/trunk</url>
+    <developerConnection>scm:svn:https://oppna-program-notification.googlecode.com/svn/trunk</developerConnection>
+    <url>https://oppna-program-notification.googlecode.com/svn/trunk/</url>
   </scm>
 
 </project>
