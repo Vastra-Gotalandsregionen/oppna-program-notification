@@ -54,8 +54,8 @@ public class NotificationController {
 
     @Resource(name = "usersNotificationsCache")
     protected Cache cache; // Protected access to make access from CacheUpdater more efficient (see Findbugs)
+    protected final Set<String> currentlyScheduledUpdates = Collections.synchronizedSet(new HashSet<String>());
     private final String recentlyCheckedSuffix = "RecentlyChecked";
-    private final Set<String> currentlyScheduledUpdates = Collections.synchronizedSet(new HashSet<String>());
 
     /**
      * Constructor.
@@ -351,9 +351,17 @@ public class NotificationController {
             String bopsId = notificationService.getBopsId(userId);
             response.setContentType("application/json");
             new ObjectMapper().writeValue(response.getPortletOutputStream(), "+BOPSID=" + bopsId);
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             try {
                 new ObjectMapper().writeValue(response.getPortletOutputStream(), "");
+                LOGGER.error(ex.getMessage(), ex);
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        } catch (IOException ex) {
+            try {
+                new ObjectMapper().writeValue(response.getPortletOutputStream(), "");
+                LOGGER.error(ex.getMessage(), ex);
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }

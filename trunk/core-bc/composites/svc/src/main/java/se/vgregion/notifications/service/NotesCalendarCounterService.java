@@ -9,11 +9,14 @@ import org.apache.http.params.HttpParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -96,8 +99,14 @@ class NotesCalendarCounterService {
                     return ""; //The user does not have any notes calendar and should receive nothing.
                 }
 
-            } catch (Exception ex) {
+            } catch (RuntimeException ex) {
                 LOGGER.warn(ex.getMessage());
+            } catch (ParserConfigurationException e) {
+                LOGGER.warn(e.getMessage());
+            } catch (SAXException e) {
+                LOGGER.warn(e.getMessage());
+            } catch (XPathExpressionException e) {
+                LOGGER.warn(e.getMessage());
             }
 
             return "-";
