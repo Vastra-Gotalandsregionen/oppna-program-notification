@@ -54,6 +54,7 @@ public class NotificationService {
      * @param notesEmailCounterService    notesEmailCounterService
      * @param raindanceInvoiceService     raindanceInvoiceService
      * @param usdIssuesService            usdIssuesService
+     * @param socialRelationService       socialRelationService
      */
     @Autowired
     public NotificationService(AlfrescoDocumentsService alfrescoDocumentsService,
@@ -143,8 +144,14 @@ public class NotificationService {
     }
 
 
-//    @Async // Can't have this Async due to a bug. Some cached and potentially wrong value will be returned. Possibly
-    //related to http://issues.liferay.com/browse/LPS-26465.
+    /**
+     * Get the number of social requests for a user.
+     *
+     * @param user the regarded user
+     * @return the count wrapped in a {@link Future}
+     */
+    //@Async // Can't have this Async due to a liferay bug. Some cached and potentially wrong value will be returned.
+    // Possibly related to http://issues.liferay.com/browse/LPS-26465.
     public Future<Integer> getSocialRequestCount(User user) {
         return new AsyncResult<Integer>(socialRelationService.getUserRequests(user, false).size());
     }
@@ -194,14 +201,35 @@ public class NotificationService {
         return raindanceInvoiceService.getInvoices(screenName, true);
     }
 
+    /**
+     * Get the {@link SocialRequest}s for a user.
+     *
+     * @param user the regarded user
+     * @return a list of {@link SocialRequest}s
+     */
     public List<SocialRequest> getSocialRequests(User user) {
         return socialRelationService.getUserRequests(user, true);
     }
 
+    /**
+     * Similar to
+     * {@link se.vgregion.notifications.service.NotificationService#getSocialRequests(com.liferay.portal.model.User)}
+     * but each {@link SocialRequest} is mapped to the requested {@link User} object. The {@link SocialRequest} class
+     * only provides access to the userId but this method provides easy access to the whole {@link User} object.
+     *
+     * @param user the regarded user
+     * @return a map of {@link SocialRequest}s mapped to the requested {@link User}
+     */
     public Map<SocialRequest, User> getSocialRequestsWithRespectiveUser(User user) {
         return socialRelationService.getUserRequestsWithUser(user, true);
     }
 
+    /**
+     * Confirm a {@link SocialRequest}.
+     *
+     * @param requestId the id of the {@link SocialRequest}
+     * @throws NotificationException NotificationException
+     */
     public void confirmRequest(Long requestId) throws NotificationException {
         try {
             socialRelationService.confirmRequest(requestId);
@@ -212,6 +240,12 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Reject a {@link SocialRequest}.
+     *
+     * @param requestId the id of the {@link SocialRequest}
+     * @throws NotificationException NotificationException
+     */
     public void rejectRequest(Long requestId) throws NotificationException {
         try {
             socialRelationService.rejectRequest(requestId);
