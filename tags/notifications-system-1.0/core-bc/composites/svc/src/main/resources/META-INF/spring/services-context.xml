@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2010 Västra Götalandsregionen
+
+      This library is free software; you can redistribute it and/or modify
+      it under the terms of version 2.1 of the GNU Lesser General Public
+      License as published by the Free Software Foundation.
+
+      This library is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU Lesser General Public License for more details.
+
+      You should have received a copy of the GNU Lesser General Public
+      License along with this library; if not, write to the
+      Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+      Boston, MA 02111-1307  USA
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+        >
+
+  <!-- This is for commons-util-core-bc-composite-security -->
+  <import resource="classpath*:service-configuration.xml"/>
+
+  <!-- Enables component scanning -->
+  <context:component-scan base-package="se.vgregion.notifications.service"/>
+  <context:component-scan base-package="se.vgregion.raindancenotifier" />
+  <context:component-scan base-package="se.vgregion.portal.raindancenotifier" />
+
+  <!-- Enables annotations -->
+  <context:annotation-config />
+
+  <!-- Enables asynchronous support -->
+  <task:annotation-driven executor="notificationsExecutor"/>
+  <task:executor id="notificationsExecutor" pool-size="20"/>
+
+  <bean id="iNotesSiteKey" class="java.lang.String">
+    <constructor-arg value="iNotes"/>
+  </bean>
+
+  <bean id="usdService" class="se.vgregion.usdservice.USDServiceImpl">
+    <constructor-arg ref="usdProperties"/>
+  </bean>
+
+  <bean id="usdProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property name="locations">
+      <list>
+        <value>classpath*:security.properties</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean class="se.vgregion.alfrescoclient.service.AlfrescoService">
+    <constructor-arg index="0" value="${alfresco-host]"/>
+    <constructor-arg index="1" value="X-Alfresco-Remote-User"/>
+  </bean>
+
+  <!-- Caching by AOP -->
+  <!-- Enable @AspectJ Support -->
+  <aop:aspectj-autoproxy/>
+
+  <bean id="servicesCacheAspect" class="se.vgregion.notifications.aspect.NotificationsCacheAspect" />
+
+  <bean id="servicesCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+    <property name="configLocation" value="classpath:service-cache.xml"/>
+  </bean>
+
+  <bean id="servicesCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+    <property name="cacheManager" ref="servicesCacheManager"/>
+    <property name="cacheName" value="servicesCache"/>
+  </bean>
+
+</beans>
