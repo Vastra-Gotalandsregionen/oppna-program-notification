@@ -40,7 +40,7 @@
     <dependency>
       <groupId>se.vgregion.alfresco-client</groupId>
       <artifactId>alfresco-client-core-bc-composite-svc</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
