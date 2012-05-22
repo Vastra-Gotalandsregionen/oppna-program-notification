@@ -59,7 +59,7 @@
   </bean>
 
   <bean class="se.vgregion.alfrescoclient.service.AlfrescoService">
-    <constructor-arg index="0" value="${alfresco-host]"/>
+    <constructor-arg index="0" value="${alfresco-host}"/>
     <constructor-arg index="1" value="X-Alfresco-Remote-User"/>
   </bean>
 
