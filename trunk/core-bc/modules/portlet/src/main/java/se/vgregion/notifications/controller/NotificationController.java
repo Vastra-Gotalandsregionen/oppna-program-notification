@@ -23,6 +23,7 @@ import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.NotificationException;
 import se.vgregion.notifications.service.NotificationService;
+import se.vgregion.portal.medcontrol.domain.DeviationCase;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
@@ -121,6 +122,7 @@ public class NotificationController {
         Integer usdIssuesCount = systemNoNotifications.get("usdIssuesCount");
         Integer emailCount = systemNoNotifications.get("emailCount");
         Integer invoicesCount = systemNoNotifications.get("invoicesCount");
+        Integer medControlCount = systemNoNotifications.get("medControlCount");
         // Do this synchronously due to a problem with liferay's services when using separate threads
         Integer socialRequestCount = getValue(notificationService.getSocialRequestCount(user));
 
@@ -136,6 +138,9 @@ public class NotificationController {
         model.addAttribute("invoicesCount", invoicesCount);
         model.addAttribute("invoicesHighlightCount", highlightCount(user.getScreenName(), "invoicesCount",
                 invoicesCount));
+        model.addAttribute("medControlCount", medControlCount);
+        model.addAttribute("medControlHighlightCount", highlightCount(user.getScreenName(), "medControlCount",
+                medControlCount));
         model.addAttribute("socialRequestCount", socialRequestCount);
         model.addAttribute("socialRequestHighlightCount", highlightCount(user.getScreenName(), "socialRequestCount",
                 socialRequestCount));
@@ -231,6 +236,10 @@ public class NotificationController {
             List<InvoiceNotification> invoices = notificationService.getInvoices(user.getScreenName());
             model.addAttribute("invoices", invoices);
             return "view_invoices";
+        } else if (notificationType.equals("medControl")) {
+            List<DeviationCase> deviationCases = notificationService.getMedControlCases(user);
+            model.addAttribute("deviationCases", deviationCases);
+            return "view_med_control";
         } else if (notificationType.equals("socialRequests")) {
             Map<SocialRequest, User> socialRequests = notificationService.getSocialRequestsWithRespectiveUser(user);
             model.addAttribute("socialRequests", socialRequests);
@@ -254,9 +263,11 @@ public class NotificationController {
         Element element = cache.get(screenName + recentlyCheckedSuffix);
 
         if (element != null && element.getValue() != null) {
+            // Add to existing set
             Set<String> values = (Set<String>) element.getValue();
             values.add(countName);
         } else {
+            // Create new set and add to ditto
             Set<String> values = new HashSet<String>();
             values.add(countName);
             element = new Element(screenName + recentlyCheckedSuffix, values);
@@ -288,6 +299,7 @@ public class NotificationController {
         Future<Integer> usdIssuesCount = notificationService.getUsdIssuesCount(user.getScreenName());
         Future<Integer> emailCount = notificationService.getEmailCount(user.getScreenName());
         Future<Integer> invoicesCount = notificationService.getInvoicesCount(user.getScreenName());
+        Future<Integer> medControlCount = notificationService.getMedControlCasesCount(user.getScreenName());
         // Should getSocialRequestCount here if we can work around the problem or the problem has been solved
 
         Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
@@ -296,6 +308,7 @@ public class NotificationController {
         systemNoNotifications.put("usdIssuesCount", getValue(usdIssuesCount));
         systemNoNotifications.put("emailCount", getValue(emailCount));
         systemNoNotifications.put("invoicesCount", getValue(invoicesCount));
+        systemNoNotifications.put("medControlCount", getValue(medControlCount));
 //        systemNoNotifications.put("socialRequestCount", getValue(socialRequestCount));
 
         return systemNoNotifications;
@@ -327,7 +340,8 @@ public class NotificationController {
             systemNoNotifications = getSystemNoNotifications(user);
         }
 
-        // Do this synchronously for now
+        // Do this specific request synchronously for now due to non-deterministic results otherwise (Liferay returns
+        // a cached result so it's rather efficient.
         if (systemNoNotifications != null) {
             Integer socialRequestCount = getValue(notificationService.getSocialRequestCount(user));
             systemNoNotifications.put("socialRequestCount", socialRequestCount);

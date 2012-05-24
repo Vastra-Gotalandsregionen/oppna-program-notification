@@ -74,7 +74,7 @@ class NotesEmailCounterService {
         HttpResponse httpResponse = callService(userSiteCredential.getSiteUser(),
                 userSiteCredential.getSitePassword(), uri);
 
-        return handleResponse(httpResponse);
+        return handleResponse(httpResponse, userId);
     }
 
     private HttpResponse callService(String userId, String sitePassword, URI uri) throws IOException {
@@ -103,7 +103,7 @@ class NotesEmailCounterService {
         return httpClient.execute(httpGet, httpContext);
     }
 
-    private Integer handleResponse(HttpResponse httpResponse) throws IOException {
+    private Integer handleResponse(HttpResponse httpResponse, String user) throws IOException {
         final int ok = 200;
         if (httpResponse.getStatusLine().getStatusCode() == ok) {
             String reply = IOUtils.toString(httpResponse.getEntity().getContent());
@@ -114,12 +114,13 @@ class NotesEmailCounterService {
             }
 
             if (reply.contains("DOCTYPE")) {
-                // Log this way to avoid too much stacktraces in the log files.
+                // Log this way to avoid too much stacktraces in the log files, but still inform about where this
+                // happens
                 StackTraceElement stackTraceElement = new Exception().getStackTrace()[0];
                 String stackTraceElementString = stackTraceElement.getClassName() + "." + stackTraceElement
                         .getMethodName() + "(" + stackTraceElement.getFileName() + ":" + stackTraceElement
                         .getLineNumber() + ")";
-                LOGGER.warn("Http request failed. Unexpected response - " + stackTraceElementString);
+                LOGGER.warn("User: " + user + ". Http request failed. Unexpected response - " + stackTraceElementString);
                 return null;
             }
 

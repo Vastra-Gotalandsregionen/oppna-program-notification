@@ -49,6 +49,12 @@
     </dependency>
 
     <dependency>
+      <groupId>se.vgregion.medcontrol</groupId>
+      <artifactId>medcontrol-core-bc-composite-svc</artifactId>
+      <version>1.8-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-validator</artifactId>
       <version>4.1.0.Final</version>

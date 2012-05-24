@@ -22,8 +22,8 @@ Generation time : 2012-03-12 09:23:52 CET
 
   <modules>
     <module>composites/types</module>
-    <module>composites/svc</module>
     <module>composites/schema</module>
+    <module>composites/svc</module>
     <module>modules/web</module>
     <module>modules/portlet</module>
     <module>modules/intsvc</module>

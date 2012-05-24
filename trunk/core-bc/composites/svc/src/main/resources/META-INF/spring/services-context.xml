@@ -63,6 +63,8 @@
     <constructor-arg index="1" value="X-Alfresco-Remote-User"/>
   </bean>
 
+  <bean class="se.vgregion.portal.medcontrol.services.MedControlDeviationService" />
+
   <!-- Caching by AOP -->
   <!-- Enable @AspectJ Support -->
   <aop:aspectj-autoproxy/>
