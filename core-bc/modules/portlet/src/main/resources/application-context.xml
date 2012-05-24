@@ -19,6 +19,7 @@
         <value>classpath*:raindance-svc.properties</value>
         <value>classpath*:hibernate.properties</value>
         <value>classpath*:alfresco-cs-iframe.properties</value>
+        <value>classpath*:medcontrol.properties</value>
       </list>
     </property>
   </bean>

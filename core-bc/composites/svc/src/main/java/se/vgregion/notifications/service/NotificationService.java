@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.NotificationException;
+import se.vgregion.portal.medcontrol.domain.DeviationCase;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
@@ -38,6 +39,7 @@ public class NotificationService {
     private RaindanceInvoiceService raindanceInvoiceService;
     private UsdIssuesService usdIssuesService;
     private SocialRelationService socialRelationService;
+    private MedControlService medControlService;
 
     /**
      * Constructor.
@@ -62,13 +64,15 @@ public class NotificationService {
                                NotesEmailCounterService notesEmailCounterService,
                                RaindanceInvoiceService raindanceInvoiceService,
                                UsdIssuesService usdIssuesService,
-                               SocialRelationService socialRelationService) {
+                               SocialRelationService socialRelationService,
+                               MedControlService medControlService) {
         this.alfrescoDocumentsService = alfrescoDocumentsService;
         this.notesCalendarCounterService = notesCalendarCounterService;
         this.notesEmailCounterService = notesEmailCounterService;
         this.raindanceInvoiceService = raindanceInvoiceService;
         this.usdIssuesService = usdIssuesService;
         this.socialRelationService = socialRelationService;
+        this.medControlService = medControlService;
     }
 
     /**
@@ -156,6 +160,12 @@ public class NotificationService {
         return new AsyncResult<Integer>(socialRelationService.getUserRequests(user, false).size());
     }
 
+    @Async
+    public Future<Integer> getMedControlCasesCount(String screenName) {
+        List<DeviationCase> deviationCases = medControlService.listDeviationCases(screenName, false);
+        return new AsyncResult<Integer>(deviationCases.size());
+    }
+
     /**
      * Get recently modified {@link se.vgregion.alfrescoclient.domain.Document}s in a list of {@link Site}s. The
      * {@link se.vgregion.alfrescoclient.domain.Document}s are accessible by calling
@@ -222,6 +232,10 @@ public class NotificationService {
      */
     public Map<SocialRequest, User> getSocialRequestsWithRespectiveUser(User user) {
         return socialRelationService.getUserRequestsWithUser(user, true);
+    }
+
+    public List<DeviationCase> getMedControlCases(User user) {
+        return medControlService.listDeviationCases(user.getScreenName(), true);
     }
 
     /**

@@ -89,6 +89,25 @@
         </a>
     </li>
     
+    <c:if test="${!(medControlCount > 0)}">
+        <c:set var="cssClassHiddenMedControl" value="${cssClassHidden}"/>
+    </c:if>
+    <li id="<portlet:namespace />itemMedControl" class="notifications-bar-item notifications-bar-med-control ${cssClassHiddenMedControl}" title="MedControl">
+        <portlet:renderURL var="medControlURL">
+            <portlet:param name="action" value="showExpandedNotifications"/>
+            <portlet:param name="notificationType" value="medControl"/>
+        </portlet:renderURL>
+        <a href="${medControlURL}">
+		    <c:if test="${medControlHighlightCount}">
+		        <c:set var="cssClassCountWrapperMedControl" value="${cssClassCountHighlight}"/>
+		    </c:if>
+            <span class="count ${cssClassCountWrapperMedControl}">
+				<span>${medControlCount}</span>
+            </span>
+            <span class="title">MedControl</span>
+        </a>
+    </li>
+
     <c:if test="${!(socialRequestCount > 0)}">
         <c:set var="cssClassHiddenRequests" value="${cssClassHidden}"/>
     </c:if>
