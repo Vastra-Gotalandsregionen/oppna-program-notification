@@ -141,6 +141,7 @@
             	nodeItemUsd: '#<portlet:namespace />itemUsd',
             	nodeItemAlfresco: '#<portlet:namespace />itemAlfresco',
             	nodeItemEmail: '#<portlet:namespace />itemEmail',
+            	nodeItemMedControl: '#<portlet:namespace />itemMedControl',
             	nodeItemSocialRequest: '#<portlet:namespace />itemSocialRequests',
 
                 notificationsListNode:'#<portlet:namespace />notificationsBarList',
