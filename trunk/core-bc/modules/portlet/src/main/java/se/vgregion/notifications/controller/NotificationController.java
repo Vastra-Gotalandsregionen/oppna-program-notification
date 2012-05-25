@@ -58,6 +58,9 @@ public class NotificationController {
     protected final Set<String> currentlyScheduledUpdates = Collections.synchronizedSet(new HashSet<String>());
     private final String recentlyCheckedSuffix = "RecentlyChecked";
 
+    @Resource
+    private List<String> exceptedUsers = new ArrayList<String>();
+
     /**
      * Constructor.
      *
@@ -90,6 +93,11 @@ public class NotificationController {
         cache.removeAll();
     }
 
+    @ManagedOperation
+    public Set<String> getCurrentlyScheduledUpdates() {
+        return currentlyScheduledUpdates;
+    }
+
     /**
      * The method which as accessed as the browser refreshes the page. This method will never make a long synchronous
      * call to fetch the count values. Instead it uses the cache and if there is nothing cached it will schedule a cache
@@ -106,6 +114,10 @@ public class NotificationController {
 
         final int millisInSecond = 1000;
         model.addAttribute("interval", INTERVAL * millisInSecond);
+
+        if (exceptedUsers.contains(user.getScreenName())) {
+            return "view";
+        }
 
         Element element = cache.get(user.getScreenName());
 
@@ -149,6 +161,10 @@ public class NotificationController {
     }
 
     private void scheduleCacheUpdate(User user, int delay) {
+        if (exceptedUsers.contains(user.getScreenName())) {
+            return;
+        }
+
         if (!currentlyScheduledUpdates.contains(user.getScreenName())) {
             executorService.schedule(new CacheUpdater(user), delay, TimeUnit.MILLISECONDS);
             currentlyScheduledUpdates.add(user.getScreenName());

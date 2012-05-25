@@ -29,4 +29,27 @@
     <url>https://oppna-program-notification.googlecode.com/svn/trunk/</url>
   </scm>
 
+  <properties>
+    <apache.cxf.version>2.3.3</apache.cxf.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-rt-frontend-jaxws</artifactId>
+        <version>${apache.cxf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-rt-transports-http</artifactId>
+        <version>${apache.cxf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+        <version>${apache.cxf.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
