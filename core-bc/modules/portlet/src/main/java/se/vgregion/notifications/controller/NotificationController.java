@@ -239,7 +239,7 @@ public class NotificationController {
             List<Issue> myUsdIssues = new ArrayList<Issue>();
             List<Issue> groupUsdIssues = new ArrayList<Issue>();
             for (Issue usdIssue : usdIssues) {
-                if ("A".equals(usdIssue.getAssociated())) {
+                if ("A".equals(usdIssue.getAssociated()) || "U".equals(usdIssue.getAssociated())) {
                     myUsdIssues.add(usdIssue);
                 } else if ("G".equals(usdIssue.getAssociated())) {
                     groupUsdIssues.add(usdIssue);

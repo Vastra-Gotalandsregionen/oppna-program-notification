@@ -35,7 +35,7 @@
     <c:if test="${!(usdIssuesCount > 0)}">
         <c:set var="cssClassHiddenUsd" value="${cssClassHidden}"/>
     </c:if>
-    <li id="<portlet:namespace />itemUsd" class="notifications-bar-item notifications-bar-usd ${cssClassHiddenUsd}" title="Navet">
+    <li id="<portlet:namespace />itemUsd" class="notifications-bar-item notifications-bar-usd ${cssClassHiddenUsd}" title="Ärenden VGR IT">
         <portlet:renderURL var="usdURL">
             <portlet:param name="action" value="showExpandedNotifications"/>
             <portlet:param name="notificationType" value="usdIssues"/>

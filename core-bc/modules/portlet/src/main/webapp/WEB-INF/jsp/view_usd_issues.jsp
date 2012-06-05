@@ -4,7 +4,7 @@
 <portlet:resourceURL var="bopsIdUrl" id="lookupBopsId" />
 
 <div class="notification-wrap">
-	<h3>Mina &auml;renden i Navet</h3>
+	<h3>Mina &auml;renden VGR IT</h3>
 
 	<ul class="notifications-list usd-issues">
 	    <c:forEach items="${myUsdIssues}" var="usdIssue" varStatus="iteratorStatus">
@@ -40,41 +40,43 @@
 	    </c:forEach>
 	</ul>
 
-	<h3>Mina gruppers &auml;renden i Navet</h3>
+    <c:if test="${fn:length(groupUsdIssues) > 0}">
+        <h3>Mina gruppers &auml;renden VGR IT</h3>
 
-	<ul class="notifications-list usd-issues">
-	    <c:forEach items="${groupUsdIssues}" var="usdIssue" varStatus="iteratorStatus">
-	    	<c:set var="listItemCssClass" value="" scope="page" />
-	    	<c:choose>
-	    		<c:when test="${iteratorStatus.first}">
-	    			<c:set var="listItemCssClass" value="first" scope="page" />
-	    		</c:when>
-	    		<c:when test="${iteratorStatus.last}">
-	    			<c:set var="listItemCssClass" value="last" scope="page" />
-	    		</c:when>
-	    	</c:choose>
+        <ul class="notifications-list usd-issues">
+            <c:forEach items="${groupUsdIssues}" var="usdIssue" varStatus="iteratorStatus">
+                <c:set var="listItemCssClass" value="" scope="page" />
+                <c:choose>
+                    <c:when test="${iteratorStatus.first}">
+                        <c:set var="listItemCssClass" value="first" scope="page" />
+                    </c:when>
+                    <c:when test="${iteratorStatus.last}">
+                        <c:set var="listItemCssClass" value="last" scope="page" />
+                    </c:when>
+                </c:choose>
 
-	    	<li class="${listItemCssClass}">
-	    		<a href="${usdIssue.url}" target="_blank" class="clearfix">
-	    			<span class="notification-types notification-usd-types">
-	    				<c:set var="notificationTypeCssClass" value="" scope="page" />
-	    				<c:choose>
-	    					<c:when test="${usdIssue.type == 'A'}">
-	    					<c:set var="notificationTypeCssClass" value="notification-usd-type-warning" scope="page" />
-	    					</c:when>
-	    					<c:otherwise>
-	    						<c:set var="notificationTypeCssClass" value="" scope="page" />
-	    					</c:otherwise>
-	    				</c:choose>
-	    				<span class="notification-type notification-usd-type ${notificationTypeCssClass}">
-	    					${usdIssue.type}
-	    				</span>
-    				</span>
-	    			<span class="notification-summary notification-usd-summary">${usdIssue.summary}</span>
-    			</a>
-	    	</li>
-	    </c:forEach>
-	</ul>
+                <li class="${listItemCssClass}">
+                    <a href="${usdIssue.url}" target="_blank" class="clearfix">
+                        <span class="notification-types notification-usd-types">
+                            <c:set var="notificationTypeCssClass" value="" scope="page" />
+                            <c:choose>
+                                <c:when test="${usdIssue.type == 'A'}">
+                                <c:set var="notificationTypeCssClass" value="notification-usd-type-warning" scope="page" />
+                                </c:when>
+                                <c:otherwise>
+                                    <c:set var="notificationTypeCssClass" value="" scope="page" />
+                                </c:otherwise>
+                            </c:choose>
+                            <span class="notification-type notification-usd-type ${notificationTypeCssClass}">
+                                ${usdIssue.type}
+                            </span>
+                        </span>
+                        <span class="notification-summary notification-usd-summary">${usdIssue.summary}</span>
+                    </a>
+                </li>
+            </c:forEach>
+        </ul>
+    </c:if>
 
 </div>
 
