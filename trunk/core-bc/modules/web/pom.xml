@@ -11,7 +11,7 @@ Generation time : 2012-03-12 09:23:52 CET
   <parent>
     <groupId>se.vgregion.notifications</groupId>
     <artifactId>notifications-core-bc</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <groupId>se.vgregion.notifications</groupId>
@@ -121,8 +121,7 @@ Generation time : 2012-03-12 09:23:52 CET
       were allowed to generate JavaScript. In 1.2 only commandLink (out of the
       standard components) is allowed to generated JavaScript. Suns RI for 1.1
       already did this (but had problems with Facelets).
-      MyFaces 1.1.x (<=1.1.6) generates loads of JavaScript for form submission. MyFaces 1.2.x seems to rely on Servlet 2.5 while Suns 1.2 RI can run with Servlet 2.4, see:
-        http://raibledesigns.com/rd/entry/thoughts_on_myfaces_1_2
+      MyFaces 1.1.x (<=1.1.6) generates loads of JavaScript for form submission. MyFaces 1.2.x seems to rely on Servlet 2.5 while Suns 1.2 RI can run with Servlet 2.4, see: http://raibledesigns.com/rd/entry/thoughts_on_myfaces_1_2
     -->
     <!--
     <dependency>
