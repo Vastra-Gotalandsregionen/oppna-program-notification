@@ -1,0 +1,33 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+  <import resource="classpath*:META-INF/spring/services-context.xml" />
+  <import resource="classpath:usersNotificationsCache-context.xml" />
+
+  <context:mbean-export/>
+
+  <context:annotation-config/>
+  <context:component-scan base-package="se.vgregion.notifications.controller"/>
+
+  <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>classpath*:META-INF/camel.properties</value>
+        <value>classpath*:raindance-svc.properties</value>
+        <value>classpath*:hibernate.properties</value>
+        <value>classpath*:alfresco-cs-iframe.properties</value>
+        <value>classpath*:medcontrol.properties</value>
+      </list>
+    </property>
+  </bean>
+
+  <util:list id="exceptedUsers">
+    <value>lifra1</value>
+    <value>test</value>
+  </util:list>
+
+</beans>
