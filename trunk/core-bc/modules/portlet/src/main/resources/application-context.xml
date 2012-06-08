@@ -8,7 +8,7 @@
   <import resource="classpath*:META-INF/spring/services-context.xml" />
   <import resource="classpath:usersNotificationsCache-context.xml" />
 
-  <context:mbean-export/>
+  <context:mbean-export registration="replaceExisting"/>
 
   <context:annotation-config/>
   <context:component-scan base-package="se.vgregion.notifications.controller"/>
