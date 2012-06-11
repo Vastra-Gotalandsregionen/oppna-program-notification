@@ -89,7 +89,7 @@
         </a>
     </li>
     
-    <%--<c:if test="${!(medControlCount > 0)}">
+    <c:if test="${!(medControlCount > 0)}">
         <c:set var="cssClassHiddenMedControl" value="${cssClassHidden}"/>
     </c:if>
     <li id="<portlet:namespace />itemMedControl" class="notifications-bar-item notifications-bar-med-control ${cssClassHiddenMedControl}" title="MedControl">
@@ -106,7 +106,7 @@
             </span>
             <span class="title">MedControl</span>
         </a>
-    </li>--%>
+    </li>
 
     <c:if test="${!(socialRequestCount > 0)}">
         <c:set var="cssClassHiddenRequests" value="${cssClassHidden}"/>

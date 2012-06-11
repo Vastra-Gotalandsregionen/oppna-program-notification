@@ -54,7 +54,7 @@ class AlfrescoDocumentsService {
      */
     public List<Site> getRecentlyModified(final String userId, boolean cachedResult) {
         if (userId == null || "".equals(userId)) {
-            return new ArrayList<Site>();
+            return null;
         }
 
         List<Site> sitesByUser = alfrescoService.getSitesByUser(userId, csiframePage, portletInstance);

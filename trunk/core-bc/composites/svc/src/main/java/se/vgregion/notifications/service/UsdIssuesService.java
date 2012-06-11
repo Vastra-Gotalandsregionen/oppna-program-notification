@@ -10,7 +10,6 @@ import se.vgregion.usdservice.USDService;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,9 +47,7 @@ class UsdIssuesService {
     // The cachedResult is used by NotificationsCacheAspect
     public List<Issue> getUsdIssues(String userId, boolean cachedResult) {
         List<Issue> issues = usdService.lookupIssues(userId, -1, true);
-        if (issues == null) {
-            return new ArrayList<Issue>();
-        }
+
         return issues;
     }
 

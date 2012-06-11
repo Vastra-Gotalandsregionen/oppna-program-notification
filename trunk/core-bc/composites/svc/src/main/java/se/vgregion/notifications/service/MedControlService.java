@@ -43,9 +43,7 @@ public class MedControlService {
         } catch (MedControlDeviationServiceException e) {
             LOGGER.error(e.getMessage(), e);
         }
-        if (deviationCases == null) {
-            deviationCases = new ArrayList<DeviationCase>();
-        }
+
         return deviationCases;
     }
 }
