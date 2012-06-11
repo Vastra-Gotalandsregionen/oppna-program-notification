@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.Model;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.notifications.service.NotificationCallManager;
 import se.vgregion.notifications.service.NotificationService;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
@@ -47,13 +48,15 @@ public class NotificationControllerTest {
         numberOfServices++;
         when(notificationService.getUsdIssuesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
         numberOfServices++;
-        when(notificationService.getMedControlCasesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+        when(notificationService.getMedControlCasesCount(anyString())).thenReturn(new AsyncResult<Integer>(null));
         numberOfServices++;
         when(notificationService.getSocialRequestCount(any(User.class))).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
         numberOfServices++;
 
+        when(notificationService.getCount(any(String.class), any(User.class))).thenCallRealMethod();
+
         if (controller == null) {
-            controller = new NotificationController(notificationService);
+            controller = new NotificationController(notificationService, new NotificationCallManager());
         }
 
         T portletRequest = mock(clazz);

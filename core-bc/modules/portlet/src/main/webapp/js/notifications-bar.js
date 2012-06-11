@@ -237,7 +237,7 @@ AUI().add('rp-notifications-bar', function (A) {
                         	var usdIssuesCount = responseJSON['usdIssuesCount'];
                         	var emailCount = responseJSON['emailCount'];
                         	var invoicesCount = responseJSON['invoicesCount'];
-                        	var medControlCount = responseJSON['medControlCount'];
+                        	var medControlCount = responseJSON['medControlCasesCount'];
                         	var socialRequestCount = responseJSON['socialRequestCount'];
 
                         	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount);

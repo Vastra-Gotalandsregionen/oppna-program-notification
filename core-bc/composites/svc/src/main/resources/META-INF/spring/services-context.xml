@@ -35,6 +35,8 @@
   <context:component-scan base-package="se.vgregion.raindancenotifier" />
   <context:component-scan base-package="se.vgregion.portal.raindancenotifier" />
 
+  <context:mbean-export registration="replaceExisting"/>
+
   <!-- Enables annotations -->
   <context:annotation-config />
 

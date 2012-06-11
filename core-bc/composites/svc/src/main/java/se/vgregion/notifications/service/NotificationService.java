@@ -17,6 +17,8 @@ import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -75,6 +77,33 @@ public class NotificationService {
         this.medControlService = medControlService;
     }
 
+    @Async
+    public Future<Integer> getCount(String serviceName, User user) {
+        serviceName = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1, serviceName.length());
+
+        try {
+            // First try with String
+            Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", String.class);
+            return (Future<Integer>) method.invoke(this, user.getScreenName());
+        } catch (NoSuchMethodException e) {
+            // No method found, try with User class instead
+            try {
+                Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", String.class);
+                return new AsyncResult<Integer>((Integer) method.invoke(this, user));
+            } catch (NoSuchMethodException e1) {
+                throw new RuntimeException(e1);
+            } catch (InvocationTargetException e1) {
+                throw new RuntimeException(e1);
+            } catch (IllegalAccessException e1) {
+                throw new RuntimeException(e1);
+            }
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Get the number of recently modified Alfresco {@link se.vgregion.alfrescoclient.domain.Document}s for all
      * {@link Site}s a user is a member of.
@@ -85,6 +114,10 @@ public class NotificationService {
     @Async
     public Future<Integer> getAlfrescoCount(String screenName) {
         List<Site> alfrescoResponse = alfrescoDocumentsService.getRecentlyModified(screenName, false);
+
+        if (alfrescoResponse == null) {
+            return new AsyncResult<Integer>(null);
+        }
 
         int n = 0;
         for (Site site : alfrescoResponse) {
@@ -103,6 +136,10 @@ public class NotificationService {
     @Async
     public Future<Integer> getUsdIssuesCount(String screenName) {
         List<Issue> issues = usdIssuesService.getUsdIssues(screenName, false);
+
+        if (issues == null) {
+            return new AsyncResult<Integer>(null);
+        }
 
         return new AsyncResult<Integer>(issues.size());
     }
@@ -144,6 +181,11 @@ public class NotificationService {
     @Async
     public Future<Integer> getInvoicesCount(String screenName) {
         List<InvoiceNotification> invoices = raindanceInvoiceService.getInvoices(screenName, false);
+
+        if (invoices == null) {
+            return new AsyncResult<Integer>(null);
+        }
+
         return new AsyncResult<Integer>(invoices.size());
     }
 
@@ -163,6 +205,11 @@ public class NotificationService {
     @Async
     public Future<Integer> getMedControlCasesCount(String screenName) {
         List<DeviationCase> deviationCases = medControlService.listDeviationCases(screenName, false);
+
+        if (deviationCases == null) {
+            return new AsyncResult<Integer>(null);
+        }
+
         return new AsyncResult<Integer>(deviationCases.size());
     }
 
