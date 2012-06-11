@@ -14,7 +14,7 @@ public enum NotificationServiceName {
         this.name = name;
     }
 
-    public static List<String> allAsList() {
+    public static List<String> allNamesAsList() {
         List<String> list = new ArrayList<String>();
         for (NotificationServiceName n : NotificationServiceName.values()) {
             list.add(n.getName());
