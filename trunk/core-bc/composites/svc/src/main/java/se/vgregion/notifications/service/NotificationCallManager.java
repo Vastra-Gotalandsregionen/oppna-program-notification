@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @ManagedResource
 public class NotificationCallManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationCallManager.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(NotificationCallManager.class);
 
     @Value("${notification.banned.services}")
     private String bannedServicesString;
@@ -41,7 +41,7 @@ public class NotificationCallManager {
     public void init() {
         // The bannedServicesString should be a comma-separated String with service names.
         if (bannedServicesString != null && !"".equals(bannedServicesString)) {
-            bannedServicesString.replaceAll(" ", "");
+            bannedServicesString = bannedServicesString.replaceAll(" ", "");
             bannedServices = Collections.synchronizedSet(new HashSet<String>(Arrays.asList(
                     bannedServicesString.split(","))));
         }
@@ -58,7 +58,7 @@ public class NotificationCallManager {
                 currentKeysInCache.add(key);
 
                 // Remove elements if there are to many
-                while (currentKeysInCache.size() > 10000) {
+                while (consecutiveNullsMap.size() > 10000) {
                     String keyToRemove = currentKeysInCache.poll();
                     // Remove from the two maps
                     consecutiveNullsMap.remove(keyToRemove);
@@ -83,6 +83,7 @@ public class NotificationCallManager {
         } else {
             consecutiveNullsMap.remove(key); // Reset - zero consecutive nulls
             earliestAllowedDates.remove(key); // No date limit
+            currentKeysInCache.remove(key);
         }
     }
 

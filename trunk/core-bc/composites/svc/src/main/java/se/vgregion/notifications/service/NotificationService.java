@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -79,10 +80,12 @@ public class NotificationService {
 
     @Async
     public Future<Integer> getCount(String serviceName, User user) {
-        serviceName = serviceName.substring(0, 1).toUpperCase() + serviceName.substring(1, serviceName.length());
+        // Make first letter upper-case.
+        serviceName = serviceName.substring(0, 1).toUpperCase(Locale.getDefault())
+                + serviceName.substring(1, serviceName.length());
 
         try {
-            // First try with String
+            // First try with String for screenName
             Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", String.class);
             return (Future<Integer>) method.invoke(this, user.getScreenName());
         } catch (NoSuchMethodException e) {

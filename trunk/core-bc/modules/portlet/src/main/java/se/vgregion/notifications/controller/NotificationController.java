@@ -61,7 +61,7 @@ public class NotificationController {
     protected final Set<String> currentlyScheduledUpdates = Collections.synchronizedSet(new HashSet<String>());
     private final String recentlyCheckedSuffix = "RecentlyChecked";
 
-    private List<String> notificationCountServices = NotificationServiceName.allAsList();
+    private List<String> notificationCountServices = NotificationServiceName.allNamesAsList();
 
     @Resource
     private List<String> exceptedUsers = new ArrayList<String>();
