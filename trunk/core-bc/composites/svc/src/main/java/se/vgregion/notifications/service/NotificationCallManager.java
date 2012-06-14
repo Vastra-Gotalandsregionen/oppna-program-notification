@@ -13,10 +13,11 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Class which helps decide whether services should be called or not.
- *
+ * <p/>
  * Many methods are exposed as {@link ManagedOperation}s and property are exposed as {@link ManagedAttribute}s, to
  * enable access via a JMX client.
  *
@@ -41,6 +42,10 @@ public class NotificationCallManager {
     // This Queue is for deciding when the two Maps should be cleared of elements.
     private ConcurrentLinkedQueue<String> currentKeysInCache = new ConcurrentLinkedQueue<String>();
 
+    // A lock to control concurrent access to the maps and collections in this class. The goal is to disallow the
+    // notifyValue method to run in parallel with the resetState method, but still allow many threads to execute
+    // the notifyValue method concurrently.
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
     /**
      * Constructor.
@@ -77,40 +82,47 @@ public class NotificationCallManager {
     public void notifyValue(String serviceName, Integer value, String screenName) {
         String key = getKey(serviceName, screenName);
 
-        if (value == null) {
-            Integer numberNull = consecutiveNullsMap.get(key);
-            if (numberNull == null) {
-                numberNull = 1; // Null for first time
-                consecutiveNullsMap.put(key, numberNull);
-                currentKeysInCache.add(key);
+        try {
+            // We acquire a read lock here since this method may be called by many threads in parallel as long as the
+            // resetState method is not executed in parallel.
+            lock.readLock().lock();
+            if (value == null) {
+                Integer numberNull = consecutiveNullsMap.get(key);
+                if (numberNull == null) {
+                    numberNull = 1; // Null for first time
+                    consecutiveNullsMap.put(key, numberNull);
+                    currentKeysInCache.add(key);
 
-                // Remove elements if there are to many
-                while (consecutiveNullsMap.size() > MAXIMUM_ENTRIES_IN_MEMORY) {
-                    String keyToRemove = currentKeysInCache.poll();
-                    // Remove from the two maps
-                    consecutiveNullsMap.remove(keyToRemove);
-                    earliestAllowedDates.remove(keyToRemove);
+                    // Remove elements if there are to many
+                    while (consecutiveNullsMap.size() > MAXIMUM_ENTRIES_IN_MEMORY) {
+                        String keyToRemove = currentKeysInCache.poll();
+                        // Remove from the two maps
+                        consecutiveNullsMap.remove(keyToRemove);
+                        earliestAllowedDates.remove(keyToRemove);
+                    }
+                    logger.warn(key + " has resulted in null 1 time.");
+                } else {
+                    numberNull++;
+                    consecutiveNullsMap.put(key, numberNull);
+                    logger.warn(key + " has resulted in null " + numberNull + " times.");
                 }
-                logger.warn(key + " has resulted in null value for the first time.");
+                double minutesDelayToNextCheck = Math.pow(2, numberNull); // 2, 4, 8, 16, 32, 64, 128, 256, 512
+
+                if (minutesDelayToNextCheck > LIMIT) {
+                    minutesDelayToNextCheck = LIMIT;
+                }
+
+                Calendar earliestAllowedDateToCheckAgain = Calendar.getInstance();
+                earliestAllowedDateToCheckAgain.add(Calendar.MINUTE, (int) minutesDelayToNextCheck);
+
+                earliestAllowedDates.put(key, earliestAllowedDateToCheckAgain.getTime());
             } else {
-                numberNull++;
-                consecutiveNullsMap.put(key, numberNull);
-                logger.warn(key + " has resulted in null " + numberNull + " times.");
+                consecutiveNullsMap.remove(key); // Reset - zero consecutive nulls
+                earliestAllowedDates.remove(key); // No date limit
+                currentKeysInCache.remove(key);
             }
-            double minutesDelayToNextCheck = Math.pow(2, numberNull); // 2, 4, 8, 16, 32, 64, 128, 256, 512
-
-            if (minutesDelayToNextCheck > LIMIT) {
-                minutesDelayToNextCheck = LIMIT;
-            }
-
-            Calendar earliestAllowedDateToCheckAgain = Calendar.getInstance();
-            earliestAllowedDateToCheckAgain.add(Calendar.MINUTE, (int) minutesDelayToNextCheck);
-
-            earliestAllowedDates.put(key, earliestAllowedDateToCheckAgain.getTime());
-        } else {
-            consecutiveNullsMap.remove(key); // Reset - zero consecutive nulls
-            earliestAllowedDates.remove(key); // No date limit
-            currentKeysInCache.remove(key);
+        } finally {
+            lock.readLock().unlock();
         }
     }
 
@@ -118,10 +130,10 @@ public class NotificationCallManager {
      * The method determines whether a service should be called based on prior calls to the
      * {@link NotificationCallManager#notifyValue(java.lang.String, java.lang.Integer, java.lang.String)} method.
      *
-     * @see NotificationCallManager#notifyValue(java.lang.String, java.lang.Integer, java.lang.String)
      * @param serviceName the serviceName
-     * @param screenName the screenName
+     * @param screenName  the screenName
      * @return <code>true</code> if the serviceName should be called or <code>false</code> otherwise
+     * @see NotificationCallManager#notifyValue(java.lang.String, java.lang.Integer, java.lang.String)
      */
     public boolean shouldICallThisService(String serviceName, String screenName) {
         if (bannedServices.contains(serviceName)) {
@@ -167,9 +179,19 @@ public class NotificationCallManager {
      */
     @ManagedOperation
     public void resetState() {
-        consecutiveNullsMap = new ConcurrentHashMap<String, Integer>();
-        earliestAllowedDates = new ConcurrentHashMap<String, Date>();
-        currentKeysInCache = new ConcurrentLinkedQueue<String>();
+        // Acquire the write lock here since no invocation of the notifyValue method should be allowed to run in
+        // parallel.
+        try {
+            lock.writeLock().lock();
+
+            logger.trace("Resetting state");
+
+            consecutiveNullsMap = new ConcurrentHashMap<String, Integer>();
+            earliestAllowedDates = new ConcurrentHashMap<String, Date>();
+            currentKeysInCache = new ConcurrentLinkedQueue<String>();
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     /**
