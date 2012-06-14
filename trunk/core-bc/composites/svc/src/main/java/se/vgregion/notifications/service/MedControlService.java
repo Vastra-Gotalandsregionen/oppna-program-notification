@@ -8,11 +8,11 @@ import se.vgregion.portal.medcontrol.domain.DeviationCase;
 import se.vgregion.portal.medcontrol.services.MedControlDeviationService;
 import se.vgregion.portal.medcontrol.services.MedControlDeviationServiceException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Service class for fetching MedControl DeviationCases.
+ *
  * @author Patrik Bergström
  */
 @Service
@@ -22,21 +22,30 @@ public class MedControlService {
 
     private MedControlDeviationService medControlDeviationService;
 
+    /**
+     * Constructor.
+     */
     public MedControlService() {
     }
 
+    /**
+     * Constructor.
+     *
+     * @param medControlDeviationService medControlDeviationService
+     */
     @Autowired
     public MedControlService(MedControlDeviationService medControlDeviationService) {
         this.medControlDeviationService = medControlDeviationService;
     }
 
+    /**
+     * Fetches {@link DeviationCase}s for a given user.
+     *
+     * @param screenName   the screenName of the user
+     * @param cachedResult whether cached result is satisfactory
+     * @return a list of {@link DeviationCase}s
+     */
     public List<DeviationCase> listDeviationCases(String screenName, boolean cachedResult) {
-//        DeviationCase case1 = new DeviationCase();
-//        case1.setActingRole(true);
-//        case1.setPhaseName("phaseName");
-//        case1.setCaseNumber("AD23");
-//        case1.setDescription("Lorem ipsum doro mio.");
-//        return Arrays.asList(case1);
         List<DeviationCase> deviationCases = null;
         try {
             deviationCases = medControlDeviationService.listDeviationCases(screenName);

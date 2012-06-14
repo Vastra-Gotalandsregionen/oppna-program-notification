@@ -96,6 +96,13 @@ public class NotificationsCacheAspect {
         return handleRequest(joinPoint);
     }
 
+    /**
+     * Around advice for caching MedControl Cases.
+     *
+     * @param joinPoint joinPoint
+     * @return a cached or non-cached response
+     * @throws Throwable Throwable
+     */
     @Around("execution(* se.vgregion.notifications.service.MedControlService.listDeviationCases("
             + "java.lang.String,boolean))")
     public Object cacheMedControlServicesResponse(ProceedingJoinPoint joinPoint) throws Throwable {

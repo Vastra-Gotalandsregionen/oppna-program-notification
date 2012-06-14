@@ -68,7 +68,7 @@ public class NotificationCallManagerTest {
     public void testNotifyValue_QueueSizeLimit() throws Exception {
 
         // So we don't need to log 10000 rows in the console
-        ReflectionTestUtils.setField(notificationCallManager, "LOGGER", NOPLogger.NOP_LOGGER);
+        ReflectionTestUtils.setField(notificationCallManager, "logger", NOPLogger.NOP_LOGGER);
 
         // When
         // First two which we decide

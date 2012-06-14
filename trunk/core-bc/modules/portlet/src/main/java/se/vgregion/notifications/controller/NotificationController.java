@@ -69,7 +69,8 @@ public class NotificationController {
     /**
      * Constructor.
      *
-     * @param notificationService the {@link NotificationService}
+     * @param notificationService     the {@link NotificationService}
+     * @param notificationCallManager the {@link NotificationCallManager}
      */
     @Autowired
     public NotificationController(NotificationService notificationService,
@@ -489,12 +490,13 @@ public class NotificationController {
             try {
                 Map<String, Integer> systemNoNotifications = getSystemNoNotifications(user);
 
-                // Compare the new values with the old to see if any value is updated. If so, it should not be considered
-                // recently checked.
+                // Compare the new values with the old to see if any value is updated. If so, it should not be
+                // considered recently checked.
                 Element recentlyCheckedSet = cache.get(user.getScreenName() + recentlyCheckedSuffix);
                 if (recentlyCheckedSet != null) {
 
-                    // If recentlyCheckedSet is null we don't need to do this at all since there will be nothing to remove.
+                    // If recentlyCheckedSet is null we don't need to do this at all since there will be nothing to
+                    // remove.
                     Element element = cache.get(user.getScreenName());
                     if (element != null && element.getValue() != null) {
 
@@ -504,8 +506,8 @@ public class NotificationController {
                             String counterName = countNameValue.getKey();
                             if (recentlyCheckedSet.getValue() != null) {
                                 if (((Set) recentlyCheckedSet.getValue()).contains(counterName)) {
-                                    // If it was recently checked, we compare the new value with the old. If they differ we
-                                    // remove the recent check.
+                                    // If it was recently checked, we compare the new value with the old. If they differ
+                                    // we remove the recent check.
                                     Integer oldValue = cachedValues.get(counterName);
                                     Integer newValue = systemNoNotifications.get(counterName);
                                     if (!oldValue.equals(newValue)) {
