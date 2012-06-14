@@ -120,7 +120,8 @@ class NotesEmailCounterService {
                 String stackTraceElementString = stackTraceElement.getClassName() + "." + stackTraceElement
                         .getMethodName() + "(" + stackTraceElement.getFileName() + ":" + stackTraceElement
                         .getLineNumber() + ")";
-                LOGGER.warn("User: " + user + ". Http request failed. Unexpected response - " + stackTraceElementString);
+                LOGGER.warn("User: " + user + ". Http request failed. Unexpected response - "
+                        + stackTraceElementString);
                 return null;
             }
 

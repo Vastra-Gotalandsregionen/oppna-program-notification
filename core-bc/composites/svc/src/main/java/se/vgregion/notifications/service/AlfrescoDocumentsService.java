@@ -12,7 +12,6 @@ import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.alfrescoclient.service.AlfrescoService;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

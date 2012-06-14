@@ -60,6 +60,7 @@ public class NotificationService {
      * @param raindanceInvoiceService     raindanceInvoiceService
      * @param usdIssuesService            usdIssuesService
      * @param socialRelationService       socialRelationService
+     * @param medControlService           medControlService
      */
     @Autowired
     public NotificationService(AlfrescoDocumentsService alfrescoDocumentsService,
@@ -78,6 +79,17 @@ public class NotificationService {
         this.medControlService = medControlService;
     }
 
+    /**
+     * Get the count for a given service. The method uses reflection to delegate to the target method. E.g. if the
+     * serviceName is given as "alfresco" the call will be delegated to the
+     * {@link NotificationService#getAlfrescoCount(java.lang.String)} method. The screenName of the {@link User}
+     * instance will be used if the target method requires a {@link String} parameter and the {@link User} instance
+     * itself will be used if the target method requires a {@link User} parameter.
+     *
+     * @param serviceName the serviceName
+     * @param user the {@link User} instance
+     * @return the count wrapped in a {@link Future}
+     */
     @Async
     public Future<Integer> getCount(String serviceName, User user) {
         // Make first letter upper-case.
@@ -91,7 +103,7 @@ public class NotificationService {
         } catch (NoSuchMethodException e) {
             // No method found, try with User class instead
             try {
-                Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", String.class);
+                Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", User.class);
                 return new AsyncResult<Integer>((Integer) method.invoke(this, user));
             } catch (NoSuchMethodException e1) {
                 throw new RuntimeException(e1);
@@ -205,6 +217,12 @@ public class NotificationService {
         return new AsyncResult<Integer>(socialRelationService.getUserRequests(user, false).size());
     }
 
+    /**
+     * Get the number of MedControl Cases for a user.
+     *
+     * @param screenName the screenName of the user
+     * @return the count wrapped in a {@link Future}
+     */
     @Async
     public Future<Integer> getMedControlCasesCount(String screenName) {
         List<DeviationCase> deviationCases = medControlService.listDeviationCases(screenName, false);
@@ -284,6 +302,12 @@ public class NotificationService {
         return socialRelationService.getUserRequestsWithUser(user, true);
     }
 
+    /**
+     * Get the MedControl Cases for a user.
+     *
+     * @param user the {@link User} instance
+     * @return a list of {@link DeviationCase}s
+     */
     public List<DeviationCase> getMedControlCases(User user) {
         return medControlService.listDeviationCases(user.getScreenName(), true);
     }
