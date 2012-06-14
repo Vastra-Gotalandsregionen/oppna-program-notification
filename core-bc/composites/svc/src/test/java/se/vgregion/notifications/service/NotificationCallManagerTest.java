@@ -1,5 +1,6 @@
 package se.vgregion.notifications.service;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.helpers.NOPLogger;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -211,5 +212,76 @@ public class NotificationCallManagerTest {
         notificationCallManager.resetBanList();
 
         assertEquals(0, notificationCallManager.getBanList().size());
+    }
+
+    @Test
+    @Ignore
+    // I haven't tried to verify the expected outcome of this execution automatically but only manuelly checked that the
+    // output looks as expected. Remove the @Ignore if you want to test it.
+    public void testConcurrency() throws InterruptedException {
+
+        Runnable notify = new Runnable() {
+            @Override
+            public void run() {
+                notificationCallManager.notifyValue("asdf", null, "asdf");
+            }
+        };
+
+        Runnable reset = new Runnable() {
+            @Override
+            public void run() {
+                notificationCallManager.resetState();
+            }
+        };
+
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(reset).start(); // Reset
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        new Thread(notify).start();
+        Thread.sleep(100);
+        Thread lastThread = new Thread(notify);
+        lastThread.start();
+
+        // Wait for the last thread and add a little more to be safe
+        lastThread.join();
+        Thread.sleep(100);
+
     }
 }
