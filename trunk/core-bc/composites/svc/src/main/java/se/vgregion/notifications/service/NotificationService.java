@@ -7,11 +7,14 @@ import com.liferay.portlet.social.model.SocialRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.NotificationException;
+import se.vgregion.notifications.UserSiteCredentialNotFoundException;
+import se.vgregion.notifications.domain.CountResult;
 import se.vgregion.portal.medcontrol.domain.DeviationCase;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
@@ -32,6 +35,7 @@ import java.util.concurrent.Future;
  * @author Patrik Bergström
  */
 @Service
+@SuppressWarnings("unchecked")
 public class NotificationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationService.class);
@@ -43,6 +47,9 @@ public class NotificationService {
     private UsdIssuesService usdIssuesService;
     private SocialRelationService socialRelationService;
     private MedControlService medControlService;
+
+    @Value("${iNotesUrl}")
+    private String iNotesUrl;
 
     /**
      * Constructor.
@@ -91,7 +98,7 @@ public class NotificationService {
      * @return the count wrapped in a {@link Future}
      */
     @Async
-    public Future<Integer> getCount(String serviceName, User user) {
+    public Future<CountResult> getCount(String serviceName, User user) throws NotificationException {
         // Make first letter upper-case.
         serviceName = serviceName.substring(0, 1).toUpperCase(Locale.getDefault())
                 + serviceName.substring(1, serviceName.length());
@@ -99,21 +106,21 @@ public class NotificationService {
         try {
             // First try with String for screenName
             Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", String.class);
-            return (Future<Integer>) method.invoke(this, user.getScreenName());
+            return (Future<CountResult>) method.invoke(this, user.getScreenName());
         } catch (NoSuchMethodException e) {
             // No method found, try with User class instead
             try {
                 Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", User.class);
-                return new AsyncResult<Integer>((Integer) method.invoke(this, user));
+                return new AsyncResult<CountResult>((CountResult) method.invoke(this, user));
             } catch (NoSuchMethodException e1) {
                 throw new RuntimeException(e1);
             } catch (InvocationTargetException e1) {
-                throw new RuntimeException(e1);
+                throw new NotificationException(e1);
             } catch (IllegalAccessException e1) {
                 throw new RuntimeException(e1);
             }
         } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new NotificationException(e);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -127,11 +134,11 @@ public class NotificationService {
      * @return the count wrapped in a {@link Future}
      */
     @Async
-    public Future<Integer> getAlfrescoCount(String screenName) {
+    public Future<CountResult> getAlfrescoCount(String screenName) {
         List<Site> alfrescoResponse = alfrescoDocumentsService.getRecentlyModified(screenName, false);
 
         if (alfrescoResponse == null) {
-            return new AsyncResult<Integer>(null);
+            return new AsyncResult<CountResult>(CountResult.createNullResult());
         }
 
         int n = 0;
@@ -139,7 +146,7 @@ public class NotificationService {
             n += site.getRecentModifiedDocuments().size();
         }
 
-        return new AsyncResult<Integer>(n);
+        return new AsyncResult<CountResult>(CountResult.createWithCount(n));
     }
 
     /**
@@ -149,14 +156,14 @@ public class NotificationService {
      * @return the count wrapped in a {@link Future}
      */
     @Async
-    public Future<Integer> getUsdIssuesCount(String screenName) {
+    public Future<CountResult> getUsdIssuesCount(String screenName) {
         List<Issue> issues = usdIssuesService.getUsdIssues(screenName, false);
 
         if (issues == null) {
-            return new AsyncResult<Integer>(null);
+            return new AsyncResult<CountResult>(CountResult.createNullResult());
         }
 
-        return new AsyncResult<Integer>(issues.size());
+        return new AsyncResult<CountResult>(CountResult.createWithCount(issues.size()));
     }
 
     /**
@@ -165,9 +172,9 @@ public class NotificationService {
      * @return random number
      */
     @Async
-    public Future<Integer> getRandomCount() {
+    public Future<CountResult> getRandomCount() {
         final int n = 1000;
-        return new AsyncResult<Integer>(new Random().nextInt(n));
+        return new AsyncResult<CountResult>(CountResult.createWithCount(new Random().nextInt(n)));
     }
 
     /**
@@ -177,14 +184,19 @@ public class NotificationService {
      * @return the count wrapped in a {@link Future}
      */
     @Async
-    public Future<Integer> getEmailCount(String screenName) {
+    public Future<CountResult> getEmailCount(String screenName) {
         Integer count = null;
         try {
             count = notesEmailCounterService.getCount(screenName);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
+        } catch (UserSiteCredentialNotFoundException e) {
+            return new AsyncResult<CountResult>(CountResult.createWithMessage("Du har inte angivit dina"
+                    + " inloggningsuppgifter till iNotes. Gå <a href=\"" + iNotesUrl + "\">hit</a> för att ange dem."
+                    + " Efter det kommer du se när du fått ny e-post här. Observera att det kan ta några minuter innan"
+                    + " ändringen träder i kraft."));
         }
-        return new AsyncResult<Integer>(count);
+        return new AsyncResult<CountResult>(CountResult.createWithCount(count));
     }
 
     /**
@@ -194,14 +206,14 @@ public class NotificationService {
      * @return the count wrapped in a {@link Future}
      */
     @Async
-    public Future<Integer> getInvoicesCount(String screenName) {
+    public Future<CountResult> getInvoicesCount(String screenName) {
         List<InvoiceNotification> invoices = raindanceInvoiceService.getInvoices(screenName, false);
 
         if (invoices == null) {
-            return new AsyncResult<Integer>(null);
+            return new AsyncResult<CountResult>(CountResult.createNullResult());
         }
 
-        return new AsyncResult<Integer>(invoices.size());
+        return new AsyncResult<CountResult>(CountResult.createWithCount(invoices.size()));
     }
 
 
@@ -213,8 +225,8 @@ public class NotificationService {
      */
     //@Async // Can't have this Async due to a liferay bug. Some cached and potentially wrong value will be returned.
     // Possibly related to http://issues.liferay.com/browse/LPS-26465.
-    public Future<Integer> getSocialRequestCount(User user) {
-        return new AsyncResult<Integer>(socialRelationService.getUserRequests(user, false).size());
+    public Future<CountResult> getSocialRequestCount(User user) {
+        return new AsyncResult<CountResult>(CountResult.createWithCount(socialRelationService.getUserRequests(user, false).size()));
     }
 
     /**
@@ -224,14 +236,20 @@ public class NotificationService {
      * @return the count wrapped in a {@link Future}
      */
     @Async
-    public Future<Integer> getMedControlCasesCount(String screenName) {
-        List<DeviationCase> deviationCases = medControlService.listDeviationCases(screenName, false);
+    public Future<CountResult> getMedControlCasesCount(String screenName) {
 
-        if (deviationCases == null) {
-            return new AsyncResult<Integer>(null);
+        List<DeviationCase> deviationCases = null;
+        try {
+            deviationCases = medControlService.listDeviationCases(screenName, false);
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage(), e);
         }
 
-        return new AsyncResult<Integer>(deviationCases.size());
+        if (deviationCases == null) {
+            return new AsyncResult<CountResult>(CountResult.createNullResult());
+        }
+
+        return new AsyncResult<CountResult>(CountResult.createWithCount(deviationCases.size()));
     }
 
     /**

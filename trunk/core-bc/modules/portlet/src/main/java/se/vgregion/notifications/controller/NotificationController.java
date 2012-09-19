@@ -13,6 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,7 @@ import org.springframework.web.portlet.bind.annotation.RenderMapping;
 import org.springframework.web.portlet.bind.annotation.ResourceMapping;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.NotificationException;
+import se.vgregion.notifications.domain.CountResult;
 import se.vgregion.notifications.domain.NotificationServiceName;
 import se.vgregion.notifications.service.NotificationCallManager;
 import se.vgregion.notifications.service.NotificationService;
@@ -48,6 +50,7 @@ import java.util.concurrent.*;
 @Controller
 @RequestMapping("VIEW")
 @ManagedResource
+@SuppressWarnings("unchecked")
 public class NotificationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationController.class);
     private static final int INTERVAL = 30; // Seconds
@@ -65,6 +68,9 @@ public class NotificationController {
 
     @Resource
     private List<String> exceptedUsers = new ArrayList<String>();
+
+    @Value("${iNotesUrl}")
+    private String iNotesUrl;
 
     /**
      * Constructor.
@@ -129,9 +135,9 @@ public class NotificationController {
 
         Element element = cache.get(user.getScreenName());
 
-        Map<String, Integer> systemNoNotifications;
+        Map<String, CountResult> systemNoNotifications;
         if (element != null && element.getValue() != null) {
-            systemNoNotifications = (Map<String, Integer>) element.getValue();
+            systemNoNotifications = (Map<String, CountResult>) element.getValue();
         } else {
             final int delay = 10;
             scheduleCacheUpdate(user, delay);
@@ -139,23 +145,25 @@ public class NotificationController {
         }
 
         // Do this synchronously due to a problem with liferay's services when using separate threads
-        Integer socialRequestCount = getValue(notificationService.getSocialRequestCount(user));
+        CountResult socialRequestCount = getValue(notificationService.getSocialRequestCount(user),
+                "socialRequestCount");
 
         for (String name : notificationCountServices) {
             // E.g. "alfrescoCount" and "3"
             String namePlusCount = name + "Count";
-            Integer value = systemNoNotifications.get(namePlusCount);
+            CountResult value = systemNoNotifications.get(namePlusCount);
 
             if (value == null) {
-                value = 0;
+                value = CountResult.createWithCount(0);
             }
 
             model.addAttribute(namePlusCount, value);
-            model.addAttribute(name + "HighlightCount", highlightCount(user.getScreenName(), namePlusCount, value));
+            model.addAttribute(name + "HighlightCount", highlightCount(user.getScreenName(), namePlusCount,
+                    value.getCount()));
         }
         model.addAttribute("socialRequestCount", socialRequestCount);
         model.addAttribute("socialRequestHighlightCount", highlightCount(user.getScreenName(), "socialRequestCount",
-                socialRequestCount));
+                socialRequestCount.getCount()));
 
         return "view";
     }
@@ -199,7 +207,7 @@ public class NotificationController {
                 return true;
             } else {
                 // The user has recently checked it so we highlight it depending on whether the value is new.
-                return !((Map<String, Integer>) element.getValue()).get(countName).equals(newCount);
+                return !((Map<String, CountResult>) element.getValue()).get(countName).getCount().equals(newCount);
             }
         }
     }
@@ -232,6 +240,9 @@ public class NotificationController {
             model.addAttribute("sites", alfrescoSites);
             return "view_alfresco";
         } else if (notificationType.equals("email")) {
+            String defaultMessage = "<p>Gå till <a href=\"" + iNotesUrl + "\">iNotes</a>.</p>";
+            String message = getMessageIfThereIsAny(user, notificationType);
+            model.addAttribute("message", message != null ? message : defaultMessage);
             return "view_email";
         } else if (notificationType.equals("usdIssues")) {
             List<Issue> usdIssues = notificationService.getUsdIssues(user.getScreenName());
@@ -264,6 +275,18 @@ public class NotificationController {
         }
     }
 
+    private String getMessageIfThereIsAny(User user, String notificationType) {
+        String message = null;
+        Map<String, CountResult> systemNoNotificationsFromCache = getSystemNoNotificationsFromCache(user);
+        if (systemNoNotificationsFromCache != null) {
+            CountResult countResult = systemNoNotificationsFromCache.get(notificationType + "Count");
+            if (countResult != null) {
+                message = countResult.getMessage();
+            }
+        }
+        return message;
+    }
+
     private String upperFirstCase(String s) {
         if (s == null || s.length() < 1) {
             return null;
@@ -290,46 +313,51 @@ public class NotificationController {
         }
     }
 
-    private Integer getValue(Future<Integer> count) {
+    private CountResult getValue(Future<CountResult> count, String countName) {
         try {
-            final int timeout = 5;
-            Integer value = count.get(timeout, TimeUnit.SECONDS);
+            final int timeout = 10;
+            CountResult value = count.get(timeout, TimeUnit.SECONDS);
 
             return value;
         } catch (InterruptedException e) {
             LOGGER.error(e.getMessage(), e);
-            return null;
+            return CountResult.createNullResult();
         } catch (ExecutionException e) {
-            LOGGER.error(e.getMessage(), e);
-            return null;
+            LOGGER.error(countName + ": " + e.getMessage(), e);
+            return CountResult.createNullResult();
         } catch (TimeoutException e) {
-            LOGGER.error(e.getMessage(), e);
-            return null;
+            LOGGER.error(countName + ": " + e.getMessage(), e);
+            return CountResult.createNullResult();
         }
     }
 
-    private Map<String, Integer> getSystemNoNotifications(User user) {
+    private Map<String, CountResult> getSystemNoNotifications(User user) {
 
-        Map<String, Future<Integer>> serviceNameWithCount = new HashMap<String, Future<Integer>>();
+        Map<String, Future<CountResult>> serviceNameWithCount = new HashMap<String, Future<CountResult>>();
 
-        for (String name : notificationCountServices) {
-            if (notificationCallManager.shouldICallThisService(name, user.getScreenName())) {
-                serviceNameWithCount.put(name, notificationService.getCount(name, user));
+        // Get counts for all services asynchronously, i.e. just start threads to start retrieving the counts.
+        for (String serviceName : notificationCountServices) {
+            if (notificationCallManager.shouldICallThisService(serviceName, user.getScreenName())) {
+                try {
+                    serviceNameWithCount.put(serviceName, notificationService.getCount(serviceName, user));
+                } catch (NotificationException e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
             }
         }
 
-        Map<String, Integer> systemNoNotifications = new HashMap<String, Integer>();
+        Map<String, CountResult> systemNoNotifications = new HashMap<String, CountResult>();
 
         for (String name : notificationCountServices) {
             String countName = name + "Count";
-            Future<Integer> count = serviceNameWithCount.get(name);
-            if (count == null) {
+            Future<CountResult> countResultFuture = serviceNameWithCount.get(name);
+            if (countResultFuture == null) {
                 // We didn't call the given service
                 systemNoNotifications.put(countName, null);
             } else {
-                Integer value = getValue(count);
+                CountResult value = getValue(countResultFuture, countName);
                 notificationCallManager.notifyValue(name, value, user.getScreenName());
-                systemNoNotifications.put(countName, value == null ? 0 : value);
+                systemNoNotifications.put(countName, value == null ? CountResult.createWithCount(0) : value);
             }
         }
 
@@ -351,27 +379,34 @@ public class NotificationController {
 
         scheduleCacheUpdate(user, INTERVAL);
 
-        Map<String, Integer> systemNoNotifications = null;
-        Element element = cache.get(user.getScreenName());
-        if (element != null) {
-            systemNoNotifications = (Map<String, Integer>) element.getValue();
-        }
+        Map<String, CountResult> systemNoNotifications = getSystemNoNotificationsFromCache(user);
 
         if (systemNoNotifications == null && request.getParameter("onlyCache").equals("false")) {
             // If we have nothing in cache and do not require cache we can make the "long" request.
             systemNoNotifications = getSystemNoNotifications(user);
+            storeInCache(user, systemNoNotifications);
         }
 
         // Do this specific request synchronously for now due to non-deterministic results otherwise (Liferay returns
         // a cached result so it's rather efficient.
         if (systemNoNotifications != null) {
-            Integer socialRequestCount = getValue(notificationService.getSocialRequestCount(user));
+            CountResult socialRequestCount = getValue(notificationService.getSocialRequestCount(user),
+                    "socialRequestCount");
             systemNoNotifications.put("socialRequestCount", socialRequestCount);
         }
 
         writeJsonObjectToResponse(response, systemNoNotifications);
 
         response.addProperty("Cache-control", "no-cache");
+    }
+
+    private Map<String, CountResult> getSystemNoNotificationsFromCache(User user) {
+        Map<String, CountResult> systemNoNotifications = null;
+        Element element = cache.get(user.getScreenName());
+        if (element != null) {
+            systemNoNotifications = (Map<String, CountResult>) element.getValue();
+        }
+        return systemNoNotifications;
     }
 
     /**
@@ -488,8 +523,7 @@ public class NotificationController {
         @Override
         public void run() {
             try {
-                Map<String, Integer> systemNoNotifications = getSystemNoNotifications(user);
-
+                Map<String, CountResult> systemNoNotifications = getSystemNoNotifications(user);
                 // Compare the new values with the old to see if any value is updated. If so, it should not be
                 // considered recently checked.
                 Element recentlyCheckedSet = cache.get(user.getScreenName() + recentlyCheckedSuffix);
@@ -500,17 +534,20 @@ public class NotificationController {
                     Element element = cache.get(user.getScreenName());
                     if (element != null && element.getValue() != null) {
 
-                        Map<String, Integer> cachedValues = (Map<String, Integer>) element.getValue();
-                        for (Map.Entry<String, Integer> countNameValue : cachedValues.entrySet()) {
+                        Map<String, CountResult> cachedValues = (Map<String, CountResult>) element.getValue();
+                        for (Map.Entry<String, CountResult> countNameValue : cachedValues.entrySet()) {
                             // Is there a recent check for this key?
                             String counterName = countNameValue.getKey();
                             if (recentlyCheckedSet.getValue() != null) {
                                 if (((Set) recentlyCheckedSet.getValue()).contains(counterName)) {
                                     // If it was recently checked, we compare the new value with the old. If they differ
                                     // we remove the recent check.
-                                    Integer oldValue = cachedValues.get(counterName);
-                                    Integer newValue = systemNoNotifications.get(counterName);
-                                    if (!oldValue.equals(newValue)) {
+                                    CountResult oldValue = cachedValues.get(counterName);
+                                    CountResult newValue = systemNoNotifications.get(counterName);
+
+                                    boolean isSame = isSame(oldValue, newValue);
+
+                                    if (!isSame) {
                                         ((Set) recentlyCheckedSet.getValue()).remove(counterName);
                                     }
                                 }
@@ -519,11 +556,41 @@ public class NotificationController {
                     }
                 }
 
-                cache.put(new Element(user.getScreenName(), systemNoNotifications));
+                storeInCache(user, systemNoNotifications);
+            } catch (RuntimeException e) {
+                LOGGER.error(e.getMessage(), e);
+                throw e;
             } finally {
                 // Finished the cache update so remove it from currentlyScheduledUpdates
                 currentlyScheduledUpdates.remove(user.getScreenName());
             }
+        }
+    }
+
+    protected void storeInCache(User user, Map<String, CountResult> systemNoNotifications) {
+        cache.put(new Element(user.getScreenName(), systemNoNotifications));
+    }
+
+    protected boolean isSame(CountResult oldValue, CountResult newValue) {
+        if (oldValue == null && newValue == null) {
+            return true;
+        }
+        if ((oldValue == null && newValue != null) || (oldValue != null && newValue == null)) {
+            return false;
+        }
+        // If we get here no-one is null.
+        if (oldValue.getCount() == null && newValue.getCount() == null) {
+            return true;
+        }
+        if ((oldValue.getCount() == null && newValue.getCount() != null) ||
+                (oldValue.getCount() != null && newValue.getCount() == null)) {
+            return false;
+        }
+        // If we get here no count is null.
+        if (oldValue.getCount().equals(newValue.getCount())) {
+            return true;
+        } else {
+            return false;
         }
     }
 

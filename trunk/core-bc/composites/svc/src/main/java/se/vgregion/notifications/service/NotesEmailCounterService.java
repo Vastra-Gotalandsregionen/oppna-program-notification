@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import se.vgregion.notifications.UserSiteCredentialNotFoundException;
 import se.vgregion.portal.cs.domain.UserSiteCredential;
 import se.vgregion.portal.cs.service.CredentialService;
 
@@ -52,7 +53,7 @@ class NotesEmailCounterService {
      * @return the number or unread emails
      * @throws IOException IOException
      */
-    public Integer getCount(final String userId) throws IOException {
+    public Integer getCount(final String userId) throws IOException, UserSiteCredentialNotFoundException {
         if (userId == null) {
             return null;
         }
@@ -60,7 +61,7 @@ class NotesEmailCounterService {
         final UserSiteCredential userSiteCredential = getSitePassword(userId);
 
         if (userSiteCredential == null) {
-            return null;
+            throw new UserSiteCredentialNotFoundException("UserSiteCredential was not found for user: " + userId);
         }
 
         URI uri = null;

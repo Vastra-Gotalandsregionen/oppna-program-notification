@@ -113,7 +113,21 @@ AUI().add('rp-notifications-bar', function (A) {
                         	e.halt(true);
                         });
                     },
-                    
+
+                    _getMessage: function (countResult) {
+                        if (countResult == null) {
+                            return null;
+                        }
+                        var message = null;
+                        if (countResult['count'] == null) {
+                            // There may be a message
+                            if (countResult['message'] != null) {
+                                message = countResult['message'];
+                            }
+                        }
+                        return message;
+                    },
+
                     _initConsole: function() {
                     	var instance = this;
                     	
@@ -231,34 +245,61 @@ AUI().add('rp-notifications-bar', function (A) {
                         }
 
                         var responseJSON = A.JSON.parse(responseText);
-                    	
-                    	if(!isNull(responseJSON)) {
-                        	var alfrescoCount = responseJSON['alfrescoCount'];
-                        	var usdIssuesCount = responseJSON['usdIssuesCount'];
-                        	var emailCount = responseJSON['emailCount'];
-                        	var invoicesCount = responseJSON['invoicesCount'];
-                        	var medControlCount = responseJSON['medControlCasesCount'];
-                        	var socialRequestCount = responseJSON['socialRequestCount'];
 
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount);
+                        if(!isNull(responseJSON)) {
+                            var alfrescoCountResult = responseJSON['alfrescoCount'];
+                            var alfrescoCount = alfrescoCountResult != null ? alfrescoCountResult['count'] : null;
+                            var alfrescoMessage = instance._getMessage(alfrescoCountResult);
+
+                            var usdIssuesCountResult = responseJSON['usdIssuesCount'];
+                            var usdIssuesCount = usdIssuesCountResult != null ? usdIssuesCountResult['count'] : null;
+                            var usdIssuesMessage = instance._getMessage(usdIssuesCountResult);
+
+                            var emailCountResult = responseJSON['emailCount'];
+                            var emailCount = emailCountResult != null ? emailCountResult['count'] : null;
+                            var emailMessage = instance._getMessage(emailCountResult);
+
+                            var invoicesCountResult = responseJSON['invoicesCount'];
+                            var invoicesCount = invoicesCountResult != null ? invoicesCountResult['count'] : null;
+                            var invoicesMessage = instance._getMessage(invoicesCountResult);
+
+                            var medControlCountResult = responseJSON['medControlCasesCount'];
+                            var medControlCount = medControlCountResult != null ? medControlCountResult['count'] : null;
+                            var medControlMessage = instance._getMessage(medControlCountResult);
+
+                            var socialRequestCountResult = responseJSON['socialRequestCount'];
+                            var socialRequestCount = socialRequestCountResult != null ? socialRequestCountResult['count'] : null;
+                            var socialRequestMessage = instance._getMessage(socialRequestCountResult);
+
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount, usdIssuesMessage);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount, emailMessage);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount, medControlMessage);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount, invoicesMessage);
+                        	instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount, socialRequestMessage);
                     	}
                     },
-                    
-                    _updateCounterHtml: function(listNode, value) {
+
+                    _updateCounterHtml: function(listNode, value, message) {
                     	var instance = this;
                     	
                     	var countWrapperNode = listNode.one('.count');
                     	var countNode = countWrapperNode.one('span');
+                        if (countNode == null) {
+                            return;
+                        }
                     	var countNodeValueStr = countNode.html();
                     	var countNodeValue = parseInt(countNodeValueStr);
                     	
                     	if(isNull(value) || value <= 0) {
-                    		countWrapperNode.hide();
+                            if (message != null) {
+                                listNode.show();
+                                countWrapperNode.show();
+                                countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
+                                countNode.html("!");
+                            } else {
+                                countWrapperNode.hide();
+                            }
                     	}
                     	else if(value == countNodeValue) {
                             countWrapperNode.show(); // In some cases this is needed even though it shouldn't be

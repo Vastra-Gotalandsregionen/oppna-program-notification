@@ -7,6 +7,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
+import se.vgregion.notifications.domain.CountResult;
 import se.vgregion.notifications.domain.NotificationServiceName;
 
 import javax.annotation.PostConstruct;
@@ -72,21 +73,21 @@ public class NotificationCallManager {
      * {@link NotificationCallManager#shouldICallThisService(java.lang.String, java.lang.String)} method. Basically
      * the time before {@link NotificationCallManager#shouldICallThisService(java.lang.String, java.lang.String)}
      * returns <code>true</code> increases as the number of <code>null</code> values for a given serviceName and
-     * screenName increases. The increase is in time is exponential to the number of consecutive <code>null</code>
+     * screenName increases. The increase in time is exponential to the number of consecutive <code>null</code>
      * values, with a limit of 256 minutes.
      *
      * @param serviceName the serviceName
-     * @param value       the value
+     * @param countResult the countResult
      * @param screenName  the screenName
      */
-    public void notifyValue(String serviceName, Integer value, String screenName) {
+    public void notifyValue(String serviceName, CountResult countResult, String screenName) {
         String key = getKey(serviceName, screenName);
 
         try {
             // We acquire a read lock here since this method may be called by many threads in parallel as long as the
             // resetState method is not executed in parallel.
             lock.readLock().lock();
-            if (value == null) {
+            if (countResult == null || (countResult.getCount() == null && countResult.getMessage() == null)) {
                 Integer numberNull = consecutiveNullsMap.get(key);
                 if (numberNull == null) {
                     numberNull = 1; // Null for first time
@@ -128,12 +129,12 @@ public class NotificationCallManager {
 
     /**
      * The method determines whether a service should be called based on prior calls to the
-     * {@link NotificationCallManager#notifyValue(java.lang.String, java.lang.Integer, java.lang.String)} method.
+     * {@link NotificationCallManager#notifyValue(String, se.vgregion.notifications.domain.CountResult, String)} method.
      *
      * @param serviceName the serviceName
      * @param screenName  the screenName
      * @return <code>true</code> if the serviceName should be called or <code>false</code> otherwise
-     * @see NotificationCallManager#notifyValue(java.lang.String, java.lang.Integer, java.lang.String)
+     * @see NotificationCallManager#notifyValue(String, se.vgregion.notifications.domain.CountResult, String)
      */
     public boolean shouldICallThisService(String serviceName, String screenName) {
         if (bannedServices.contains(serviceName)) {

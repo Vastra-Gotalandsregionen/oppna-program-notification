@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
 import se.vgregion.notifications.NotificationException;
+import se.vgregion.notifications.domain.CountResult;
 import se.vgregion.notifications.domain.NotificationServiceName;
 import se.vgregion.portal.medcontrol.domain.DeviationCase;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
@@ -73,10 +74,10 @@ public class NotificationServiceTest {
         when(alfrescoDocumentsService.getRecentlyModified(anyString(), anyBoolean())).thenReturn(Arrays.asList(site));
 
         // When
-        Future<Integer> count = notificationService.getAlfrescoCount("anyScreenName");
+        Future<CountResult> count = notificationService.getAlfrescoCount("anyScreenName");
 
         // Then
-        assertEquals(1, (int) count.get());
+        assertEquals(1, (int) count.get().getCount());
     }
 
     @Test
@@ -87,10 +88,10 @@ public class NotificationServiceTest {
         when(usdIssuesService.getUsdIssues(anyString(), anyBoolean())).thenReturn(Arrays.asList(issue));
 
         // When
-        Future<Integer> issues = notificationService.getUsdIssuesCount("anyScreenName");
+        Future<CountResult> issues = notificationService.getUsdIssuesCount("anyScreenName");
 
         // Then
-        assertEquals(1, (int) issues.get());
+        assertEquals(1, (int) issues.get().getCount());
 
     }
 
@@ -101,10 +102,10 @@ public class NotificationServiceTest {
         when(notesEmailCounterService.getCount(anyString())).thenReturn(1);
 
         // When
-        Future<Integer> count = notificationService.getEmailCount("anyScreenName");
+        Future<CountResult> count = notificationService.getEmailCount("anyScreenName");
 
         // Then
-        assertEquals(1, (int) count.get());
+        assertEquals(1, (int) count.get().getCount());
     }
 
     @Test
@@ -117,10 +118,10 @@ public class NotificationServiceTest {
                 invoiceNotification));
 
         // When
-        Future<Integer> count = notificationService.getInvoicesCount("anyScreenName");
+        Future<CountResult> count = notificationService.getInvoicesCount("anyScreenName");
 
         // Then
-        assertEquals(1, (int) count.get());
+        assertEquals(1, (int) count.get().getCount());
     }
 
     @Test
@@ -132,10 +133,10 @@ public class NotificationServiceTest {
 
         // When
         User user = mock(User.class);
-        Future<Integer> count = notificationService.getSocialRequestCount(user);
+        Future<CountResult> count = notificationService.getSocialRequestCount(user);
 
         // Then
-        assertEquals(1, (int) count.get());
+        assertEquals(1, (int) count.get().getCount());
     }
 
     @Test
@@ -147,10 +148,10 @@ public class NotificationServiceTest {
 
         // When
         User user = mock(User.class);
-        Future<Integer> count = notificationService.getMedControlCasesCount("anyScreenName");
+        Future<CountResult> count = notificationService.getMedControlCasesCount("anyScreenName");
 
         // Then
-        assertEquals(1, (int) count.get());
+        assertEquals(1, (int) count.get().getCount());
     }
 
     @Test

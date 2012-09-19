@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.Model;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.notifications.domain.CountResult;
 import se.vgregion.notifications.service.NotificationCallManager;
 import se.vgregion.notifications.service.NotificationService;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
@@ -19,11 +20,12 @@ import se.vgregion.usdservice.domain.Issue;
 
 import javax.portlet.*;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
@@ -31,6 +33,7 @@ import static org.mockito.Mockito.*;
 /**
  * @author Patrik Bergström
  */
+@SuppressWarnings("unchecked")
 public class NotificationControllerTest {
 
     private NotificationController controller;
@@ -38,19 +41,31 @@ public class NotificationControllerTest {
     private final int SERVICES_RETURNED_COUNT = 2;
     private int numberOfServices = 0; // This number is used to verify several tests
 
-    private <T extends PortletRequest> T setUp(Class<T> clazz) throws IOException, InterruptedException {
+    private <T extends PortletRequest> T setUp(Class<T> clazz) throws Exception {
         NotificationService notificationService = mock(NotificationService.class);
-        when(notificationService.getAlfrescoCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+
+        when(notificationService.getAlfrescoCount(anyString())).thenReturn(new AsyncResult<CountResult>(CountResult
+                .createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
-        when(notificationService.getEmailCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+
+        when(notificationService.getEmailCount(anyString())).thenReturn(new AsyncResult<CountResult>(CountResult
+                .createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
-        when(notificationService.getInvoicesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+
+        when(notificationService.getInvoicesCount(anyString())).thenReturn(new AsyncResult<CountResult>(CountResult
+                .createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
-        when(notificationService.getUsdIssuesCount(anyString())).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+
+        when(notificationService.getUsdIssuesCount(anyString())).thenReturn(new AsyncResult<CountResult>(CountResult
+                .createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
-        when(notificationService.getMedControlCasesCount(anyString())).thenReturn(new AsyncResult<Integer>(null));
+
+        when(notificationService.getMedControlCasesCount(anyString())).thenReturn(new AsyncResult<CountResult>(
+                CountResult.createNullResult()));
         numberOfServices++;
-        when(notificationService.getSocialRequestCount(any(User.class))).thenReturn(new AsyncResult<Integer>(SERVICES_RETURNED_COUNT));
+
+        when(notificationService.getSocialRequestCount(any(User.class))).thenReturn(new AsyncResult<CountResult>(
+                CountResult.createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
 
         when(notificationService.getCount(any(String.class), any(User.class))).thenCallRealMethod();
@@ -93,7 +108,7 @@ public class NotificationControllerTest {
         // We also test that the cache is updated after the scheduled update has run
         Thread.sleep(500);
 
-        Map<String, Integer> cachedMap = (Map) cache.get(SOME_SCREEN_NAME).getValue();
+        Map<String, CountResult> cachedMap = (Map) cache.get(SOME_SCREEN_NAME).getValue();
 
         assertEquals(numberOfServices - 1, cachedMap.size()); // -1 since socialRequestsCount is not cached
     }
@@ -110,9 +125,9 @@ public class NotificationControllerTest {
         CacheManager manager = new CacheManager();
         manager.addCache(cache);
 
-        Map<String, Integer> values = new HashMap<String, Integer>();
-        values.put("alfrescoCount", THE_COUNT);
-        values.put("emailCount", THE_COUNT);
+        Map<String, CountResult> values = new HashMap<String, CountResult>();
+        values.put("alfrescoCount", CountResult.createWithCount(THE_COUNT));
+        values.put("emailCount", CountResult.createWithCount(THE_COUNT));
 
         cache.put(new Element(SOME_SCREEN_NAME, values));
         ReflectionTestUtils.setField(controller, "cache", cache);
@@ -123,7 +138,7 @@ public class NotificationControllerTest {
 
         // Then
         verify(model, times(3)).addAttribute(anyString(), eq(true)); // *HighlightCount will be added three times
-        verify(model, times(2)).addAttribute(anyString(), eq(THE_COUNT)); // The respective counts will be added two times
+        verify(model, times(2)).addAttribute(anyString(), eq(CountResult.createWithCount(THE_COUNT))); // The respective counts will be added two times
     }
 
     @Test
@@ -199,10 +214,12 @@ public class NotificationControllerTest {
         CacheManager manager = new CacheManager();
         manager.addCache(cache);
 
-        Map<String, Integer> values = new HashMap<String, Integer>();
-        values.put("alfrescoCount", 1);
-        values.put("emailCount", 1);
+        // These values will be cached...
+        Map<String, CountResult> values = new HashMap<String, CountResult>();
+        values.put("alfrescoCount", CountResult.createWithCount(1));
+        values.put("emailCount", CountResult.createWithCount(1));
 
+        // ... but they are also recently checked so they won't be highlighted.
         Set<String> recentlyChecked = new HashSet<String>(Arrays.asList("alfrescoCount", "emailCount"));
 
         cache.put(new Element(SOME_SCREEN_NAME, values));
@@ -220,7 +237,38 @@ public class NotificationControllerTest {
     }
 
     @Test
-    public void testShowExpandedNotifications() throws IOException, InterruptedException {
+    public void testViewNotificationsNullCountWithMessage() throws Exception {
+
+        // Given
+        RenderRequest renderRequest = setUp(RenderRequest.class);
+        Cache cache = new Cache("asdf", 100, false, false, 10, 10);
+        CacheManager manager = new CacheManager();
+        manager.addCache(cache);
+
+        // These values will be cached...
+        Map<String, CountResult> values = new HashMap<String, CountResult>();
+        values.put("alfrescoCount", CountResult.createWithCount(1));
+        values.put("emailCount", CountResult.createWithMessage("Du har inte fyllt i dina uppgifter..."));
+
+        // ... but they are also recently checked so they won't be highlighted.
+        Set<String> recentlyChecked = new HashSet<String>(Arrays.asList("alfrescoCount", "emailCount"));
+
+        cache.put(new Element(SOME_SCREEN_NAME, values));
+        cache.put(new Element(SOME_SCREEN_NAME + "RecentlyChecked", recentlyChecked));
+        ReflectionTestUtils.setField(controller, "cache", cache);
+
+        Model model = mock(Model.class);
+
+        // When
+        controller.viewNotifications(model, renderRequest);
+
+        // Then
+        verify(model, times(1)).addAttribute(anyString(), eq(true)); // Both the alfresco and email count should not be highlighted since both are recently, but socialRequests make it one
+        verify(model, times(numberOfServices - 1)).addAttribute(anyString(), eq(false));// All *HighlightCount, except socialRequestCount, are instead false so five here
+    }
+
+    @Test
+    public void testShowExpandedNotifications() throws Exception {
 
         // Given
         RenderRequest renderRequest = setUp(RenderRequest.class);
@@ -267,7 +315,7 @@ public class NotificationControllerTest {
     }
 
     @Test
-    public void testCacheUpdater() throws IOException, InterruptedException {
+    public void testCacheUpdater() throws Exception {
 
         // Given
         RenderRequest request = setUp(RenderRequest.class);
@@ -276,9 +324,9 @@ public class NotificationControllerTest {
         CacheManager manager = new CacheManager();
         manager.addCache(cache);
 
-        Map<String, Integer> values = new HashMap<String, Integer>();
-        values.put("alfrescoCount", 1);
-        values.put("emailCount", SERVICES_RETURNED_COUNT);
+        Map<String, CountResult> values = new HashMap<String, CountResult>();
+        values.put("alfrescoCount", CountResult.createWithCount(1));
+        values.put("emailCount", CountResult.createWithCount(SERVICES_RETURNED_COUNT));
 
         Set<String> recentlyChecked = new HashSet<String>(Arrays.asList("alfrescoCount", "emailCount"));
 
@@ -300,4 +348,38 @@ public class NotificationControllerTest {
         assertEquals(1, recentlyChecked.size());
         assertEquals("emailCount", recentlyChecked.iterator().next());
     }
+
+    @Test
+    public void testIsSame() throws Exception {
+        setUp(PortletRequest.class);
+
+        CountResult cr1 = null;
+        CountResult cr2 = null;
+        assertTrue(controller.isSame(cr1, cr2));
+
+        cr1 = CountResult.createWithCount(1);
+        cr2 = null;
+        assertFalse(controller.isSame(cr1, cr2));
+
+        cr1 = null;
+        cr2 = CountResult.createWithCount(1);
+        assertFalse(controller.isSame(cr1, cr2));
+
+        cr1 = CountResult.createWithCount(1);
+        cr2 = CountResult.createWithCount(1);
+        assertTrue(controller.isSame(cr1, cr2));
+
+        cr1 = CountResult.createNullResult();
+        cr2 = CountResult.createWithCount(1);
+        assertFalse(controller.isSame(cr1, cr2));
+
+        cr1 = CountResult.createWithCount(1);
+        cr2 = CountResult.createNullResult();
+        assertFalse(controller.isSame(cr1, cr2));
+
+        cr1 = CountResult.createWithCount(2);
+        cr2 = CountResult.createWithCount(1);
+        assertFalse(controller.isSame(cr1, cr2));
+    }
+
 }

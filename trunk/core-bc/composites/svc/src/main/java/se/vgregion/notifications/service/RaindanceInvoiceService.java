@@ -39,7 +39,7 @@ class RaindanceInvoiceService {
         } catch (RuntimeException ex) {
             LOGGER.error(ex.getMessage()); // Do it this way since the logs would be full with stacktraces otherwise
             logCause(ex);
-            return Collections.emptyList();
+            return null;
         }
         return invoices;
     }
