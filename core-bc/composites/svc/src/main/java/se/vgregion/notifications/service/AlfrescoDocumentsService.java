@@ -58,6 +58,10 @@ class AlfrescoDocumentsService {
 
         List<Site> sitesByUser = alfrescoService.getSitesByUser(userId, csiframePage, portletInstance);
 
+        if (sitesByUser.size() == 0) {
+            return null; // If zero length it is probable that the user has no connection to Alfresco so null is proper.
+        }
+
         for (Site site : sitesByUser) {
             List<Document> recentlyModified = alfrescoService.getRecentlyModified(userId, site.getShortName());
 

@@ -4,6 +4,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.helpers.NOPLogger;
 import org.springframework.test.util.ReflectionTestUtils;
+import se.vgregion.notifications.domain.CountResult;
 import se.vgregion.notifications.domain.NotificationServiceName;
 
 import java.util.*;
@@ -58,7 +59,7 @@ public class NotificationCallManagerTest {
     public void testNotifyValue_NonNullValue() throws Exception {
 
         // When
-        notificationCallManager.notifyValue("service1", 3, "name1");
+        notificationCallManager.notifyValue("service1", CountResult.createWithCount(3), "name1");
 
         // Then
         boolean b = notificationCallManager.shouldICallThisService("service1", "name1");
@@ -216,7 +217,7 @@ public class NotificationCallManagerTest {
 
     @Test
     @Ignore
-    // I haven't tried to verify the expected outcome of this execution automatically but only manuelly checked that the
+    // I haven't tried to verify the expected outcome of this execution automatically but only manually checked that the
     // output looks as expected. Remove the @Ignore if you want to test it.
     public void testConcurrency() throws InterruptedException {
 
