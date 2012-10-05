@@ -20,20 +20,26 @@
     <dependency>
       <groupId>se.vgregion.commons-util</groupId>
       <artifactId>commons-util-core-bc-composite-svc-camel</artifactId>
-      <version>3.11</version>
+      <version>${commons-util.version}</version>
       <scope>runtime</scope>
     </dependency>
 
     <dependency>
       <groupId>se.vgregion.commons-util</groupId>
       <artifactId>commons-util-core-bc-composite-security</artifactId>
-      <version>3.11</version>
+      <version>${commons-util.version}</version>
     </dependency>
 
     <dependency>
       <groupId>se.vgregion.commons-util</groupId>
       <artifactId>commons-util-core-bc-composite-svc-usd</artifactId>
-      <version>3.11</version>
+      <version>${commons-util.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>se.vgregion.commons-util</groupId>
+      <artifactId>commons-util-core-bc-composite-svc-liferay</artifactId>
+      <version>${commons-util.version}</version>
     </dependency>
 
     <dependency>
@@ -145,4 +151,8 @@
       <artifactId>mockito-all</artifactId>
     </dependency>
   </dependencies>
+
+  <properties>
+    <commons-util.version>3.11</commons-util.version>
+  </properties>
 </project>

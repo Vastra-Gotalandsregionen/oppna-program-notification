@@ -4,10 +4,12 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portlet.social.model.SocialRequest;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.liferay.expando.UserExpandoHelper;
 import se.vgregion.notifications.NotificationException;
 import se.vgregion.notifications.domain.CountResult;
 import se.vgregion.notifications.domain.NotificationServiceName;
@@ -39,6 +41,7 @@ public class NotificationServiceTest {
     private UsdIssuesService usdIssuesService = mock(UsdIssuesService.class);
     private SocialRelationService socialRelationService = mock(SocialRelationService.class);
     private MedControlService medControlService = mock(MedControlService.class);
+    private UserExpandoHelper userExpandoHelper = mock(UserExpandoHelper.class);
 
     private NotificationService notificationService = new NotificationService(
             alfrescoDocumentsService,
@@ -47,7 +50,13 @@ public class NotificationServiceTest {
             raindanceInvoiceService,
             usdIssuesService,
             socialRelationService,
-            medControlService);
+            medControlService,
+            userExpandoHelper);
+
+    @Before
+    public void setup() {
+        when(userExpandoHelper.get(eq("isDominoUser"), any(User.class))).thenReturn(Boolean.TRUE);
+    }
 
     @Test
     public void testGetCount() throws Exception {
@@ -100,9 +109,11 @@ public class NotificationServiceTest {
 
         // Given
         when(notesEmailCounterService.getCount(anyString())).thenReturn(1);
+        User user = mock(User.class);
+        when(user.getScreenName()).thenReturn("anyScreenName");
 
         // When
-        Future<CountResult> count = notificationService.getEmailCount("anyScreenName");
+        Future<CountResult> count = notificationService.getEmailCount(user);
 
         // Then
         assertEquals(1, (int) count.get().getCount());

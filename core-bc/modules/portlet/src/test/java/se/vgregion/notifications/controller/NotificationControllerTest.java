@@ -48,7 +48,7 @@ public class NotificationControllerTest {
                 .createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
 
-        when(notificationService.getEmailCount(anyString())).thenReturn(new AsyncResult<CountResult>(CountResult
+        when(notificationService.getEmailCount(any(User.class))).thenReturn(new AsyncResult<CountResult>(CountResult
                 .createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
 
@@ -380,6 +380,9 @@ public class NotificationControllerTest {
         cr1 = CountResult.createWithCount(2);
         cr2 = CountResult.createWithCount(1);
         assertFalse(controller.isSame(cr1, cr2));
-    }
 
+        cr1 = CountResult.createNullResult();
+        cr2 = CountResult.createNullResult();
+        assertTrue(controller.isSame(cr1, cr2));
+    }
 }

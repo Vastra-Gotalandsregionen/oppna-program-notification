@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2010 Västra Götalandsregionen
+
+      This library is free software; you can redistribute it and/or modify
+      it under the terms of version 2.1 of the GNU Lesser General Public
+      License as published by the Free Software Foundation.
+
+      This library is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU Lesser General Public License for more details.
+
+      You should have received a copy of the GNU Lesser General Public
+      License along with this library; if not, write to the
+      Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+      Boston, MA 02111-1307  USA
+-->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+        >
+
+  <bean id="userExpandoHelper" class="se.vgregion.liferay.expando.UserExpandoHelperImpl"/>
+
+  <bean id="expandoUtil" class="se.vgregion.liferay.expando.ExpandoUtil"/>
+
+  <bean id="userGroupHelper" class="se.vgregion.liferay.usergroup.UserGroupHelperImpl"/>
+
+  <bean id="liferayAutomation" class="se.vgregion.liferay.LiferayAutomation"/>
+
+  <bean id="organizationHelper" class="se.vgregion.liferay.organization.OrganizationHelperImpl"/>
+
+  <!-- Liferay utilities-->
+  <bean id="userLocalService" class="com.liferay.portal.service.UserLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="contactLocalService" class="com.liferay.portal.service.ContactLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="expandoColumnLocalService" class="com.liferay.portlet.expando.service.ExpandoColumnLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="expandoTableLocalService" class="com.liferay.portlet.expando.service.ExpandoTableLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="expandoValueLocalService" class="com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="userGroupLocalService" class="com.liferay.portal.service.UserGroupLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="roleLocalService" class="com.liferay.portal.service.RoleLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="resourcePermissionLocalService" class="com.liferay.portal.service.ResourcePermissionLocalServiceUtil"
+        factory-method="getService"/>
+  <bean id="organizationLocalService" class="com.liferay.portal.service.OrganizationLocalServiceUtil"
+        factory-method="getService"/>
+
+</beans>
