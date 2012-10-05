@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.liferay.expando.UserExpandoHelper;
 import se.vgregion.notifications.NotificationException;
 import se.vgregion.notifications.UserSiteCredentialNotFoundException;
 import se.vgregion.notifications.domain.CountResult;
@@ -47,6 +48,7 @@ public class NotificationService {
     private UsdIssuesService usdIssuesService;
     private SocialRelationService socialRelationService;
     private MedControlService medControlService;
+    private UserExpandoHelper userExpandoHelper;
 
     @Value("${iNotesUrl}")
     private String iNotesUrl;
@@ -76,7 +78,8 @@ public class NotificationService {
                                RaindanceInvoiceService raindanceInvoiceService,
                                UsdIssuesService usdIssuesService,
                                SocialRelationService socialRelationService,
-                               MedControlService medControlService) {
+                               MedControlService medControlService,
+                               UserExpandoHelper userExpandoHelper) {
         this.alfrescoDocumentsService = alfrescoDocumentsService;
         this.notesCalendarCounterService = notesCalendarCounterService;
         this.notesEmailCounterService = notesEmailCounterService;
@@ -84,6 +87,7 @@ public class NotificationService {
         this.usdIssuesService = usdIssuesService;
         this.socialRelationService = socialRelationService;
         this.medControlService = medControlService;
+        this.userExpandoHelper = userExpandoHelper;
     }
 
     /**
@@ -94,7 +98,7 @@ public class NotificationService {
      * itself will be used if the target method requires a {@link User} parameter.
      *
      * @param serviceName the serviceName
-     * @param user the {@link User} instance
+     * @param user        the {@link User} instance
      * @return the count wrapped in a {@link Future}
      */
     @Async
@@ -111,7 +115,7 @@ public class NotificationService {
             // No method found, try with User class instead
             try {
                 Method method = this.getClass().getDeclaredMethod("get" + serviceName + "Count", User.class);
-                return new AsyncResult<CountResult>((CountResult) method.invoke(this, user));
+                return (Future<CountResult>) method.invoke(this, user);
             } catch (NoSuchMethodException e1) {
                 throw new RuntimeException(e1);
             } catch (InvocationTargetException e1) {
@@ -180,14 +184,17 @@ public class NotificationService {
     /**
      * Get the number of unread emails for a user.
      *
-     * @param screenName the user's screen name
+     * @param user the user
      * @return the count wrapped in a {@link Future}
      */
     @Async
-    public Future<CountResult> getEmailCount(String screenName) {
+    public Future<CountResult> getEmailCount(User user) {
         Integer count = null;
+        if (!(Boolean) userExpandoHelper.get("isDominoUser", user)) {
+            return new AsyncResult<CountResult>(CountResult.createNullResult());
+        }
         try {
-            count = notesEmailCounterService.getCount(screenName);
+            count = notesEmailCounterService.getCount(user.getScreenName());
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
         } catch (UserSiteCredentialNotFoundException e) {

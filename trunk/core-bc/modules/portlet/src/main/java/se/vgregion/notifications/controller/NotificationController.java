@@ -593,6 +593,4 @@ public class NotificationController {
             return false;
         }
     }
-
-
 }
