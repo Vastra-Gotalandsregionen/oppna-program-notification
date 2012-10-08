@@ -271,17 +271,28 @@ AUI().add('rp-notifications-bar', function (A) {
                             var socialRequestCount = socialRequestCountResult != null ? socialRequestCountResult['count'] : null;
                             var socialRequestMessage = instance._getMessage(socialRequestCountResult);
 
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount, usdIssuesMessage);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount, emailMessage);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount, medControlMessage);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount, invoicesMessage);
-                        	instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount, socialRequestMessage);
-                    	}
+                            var anythingToShow = false;
+
+                        	anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage);
+                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount, usdIssuesMessage);
+                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount, emailMessage);
+                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount, medControlMessage);
+                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount, invoicesMessage);
+                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount, socialRequestMessage);
+
+                            var listNode = instance.get(NOTIFICATIONS_LIST_NODE);
+                            if (anythingToShow) {
+                                listNode.show();
+                            } else {
+                                listNode.hide();
+                            }
+                        }
                     },
 
                     _updateCounterHtml: function(listNode, value, message) {
                     	var instance = this;
+
+                        var anythingToShow = false;
                     	
                     	var countWrapperNode = listNode.one('.count');
                     	var countNode = countWrapperNode.one('span');
@@ -297,19 +308,23 @@ AUI().add('rp-notifications-bar', function (A) {
                                 countWrapperNode.show();
                                 countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
                                 countNode.html("!");
+                                anythingToShow = true;
                             } else {
                                 countWrapperNode.hide();
                             }
                     	}
                     	else if(value == countNodeValue) {
                             countWrapperNode.show(); // In some cases this is needed even though it shouldn't be
+                            anythingToShow = true;
                         }
                     	else {
                             listNode.show();
                             countWrapperNode.show();
                             countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
                             countNode.html(value);
+                            anythingToShow = true;
                         }
+                        return anythingToShow;
                     },
                     
                     _updateNotifications: function(updateUrl) {
