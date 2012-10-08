@@ -11,9 +11,7 @@
 <c:set var="cssClassHidden" value="aui-helper-hidden" scope="page"/>
 <c:set var="cssClassCountHighlight" value="count-highlight" scope="page"/>
 
-<c:if test="${invoicesCount.count > 0 or usdIssuesCount.count > 0 or alfrescoCount.count > 0 or emailCount.count > 0 or not empty emailCount.message or medControlCount.count > 0 or socialRequestCount.count > 0}">
-
-    <ul id="<portlet:namespace />notificationsBarList" class="notfications-bar-list clearfix">
+<ul id="<portlet:namespace />notificationsBarList" class="notfications-bar-list clearfix">
 
         <c:if test="${!(invoicesCount.count > 0)}">
             <c:set var="cssClassHiddenInvoices" value="${cssClassHidden}"/>
@@ -147,11 +145,9 @@
         </li>
 
     </ul>
-</c:if>
 
-<%--  --%>
 <liferay-util:html-bottom>
-    <script type="text/javascript" src="<%= request.getContextPath() %>/js/notifications-bar.js?a=e"></script>
+    <script type="text/javascript" src="<%= request.getContextPath() %>/js/notifications-bar.js?a=g"></script>
     <script type="text/javascript">
 
         AUI().ready('aui-base', 'rp-notifications-bar', function (A) {
