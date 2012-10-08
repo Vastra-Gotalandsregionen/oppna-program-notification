@@ -377,6 +377,10 @@ public class NotificationController {
     public void pollNotifications(ResourceRequest request, ResourceResponse response) throws IOException {
         final User user = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser();
 
+        if (exceptedUsers.contains(user.getScreenName())) {
+            return;
+        }
+
         scheduleCacheUpdate(user, INTERVAL);
 
         Map<String, CountResult> systemNoNotifications = getSystemNoNotificationsFromCache(user);

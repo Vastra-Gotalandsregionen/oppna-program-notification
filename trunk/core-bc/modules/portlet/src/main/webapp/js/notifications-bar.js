@@ -37,45 +37,45 @@ AUI().add('rp-notifications-bar', function (A) {
         var NotificationsBar = A.Component.create(
             {
                 ATTRS:{
-                	
-                	nodeItemInvoices: {
-                		setter: A.one
-                	},
-                	
-                	nodeItemUsd: {
-                		setter: A.one
-                	},
-                	
-                	nodeItemAlfresco: {
-                		setter: A.one
-                	},
-                	
-                	nodeItemEmail: {
-                		setter: A.one
-                	},
 
-                    nodeItemMedControl: {
-                		setter: A.one
-                	},
+                    nodeItemInvoices:{
+                        setter:A.one
+                    },
 
-                    nodeItemSocialRequest: {
-                		setter: A.one
-                	},
+                    nodeItemUsd:{
+                        setter:A.one
+                    },
 
-                    notificationsListNode: {
-                        setter: A.one
+                    nodeItemAlfresco:{
+                        setter:A.one
                     },
-                    
-                    updateNotificationsInterval: {
-                    	value: 10000
+
+                    nodeItemEmail:{
+                        setter:A.one
                     },
-                    
-                    updateNotificationsUrl: {
-                    	value: ''
+
+                    nodeItemMedControl:{
+                        setter:A.one
                     },
-                    
-                    updateNotificationsNoCacheUrl: {
-                    	value: ''
+
+                    nodeItemSocialRequest:{
+                        setter:A.one
+                    },
+
+                    notificationsListNode:{
+                        setter:A.one
+                    },
+
+                    updateNotificationsInterval:{
+                        value:10000
+                    },
+
+                    updateNotificationsUrl:{
+                        value:''
+                    },
+
+                    updateNotificationsNoCacheUrl:{
+                        value:''
                     }
 
                 },
@@ -84,22 +84,22 @@ AUI().add('rp-notifications-bar', function (A) {
                 NS:NS,
 
                 notificationOverlays:null,
-                updateNotificationsIO: null,
+                updateNotificationsIO:null,
 
                 prototype:{
 
                     initializer:function (config) {
                         var instance = this;
-                        
+
                         instance.notificationOverlays = null;
                         instance.updateNotificationsIO = null;
                     },
 
                     renderUI:function () {
                         var instance = this;
-                        
+
                         //instance._initConsole();
-                        
+
                         instance._initNotificationsUpdate();
                         instance._initNotificationOverlays();
                     },
@@ -110,11 +110,11 @@ AUI().add('rp-notifications-bar', function (A) {
                         var listNode = instance.get(NOTIFICATIONS_LIST_NODE);
                         var notificationLinks = listNode.all('.' + CSS_NOTIFICATIONS_ITEM + ' a');
                         notificationLinks.on('click', function (e) {
-                        	e.halt(true);
+                            e.halt(true);
                         });
                     },
 
-                    _getMessage: function (countResult) {
+                    _getMessage:function (countResult) {
                         if (countResult == null) {
                             return null;
                         }
@@ -128,17 +128,17 @@ AUI().add('rp-notifications-bar', function (A) {
                         return message;
                     },
 
-                    _initConsole: function() {
-                    	var instance = this;
-                    	
-                    	var consoleSettings = {
-	            	        newestOnTop: true,
-	            	        visible: true
-                    	};
-                    	
-                    	var console =  new A.Console(consoleSettings).render();
+                    _initConsole:function () {
+                        var instance = this;
+
+                        var consoleSettings = {
+                            newestOnTop:true,
+                            visible:true
+                        };
+
+                        var console = new A.Console(consoleSettings).render();
                     },
-                    
+
                     _initNotificationOverlays:function () {
                         var instance = this;
 
@@ -191,13 +191,13 @@ AUI().add('rp-notifications-bar', function (A) {
 
                         instance.notificationOverlays = notificationOverlays;
                     },
-                    
-                    _initNotificationsUpdate: function() {
-                    	var instance = this;
-                    	
-                    	instance._updateNotifications(instance.get(UPDATE_NOTIFICATIONS_NO_CACHE_URL));
-                    	
-                    	A.later(instance.get(UPDATE_NOTIFICATIONS_INTERVAL), instance, instance._updateNotifications, [], true);
+
+                    _initNotificationsUpdate:function () {
+                        var instance = this;
+
+                        instance._updateNotifications(instance.get(UPDATE_NOTIFICATIONS_NO_CACHE_URL));
+
+                        A.later(instance.get(UPDATE_NOTIFICATIONS_INTERVAL), instance, instance._updateNotifications, [], true);
                     },
 
                     _onNotificationOverlayHide:function (e) {
@@ -233,20 +233,23 @@ AUI().add('rp-notifications-bar', function (A) {
 
                         overlay.io.start();
                     },
-                    
-                    _onUpdateNotificationsSuccess: function(event, id, xhr) {
-                    	
-                    	var instance = this;
+
+                    _onUpdateNotificationsSuccess:function (event, id, xhr) {
+
+                        var instance = this;
 
                         var responseText = xhr.responseText;
 
+                        var listNode = instance.get(NOTIFICATIONS_LIST_NODE);
+
                         if (responseText.hasOwnProperty('length') && responseText.length < 1) {
+                            listNode.hide();
                             return;
                         }
 
                         var responseJSON = A.JSON.parse(responseText);
 
-                        if(!isNull(responseJSON)) {
+                        if (!isNull(responseJSON)) {
                             var alfrescoCountResult = responseJSON['alfrescoCount'];
                             var alfrescoCount = alfrescoCountResult != null ? alfrescoCountResult['count'] : null;
                             var alfrescoMessage = instance._getMessage(alfrescoCountResult);
@@ -273,36 +276,37 @@ AUI().add('rp-notifications-bar', function (A) {
 
                             var anythingToShow = false;
 
-                        	anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage);
+                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage);
                             anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount, usdIssuesMessage);
                             anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount, emailMessage);
                             anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount, medControlMessage);
                             anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount, invoicesMessage);
                             anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount, socialRequestMessage);
 
-                            var listNode = instance.get(NOTIFICATIONS_LIST_NODE);
                             if (anythingToShow) {
                                 listNode.show();
                             } else {
                                 listNode.hide();
                             }
+                        } else {
+                            listNode.hide();
                         }
                     },
 
-                    _updateCounterHtml: function(listNode, value, message) {
-                    	var instance = this;
+                    _updateCounterHtml:function (listNode, value, message) {
+                        var instance = this;
 
                         var anythingToShow = false;
-                    	
-                    	var countWrapperNode = listNode.one('.count');
-                    	var countNode = countWrapperNode.one('span');
+
+                        var countWrapperNode = listNode.one('.count');
+                        var countNode = countWrapperNode.one('span');
                         if (countNode == null) {
                             return;
                         }
-                    	var countNodeValueStr = countNode.html();
-                    	var countNodeValue = parseInt(countNodeValueStr);
-                    	
-                    	if(isNull(value) || value <= 0) {
+                        var countNodeValueStr = countNode.html();
+                        var countNodeValue = parseInt(countNodeValueStr);
+
+                        if (isNull(value) || value <= 0) {
                             if (message != null) {
                                 listNode.show();
                                 countWrapperNode.show();
@@ -312,12 +316,12 @@ AUI().add('rp-notifications-bar', function (A) {
                             } else {
                                 countWrapperNode.hide();
                             }
-                    	}
-                    	else if(value == countNodeValue) {
+                        }
+                        else if (value == countNodeValue) {
                             countWrapperNode.show(); // In some cases this is needed even though it shouldn't be
                             anythingToShow = true;
                         }
-                    	else {
+                        else {
                             listNode.show();
                             countWrapperNode.show();
                             countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
@@ -326,39 +330,39 @@ AUI().add('rp-notifications-bar', function (A) {
                         }
                         return anythingToShow;
                     },
-                    
-                    _updateNotifications: function(updateUrl) {
-                    	var instance = this;
 
-                    	if(updateUrl == '' || isNull(updateUrl) || isUndefined(updateUrl)) {
-                    		updateUrl = instance.get(UPDATE_NOTIFICATIONS_URL);
-                    	}
+                    _updateNotifications:function (updateUrl) {
+                        var instance = this;
 
-                    	if(isNull(instance.updateNotificationsIO)) {
+                        if (updateUrl == '' || isNull(updateUrl) || isUndefined(updateUrl)) {
+                            updateUrl = instance.get(UPDATE_NOTIFICATIONS_URL);
+                        }
 
-                    		instance.updateNotificationsIO = new A.io.request(updateUrl, {
-                            	autoLoad: false,
-                                cache: false,
-                                sync: false,
-                                timeout: instance.get(UPDATE_NOTIFICATIONS_INTERVAL),
-                                dataType: 'json',
-                                method: 'POST'  // Need to post to avoid caching in IE
+                        if (isNull(instance.updateNotificationsIO)) {
+
+                            instance.updateNotificationsIO = new A.io.request(updateUrl, {
+                                autoLoad:false,
+                                cache:false,
+                                sync:false,
+                                timeout:instance.get(UPDATE_NOTIFICATIONS_INTERVAL),
+                                dataType:'json',
+                                method:'POST'  // Need to post to avoid caching in IE
                             });
 
-                        	// Success handler
-                    		instance.updateNotificationsIO.on('success', instance._onUpdateNotificationsSuccess, instance);
-                    	}
-                    	else {
-                    		
-                    		if(instance.updateNotificationsIO.get('active')) {
-                    			instance.updateNotificationsIO.stop();
-                    		}
-                    		
-							// Update io data params
-                    		instance.updateNotificationsIO.set('uri', updateUrl);
-                    	}
-                    	
-                    	instance.updateNotificationsIO.start();
+                            // Success handler
+                            instance.updateNotificationsIO.on('success', instance._onUpdateNotificationsSuccess, instance);
+                        }
+                        else {
+
+                            if (instance.updateNotificationsIO.get('active')) {
+                                instance.updateNotificationsIO.stop();
+                            }
+
+                            // Update io data params
+                            instance.updateNotificationsIO.set('uri', updateUrl);
+                        }
+
+                        instance.updateNotificationsIO.start();
                     },
 
                     _someFunction:function () {
