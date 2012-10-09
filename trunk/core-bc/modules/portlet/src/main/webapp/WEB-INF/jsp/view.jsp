@@ -147,7 +147,7 @@
     </ul>
 
 <liferay-util:html-bottom>
-    <script type="text/javascript" src="<%= request.getContextPath() %>/js/notifications-bar.js?a=h"></script>
+    <script type="text/javascript" src="<%= request.getContextPath() %>/js/notifications-bar.js?a=i"></script>
     <script type="text/javascript">
 
         AUI().ready('aui-base', 'rp-notifications-bar', function (A) {
