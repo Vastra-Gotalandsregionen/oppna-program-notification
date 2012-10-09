@@ -16,6 +16,11 @@ public class NotificationException extends Exception {
         super(cause);
     }
 
+    /**
+     * Constructor.
+     *
+     * @param message the message
+     */
     public NotificationException(String message) {
         super(message);
     }

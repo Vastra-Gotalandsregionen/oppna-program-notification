@@ -10,7 +10,6 @@ import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.raindancenotifier.services.RaindanceInvoicesService;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**
