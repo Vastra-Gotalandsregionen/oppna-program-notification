@@ -70,6 +70,7 @@ public class NotificationService {
      * @param usdIssuesService            usdIssuesService
      * @param socialRelationService       socialRelationService
      * @param medControlService           medControlService
+     * @param userExpandoHelper           userExpandoHelper
      */
     @Autowired
     public NotificationService(AlfrescoDocumentsService alfrescoDocumentsService,
@@ -100,6 +101,7 @@ public class NotificationService {
      * @param serviceName the serviceName
      * @param user        the {@link User} instance
      * @return the count wrapped in a {@link Future}
+     * @throws NotificationException NotificationException
      */
     @Async
     public Future<CountResult> getCount(String serviceName, User user) throws NotificationException {
@@ -233,7 +235,8 @@ public class NotificationService {
     //@Async // Can't have this Async due to a liferay bug. Some cached and potentially wrong value will be returned.
     // Possibly related to http://issues.liferay.com/browse/LPS-26465.
     public Future<CountResult> getSocialRequestCount(User user) {
-        return new AsyncResult<CountResult>(CountResult.createWithCount(socialRelationService.getUserRequests(user, false).size()));
+        return new AsyncResult<CountResult>(CountResult.createWithCount(socialRelationService.getUserRequests(user,
+                false).size()));
     }
 
     /**

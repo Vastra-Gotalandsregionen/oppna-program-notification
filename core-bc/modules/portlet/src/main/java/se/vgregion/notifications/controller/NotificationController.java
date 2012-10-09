@@ -586,15 +586,11 @@ public class NotificationController {
         if (oldValue.getCount() == null && newValue.getCount() == null) {
             return true;
         }
-        if ((oldValue.getCount() == null && newValue.getCount() != null) ||
-                (oldValue.getCount() != null && newValue.getCount() == null)) {
+        if ((oldValue.getCount() == null && newValue.getCount() != null)
+                || (oldValue.getCount() != null && newValue.getCount() == null)) {
             return false;
         }
         // If we get here no count is null.
-        if (oldValue.getCount().equals(newValue.getCount())) {
-            return true;
-        } else {
-            return false;
-        }
+        return oldValue.getCount().equals(newValue.getCount());
     }
 }
