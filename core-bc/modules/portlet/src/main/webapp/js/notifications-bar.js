@@ -276,12 +276,12 @@ AUI().add('rp-notifications-bar', function (A) {
 
                             var anythingToShow = false;
 
-                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage);
-                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount, usdIssuesMessage);
-                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount, emailMessage);
-                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount, medControlMessage);
-                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount, invoicesMessage);
-                            anythingToShow = anythingToShow || instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount, socialRequestMessage);
+                            anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage) || anythingToShow;
+                            anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount, usdIssuesMessage) || anythingToShow;
+                            anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount, emailMessage) || anythingToShow;
+                            anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount, medControlMessage) || anythingToShow;
+                            anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount, invoicesMessage) || anythingToShow;
+                            anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount, socialRequestMessage) || anythingToShow;
 
                             if (anythingToShow) {
                                 listNode.show();
