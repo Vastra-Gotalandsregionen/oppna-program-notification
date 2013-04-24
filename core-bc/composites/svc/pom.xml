@@ -8,7 +8,7 @@
   <parent>
     <groupId>se.vgregion.notifications</groupId>
     <artifactId>notifications-core-bc</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <groupId>se.vgregion.notifications</groupId>
@@ -153,6 +153,6 @@
   </dependencies>
 
   <properties>
-    <commons-util.version>3.11</commons-util.version>
+    <commons-util.version>3.18</commons-util.version>
   </properties>
 </project>
