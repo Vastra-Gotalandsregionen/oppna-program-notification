@@ -375,9 +375,13 @@ public class NotificationController {
      */
     @ResourceMapping
     public void pollNotifications(ResourceRequest request, ResourceResponse response) throws IOException {
+        response.setContentType("application/json");
         final User user = ((ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY)).getUser();
 
         if (exceptedUsers.contains(user.getScreenName())) {
+            PrintWriter writer = response.getWriter();
+            writer.append("{}");
+            writer.close();
             return;
         }
 
@@ -491,8 +495,6 @@ public class NotificationController {
 
         PrintWriter writer = null;
         try {
-            response.setContentType("application/json");
-
             writer = response.getWriter();
             ObjectMapper objectMapper = new ObjectMapper();
 
