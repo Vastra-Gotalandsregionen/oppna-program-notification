@@ -242,7 +242,7 @@ AUI().add('rp-notifications-bar', function (A) {
 
                         var listNode = instance.get(NOTIFICATIONS_LIST_NODE);
 
-                        if (responseText.hasOwnProperty('length') && responseText.length < 1) {
+                        if (responseText.hasOwnProperty('length') && responseText.length < 3) {
                             listNode.hide();
                             return;
                         }

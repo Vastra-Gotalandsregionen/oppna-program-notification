@@ -17,12 +17,12 @@
   <name>${project.artifactId}</name>
 
   <dependencies>
-    <dependency>
+<!--    <dependency>
       <groupId>se.vgregion.commons-util</groupId>
       <artifactId>commons-util-core-bc-composite-svc-camel</artifactId>
       <version>${commons-util.version}</version>
-      <scope>runtime</scope>
-    </dependency>
+      &lt;!&ndash;<scope>runtime</scope>&ndash;&gt;
+    </dependency>-->
 
     <dependency>
       <groupId>se.vgregion.commons-util</groupId>
