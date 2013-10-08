@@ -70,6 +70,7 @@ class NotesEmailCounterService {
                     + userSiteCredential.getSiteUser(), "");
         } catch (URISyntaxException e) {
             LOGGER.error(e.getMessage(), e);
+            throw new UserSiteCredentialNotFoundException("UserSiteCredential was not found for user: " + userId);
         }
 
         HttpResponse httpResponse = callService(userSiteCredential.getSiteUser(),
@@ -104,7 +105,7 @@ class NotesEmailCounterService {
         return httpClient.execute(httpGet, httpContext);
     }
 
-    private Integer handleResponse(HttpResponse httpResponse, String user) throws IOException {
+    private Integer handleResponse(HttpResponse httpResponse, String user) throws IOException, UserSiteCredentialNotFoundException {
         final int ok = 200;
         if (httpResponse.getStatusLine().getStatusCode() == ok) {
             String reply = IOUtils.toString(httpResponse.getEntity().getContent());
@@ -123,7 +124,7 @@ class NotesEmailCounterService {
                         .getLineNumber() + ")";
                 LOGGER.warn("User: " + user + ". Http request failed. Unexpected response - "
                         + stackTraceElementString);
-                return null;
+                throw new UserSiteCredentialNotFoundException("UserSiteCredential was not found for user: " + user);
             }
 
             Scanner scanner = new Scanner(reply);
