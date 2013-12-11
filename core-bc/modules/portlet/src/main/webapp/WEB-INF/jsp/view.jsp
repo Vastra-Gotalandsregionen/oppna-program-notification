@@ -77,7 +77,7 @@
             <c:set var="cssClassHiddenEmail" value="${cssClassHidden}"/>
         </c:if>
         <li id="<portlet:namespace />itemEmail"
-            class="notifications-bar-item notifications-bar-email ${cssClassHiddenEmail}" title="E-post">
+            class="notifications-bar-item notifications-bar-email ${cssClassHiddenEmail}" title="E-post  dafs ${ewsEmailCount.count}">
             <portlet:renderURL var="emailURL" windowState="exclusive">
                 <portlet:param name="action" value="showExpandedNotifications"/>
                 <portlet:param name="notificationType" value="email"/>
@@ -92,6 +92,36 @@
                         <span>${emailCount.count}</span>
                     </c:when>
                     <c:when test="${not empty emailCount.message}">
+                        <span>!</span>
+                    </c:when>
+                    <c:otherwise>
+                        <span></span>
+                    </c:otherwise>
+                </c:choose>
+            </span>
+                <span class="title">E-post daf ${ewsEmailCount.count}</span>
+            </a>
+        </li>
+
+        <c:if test="${!(ewsEmailCount.count > 0)}">
+            <c:set var="cssClassHiddenEmail" value="${cssClassHidden}"/>
+        </c:if>
+        <li id="<portlet:namespace />itemEwsEmail"
+            class="notifications-bar-item notifications-bar-email ${cssClassHiddenEmail}" title="E-post">
+            <portlet:renderURL var="ewsEmailURL" windowState="exclusive">
+                <portlet:param name="action" value="showExpandedNotifications"/>
+                <portlet:param name="notificationType" value="ewsEmail"/>
+            </portlet:renderURL>
+            <a href="${ewsEmailURL}">
+                <c:if test="${ewsEmailHighlightCount}">
+                    <c:set var="cssClassCountWrapperEwsEmail" value="${cssClassCountHighlight}"/>
+                </c:if>
+            <span class="count ${cssClassCountWrapperEwsEmail}">
+                <c:choose>
+                    <c:when test="${not empty ewsEmailCount.count}">
+                        <span>${ewsEmailCount.count}</span>
+                    </c:when>
+                    <c:when test="${not empty ewsEmailCount.message}">
                         <span>!</span>
                     </c:when>
                     <c:otherwise>
@@ -158,6 +188,7 @@
                 nodeItemUsd:'#<portlet:namespace />itemUsd',
                 nodeItemAlfresco:'#<portlet:namespace />itemAlfresco',
                 nodeItemEmail:'#<portlet:namespace />itemEmail',
+                nodeItemEwsEmail:'#<portlet:namespace />itemEwsEmail',
                 nodeItemMedControl:'#<portlet:namespace />itemMedControl',
                 nodeItemSocialRequest:'#<portlet:namespace />itemSocialRequests',
 

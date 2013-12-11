@@ -20,6 +20,7 @@ AUI().add('rp-notifications-bar', function (A) {
             NODE_ITEM_USD = 'nodeItemUsd',
             NODE_ITEM_ALFRESCO = 'nodeItemAlfresco',
             NODE_ITEM_EMAIL = 'nodeItemEmail',
+            NODE_ITEM_EWS_EMAIL = 'nodeItemEwsEmail',
             NODE_ITEM_MED_CONTROL = 'nodeItemMedControl',
             NODE_ITEM_SOCIAL_REQUEST = 'nodeItemSocialRequest',
 
@@ -51,6 +52,10 @@ AUI().add('rp-notifications-bar', function (A) {
                     },
 
                     nodeItemEmail:{
+                        setter:A.one
+                    },
+
+                    nodeItemEwsEmail:{
                         setter:A.one
                     },
 
@@ -166,7 +171,7 @@ AUI().add('rp-notifications-bar', function (A) {
                                 hideOnDocumentClick:true,
                                 showArrow:false,
                                 trigger:nodeLink,
-                                width:'300px'
+                                width:'400px'
                             });
 
                             overlay.on('hide', instance._onNotificationOverlayHide, instance);
@@ -262,6 +267,10 @@ AUI().add('rp-notifications-bar', function (A) {
                             var emailCount = emailCountResult != null ? emailCountResult['count'] : null;
                             var emailMessage = instance._getMessage(emailCountResult);
 
+                            var ewsEmailCountResult = responseJSON['ewsEmailCount'];
+                            var ewsEmailCount = ewsEmailCountResult != null ? ewsEmailCountResult['count'] : null;
+                            var ewsEmailMessage = instance._getMessage(ewsEmailCountResult);
+
                             var invoicesCountResult = responseJSON['invoicesCount'];
                             var invoicesCount = invoicesCountResult != null ? invoicesCountResult['count'] : null;
                             var invoicesMessage = instance._getMessage(invoicesCountResult);
@@ -279,6 +288,7 @@ AUI().add('rp-notifications-bar', function (A) {
                             anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_ALFRESCO), alfrescoCount, alfrescoMessage) || anythingToShow;
                             anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_USD), usdIssuesCount, usdIssuesMessage) || anythingToShow;
                             anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_EMAIL), emailCount, emailMessage) || anythingToShow;
+                            anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_EWS_EMAIL), ewsEmailCount, ewsEmailMessage) || anythingToShow;
                             anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_MED_CONTROL), medControlCount, medControlMessage) || anythingToShow;
                             anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_INVOICES), invoicesCount, invoicesMessage) || anythingToShow;
                             anythingToShow = instance._updateCounterHtml(instance.get(NODE_ITEM_SOCIAL_REQUEST), socialRequestCount, socialRequestMessage) || anythingToShow;

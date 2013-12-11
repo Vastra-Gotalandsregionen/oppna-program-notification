@@ -4,6 +4,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portlet.social.model.SocialRequest;
+import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.exchange.service.EwsService;
 import se.vgregion.liferay.expando.UserExpandoHelper;
 import se.vgregion.notifications.NotificationException;
 import se.vgregion.notifications.UserSiteCredentialNotFoundException;
@@ -49,6 +51,7 @@ public class NotificationService {
     private SocialRelationService socialRelationService;
     private MedControlService medControlService;
     private UserExpandoHelper userExpandoHelper;
+    private EwsService ewsService;
 
     @Value("${iNotesUrl}")
     private String iNotesUrl;
@@ -80,7 +83,8 @@ public class NotificationService {
                                UsdIssuesService usdIssuesService,
                                SocialRelationService socialRelationService,
                                MedControlService medControlService,
-                               UserExpandoHelper userExpandoHelper) {
+                               UserExpandoHelper userExpandoHelper,
+                               EwsService ewsService) {
         this.alfrescoDocumentsService = alfrescoDocumentsService;
         this.notesCalendarCounterService = notesCalendarCounterService;
         this.notesEmailCounterService = notesEmailCounterService;
@@ -89,6 +93,7 @@ public class NotificationService {
         this.socialRelationService = socialRelationService;
         this.medControlService = medControlService;
         this.userExpandoHelper = userExpandoHelper;
+        this.ewsService = ewsService;
     }
 
     /**
@@ -206,6 +211,14 @@ public class NotificationService {
                     + " ändringen träder i kraft."));
         }
         return new AsyncResult<CountResult>(CountResult.createWithCount(count));
+    }
+
+    @Async
+    public Future<CountResult> getEwsEmailCount(String screenName) {
+
+        Integer integer = ewsService.fetchInboxUnreadCount(screenName);
+
+        return new AsyncResult<CountResult>(CountResult.createWithCount(integer));
     }
 
     /**
@@ -370,5 +383,9 @@ public class NotificationService {
         } catch (PortalException e) {
             throw new NotificationException(e);
         }
+    }
+
+    public List<MessageType> getEwsUnreadEmails(String screenName, int maxNumber) {
+        return ewsService.fetchUnreadEmails(screenName, maxNumber);
     }
 }

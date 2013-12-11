@@ -1,0 +1,19 @@
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+        version="2.0">
+
+    <tlib-version>1.0</tlib-version>
+
+    <short-name>Util</short-name>
+
+    <uri>http://vgregion.se/portal/util/1.0</uri>
+
+    <function>
+        <description>Converts bean into base encoded serialized text.</description>
+        <display-name>xmlGregorianCalendarToNiceString</display-name>
+        <name>xmlGregorianCalendarToNiceString</name>
+        <function-class>se.vgregion.notifications.util.DateUtil</function-class>
+        <function-signature>java.lang.String xmlGregorianCalendarToNiceString(javax.xml.datatype.XMLGregorianCalendar)</function-signature>
+    </function>
+
+</taglib>
