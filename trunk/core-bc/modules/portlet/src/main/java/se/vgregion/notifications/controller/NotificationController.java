@@ -7,6 +7,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.User;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.social.model.SocialRequest;
+import com.microsoft.schemas.exchange.services._2006.types.MessageType;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -71,6 +72,9 @@ public class NotificationController {
 
     @Value("${iNotesUrl}")
     private String iNotesUrl;
+
+    @Value("${outlookUrl}")
+    private String outlookUrl;
 
     /**
      * Constructor.
@@ -244,6 +248,15 @@ public class NotificationController {
             String message = getMessageIfThereIsAny(user, notificationType);
             model.addAttribute("message", message != null ? message : defaultMessage);
             return "view_email";
+        } else if (notificationType.equals("ewsEmail")) {
+            List<MessageType> ewsUnreadEmails = notificationService.getEwsUnreadEmails(user.getScreenName(), 20);
+            model.addAttribute("emails", ewsUnreadEmails);
+            model.addAttribute("website", outlookUrl);
+
+            String defaultMessage = "<p>Gå till <a href=\"" + outlookUrl + "\" target=\"blank\">Outlook</a>.</p>";
+            String message = getMessageIfThereIsAny(user, notificationType);
+            model.addAttribute("message", message != null ? message : defaultMessage);
+            return "view_ews_email";
         } else if (notificationType.equals("usdIssues")) {
             List<Issue> usdIssues = notificationService.getUsdIssues(user.getScreenName());
             List<Issue> myUsdIssues = new ArrayList<Issue>();

@@ -68,6 +68,10 @@ public class NotificationControllerTest {
                 CountResult.createWithCount(SERVICES_RETURNED_COUNT)));
         numberOfServices++;
 
+        when(notificationService.getEwsEmailCount(anyString())).thenReturn(new AsyncResult<CountResult>(
+                CountResult.createWithCount(SERVICES_RETURNED_COUNT)));
+        numberOfServices++;
+
         when(notificationService.getCount(any(String.class), any(User.class))).thenCallRealMethod();
 
         if (controller == null) {

@@ -26,6 +26,7 @@
         <value>classpath*:raindance-svc.properties</value>
         <value>classpath*:hibernate.properties</value>
         <value>classpath*:alfresco-cs-iframe.properties</value>
+        <value>file:${user.home}/.rp/AD.properties</value>
       </list>
     </property>
   </bean>

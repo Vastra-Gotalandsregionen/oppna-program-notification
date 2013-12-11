@@ -23,6 +23,8 @@
         <value>classpath*:alfresco-cs-iframe.properties</value>
         <value>classpath*:medcontrol.properties</value>
         <value>classpath*:security.properties</value>
+        <value>file:${user.home}/.rp/AD.properties</value>
+        <value>file:${user.home}/.rp/ews.properties</value>
       </list>
     </property>
   </bean>

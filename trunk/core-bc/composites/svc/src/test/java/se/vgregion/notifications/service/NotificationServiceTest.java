@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import se.vgregion.alfrescoclient.domain.Document;
 import se.vgregion.alfrescoclient.domain.Site;
+import se.vgregion.exchange.service.EwsService;
 import se.vgregion.liferay.expando.UserExpandoHelper;
 import se.vgregion.notifications.NotificationException;
 import se.vgregion.notifications.domain.CountResult;
@@ -42,6 +43,7 @@ public class NotificationServiceTest {
     private SocialRelationService socialRelationService = mock(SocialRelationService.class);
     private MedControlService medControlService = mock(MedControlService.class);
     private UserExpandoHelper userExpandoHelper = mock(UserExpandoHelper.class);
+    private EwsService ewsService = mock(EwsService.class);
 
     private NotificationService notificationService = new NotificationService(
             alfrescoDocumentsService,
@@ -51,7 +53,8 @@ public class NotificationServiceTest {
             usdIssuesService,
             socialRelationService,
             medControlService,
-            userExpandoHelper);
+            userExpandoHelper,
+            ewsService);
 
     @Before
     public void setup() {

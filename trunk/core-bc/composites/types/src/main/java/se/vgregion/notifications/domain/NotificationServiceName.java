@@ -10,7 +10,7 @@ import java.util.List;
  */
 public enum NotificationServiceName {
     ALFRESCO("alfresco"), EMAIL("email"), INVOICES("invoices"), USD_ISSUES("usdIssues"),
-    /*SOCIAL_REQUEST("socialRequest"), */MED_CONTROL_CASES("medControlCases");
+    /*SOCIAL_REQUEST("socialRequest"), */MED_CONTROL_CASES("medControlCases"), EWS_EMAIL("ewsEmail");
 
     private NotificationServiceName(String name) {
         this.name = name;
