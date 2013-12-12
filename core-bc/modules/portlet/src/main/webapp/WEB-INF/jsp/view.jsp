@@ -77,7 +77,7 @@
             <c:set var="cssClassHiddenEmail" value="${cssClassHidden}"/>
         </c:if>
         <li id="<portlet:namespace />itemEmail"
-            class="notifications-bar-item notifications-bar-email ${cssClassHiddenEmail}" title="E-post  dafs ${ewsEmailCount.count}">
+            class="notifications-bar-item notifications-bar-email ${cssClassHiddenEmail}" title="E-post">
             <portlet:renderURL var="emailURL" windowState="exclusive">
                 <portlet:param name="action" value="showExpandedNotifications"/>
                 <portlet:param name="notificationType" value="email"/>
@@ -104,10 +104,10 @@
         </li>
 
         <c:if test="${!(ewsEmailCount.count > 0)}">
-            <c:set var="cssClassHiddenEmail" value="${cssClassHidden}"/>
+            <c:set var="cssClassHiddenEwsEmail" value="${cssClassHidden}"/>
         </c:if>
         <li id="<portlet:namespace />itemEwsEmail"
-            class="notifications-bar-item notifications-bar-email ${cssClassHiddenEmail}" title="E-post">
+            class="notifications-bar-item notifications-bar-email ${cssClassHiddenEwsEmail}" title="E-post">
             <portlet:renderURL var="ewsEmailURL" windowState="exclusive">
                 <portlet:param name="action" value="showExpandedNotifications"/>
                 <portlet:param name="notificationType" value="ewsEmail"/>
