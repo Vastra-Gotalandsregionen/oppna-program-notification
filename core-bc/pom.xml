@@ -11,13 +11,13 @@ Generation time : 2012-03-12 09:23:52 CET
   <parent>
     <groupId>se.vgregion.notifications</groupId>
     <artifactId>notifications-system</artifactId>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.6</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <groupId>se.vgregion.notifications</groupId>
   <artifactId>notifications-core-bc</artifactId>
   <packaging>pom</packaging>
-  <version>1.6-SNAPSHOT</version>
+  <version>1.6</version>
   <name>${project.artifactId}</name>
 
   <modules>
