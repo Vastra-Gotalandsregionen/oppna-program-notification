@@ -67,7 +67,7 @@ public class NotificationController {
 
     private List<String> notificationCountServices = NotificationServiceName.allNamesAsList();
 
-    @Resource
+    @Resource(name = "exceptedUsers")
     private List<String> exceptedUsers = new ArrayList<String>();
 
     @Value("${iNotesUrl}")

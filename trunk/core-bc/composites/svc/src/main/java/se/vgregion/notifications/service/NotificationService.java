@@ -22,13 +22,11 @@ import se.vgregion.portal.medcontrol.domain.DeviationCase;
 import se.vgregion.raindancenotifier.domain.InvoiceNotification;
 import se.vgregion.usdservice.domain.Issue;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Future;
 
 /**
@@ -52,6 +50,9 @@ public class NotificationService {
     private MedControlService medControlService;
     private UserExpandoHelper userExpandoHelper;
     private EwsService ewsService;
+
+    @Resource(name = "hiddenUsdStatuses")
+    private List<String> hiddenUsdStatuses;// = new ArrayList<String>(Arrays.asList("Åtgärdad"));
 
     @Value("${iNotesUrl}")
     private String iNotesUrl;
@@ -168,7 +169,7 @@ public class NotificationService {
      */
     @Async
     public Future<CountResult> getUsdIssuesCount(String screenName) {
-        List<Issue> issues = usdIssuesService.getUsdIssues(screenName, false);
+        List<Issue> issues = getUsdIssues(screenName, false);
 
         if (issues == null) {
             return new AsyncResult<CountResult>(CountResult.createNullResult());
@@ -296,7 +297,24 @@ public class NotificationService {
      * @return a list of {@link Issue}s
      */
     public List<Issue> getUsdIssues(String screenName) {
-        return usdIssuesService.getUsdIssues(screenName, true);
+        return getUsdIssues(screenName, true);
+    }
+
+    private List<Issue> getUsdIssues(String screenName, boolean cachedResult) {
+        List<Issue> usdIssues = usdIssuesService.getUsdIssues(screenName, cachedResult);
+
+        Iterator<Issue> iterator = usdIssues.iterator();
+
+        while (iterator.hasNext()) {
+            Issue next = iterator.next();
+            String status = next.getStatus();
+
+            if (hiddenUsdStatuses.contains(status)) {
+                iterator.remove();
+            }
+        }
+
+        return usdIssues;
     }
 
     /**
@@ -387,5 +405,13 @@ public class NotificationService {
 
     public List<MessageType> getEwsUnreadEmails(String screenName, int maxNumber) {
         return ewsService.fetchUnreadEmails(screenName, maxNumber);
+    }
+
+    public List<String> getHiddenUsdStatuses() {
+        return hiddenUsdStatuses;
+    }
+
+    public void setHiddenUsdStatuses(List<String> hiddenUsdStatuses) {
+        this.hiddenUsdStatuses = hiddenUsdStatuses;
     }
 }
