@@ -52,7 +52,7 @@ public class NotificationService {
     private EwsService ewsService;
 
     @Resource(name = "hiddenUsdStatuses")
-    private List<String> hiddenUsdStatuses;// = new ArrayList<String>(Arrays.asList("Åtgärdad"));
+    private List<String> hiddenUsdStatuses = new ArrayList<String>(Arrays.asList("Åtgärdad"));
 
     @Value("${iNotesUrl}")
     private String iNotesUrl;
