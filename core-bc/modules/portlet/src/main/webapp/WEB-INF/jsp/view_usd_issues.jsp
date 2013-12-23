@@ -34,7 +34,7 @@
 	    					${usdIssue.type}
 	    				</span>
     				</span>
-	    			<span class="notification-summary notification-usd-summary">${usdIssue.summary}</span>
+	    			<span class="notification-summary notification-usd-summary">${usdIssue.summary} - <b>${usdIssue.status}</b></span>
     			</a>
 	    	</li>
 	    </c:forEach>
@@ -71,7 +71,7 @@
                                 ${usdIssue.type}
                             </span>
                         </span>
-                        <span class="notification-summary notification-usd-summary">${usdIssue.summary}</span>
+                        <span class="notification-summary notification-usd-summary">${usdIssue.summary} - <b>${usdIssue.status}</b></span>
                     </a>
                 </li>
             </c:forEach>
