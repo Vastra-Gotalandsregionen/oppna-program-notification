@@ -87,7 +87,7 @@
   </bean>
 
   <util:list id="hiddenUsdStatuses">
-    <value>Årgärdad</value>
+    <value>Åtgärdad</value>
   </util:list>
 
 </beans>
