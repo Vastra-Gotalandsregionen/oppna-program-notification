@@ -71,7 +71,6 @@ public class TestService {
     @Path("/mail/{userId}")
     @GET
     public String getMail(@PathParam("userId") String userId) {
-        System.out.println("getAlfresco userId = " + userId);
         String msg = getFromMessageBus("vgr/notes_email_count", userId);
         return msg;
     }
@@ -136,7 +135,6 @@ public class TestService {
     @POST
     public String getRandom() {
         String msg = get();
-        System.out.println("POST: " + msg);
         return msg;
     }
 
@@ -148,7 +146,6 @@ public class TestService {
     @GET
     public String random() {
         String msg = get();
-        System.out.println("GET: " + msg);
         return msg;
     }
 
