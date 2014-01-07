@@ -205,11 +205,9 @@ public class NotificationService {
             count = notesEmailCounterService.getCount(user.getScreenName());
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
+            return new AsyncResult<CountResult>(CountResult.createNullResult());
         } catch (UserSiteCredentialNotFoundException e) {
-            return new AsyncResult<CountResult>(CountResult.createWithMessage("Du har inte angivit dina"
-                    + " inloggningsuppgifter till iNotes. Gå <a href=\"" + iNotesUrl + "\">hit</a> för att ange dem."
-                    + " Efter det kommer du se när du fått ny e-post här. Observera att det kan ta några minuter innan"
-                    + " ändringen träder i kraft."));
+            return new AsyncResult<CountResult>(CountResult.createNullResult());
         }
         return new AsyncResult<CountResult>(CountResult.createWithCount(count));
     }
