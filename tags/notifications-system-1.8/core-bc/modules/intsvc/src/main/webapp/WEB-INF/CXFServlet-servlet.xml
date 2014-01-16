@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	
+	<import resource="applicationContext.xml"/>
+	<!--<import resource="classpath*:ehcache-context.xml"/>-->
+
+	<!--<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="mediaTypes">
+			<map>
+				&lt;!&ndash;<entry key="xml" value="application/xml" />&ndash;&gt;
+				<entry key="json" value="application/json" />
+				<entry key="jsonp" value="application/json" />
+			</map>
+		</property>
+		<property name="defaultViews">
+			<list>
+				&lt;!&ndash;<bean class="org.springframework.web.servlet.view.xml.MarshallingView">
+					<property name="marshaller">
+						<bean class="org.springframework.oxm.xstream.XStreamMarshaller"/>
+					</property>
+				</bean>&ndash;&gt;
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+			</list>
+		</property>
+	</bean>
+-->
+</beans>

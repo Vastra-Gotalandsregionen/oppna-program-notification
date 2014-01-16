@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+                           http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <import resource="messagebus-common.xml"/>
+  <import resource="classpath*:service-configuration.xml" />
+  <context:annotation-config />
+  <context:spring-configured />
+
+  <camelContext xmlns="http://camel.apache.org/schema/spring">
+
+    <routeBuilder ref="alfrescoJson" />
+
+    <routeBuilder ref="usdIssuesJson" />
+
+    <routeBuilder ref="raindanceInvoiceJson"/>
+
+    <routeBuilder ref="raindanceInvoiceCounter"/>
+
+    <routeBuilder ref="notesCalendarCounter" />
+
+    <routeBuilder ref="notesEmailCounter" />
+
+  </camelContext>
+
+  <bean id="alfrescoJson" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
+    <constructor-arg index="0" value="vgr/alfresco_recently_modified_json"/>
+    <constructor-arg index="1" value="se.vgregion.notifications.service.AlfrescoDocumentsService" />
+    <constructor-arg index="2" value="getRecentlyModifiedJson" />
+  </bean>
+
+  <bean id="usdIssuesJson" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
+    <constructor-arg index="0" value="vgr/usd_issues_json"/>
+    <constructor-arg index="1" value="se.vgregion.notifications.service.UsdIssuesService" />
+    <constructor-arg index="2" value="getUsdIssuesJson" />
+  </bean>
+
+  <bean id="raindanceInvoiceJson" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
+    <constructor-arg index="0" value="vgr/raindance_invoices_json"/>
+    <constructor-arg index="1" value="se.vgregion.notifications.service.RaindanceInvoiceService" />
+    <constructor-arg index="2" value="getInvoicesJson" />
+  </bean>
+
+  <bean id="raindanceInvoiceCounter" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
+    <constructor-arg index="0" value="vgr/raindance_invoices_count"/>
+    <constructor-arg index="1" value="se.vgregion.notifications.service.RaindanceInvoiceService" />
+    <constructor-arg index="2" value="getCount" />
+  </bean>
+
+  <bean id="notesCalendarCounter" class="se.vgregion.routes.MessagebusBeanRouteBuilder">
+    <constructor-arg index="0" value="vgr/notes_calendar_count"/>
+    <constructor-arg index="1" value="se.vgregion.notifications.service.NotesCalendarCounterService" />
+    <constructor-arg index="2" value="getCount" />
+  </bean>
+
+  <bean id="notesEmailCounter" class="se.vgregion.routes.MessagebusBeanrefRouteBuilder">
+    <constructor-arg index="0" value="vgr/notes_email_count"/>
+    <constructor-arg index="1" value="notesEmailCounterBean" />
+    <constructor-arg index="2" value="getCount" />
+  </bean>
+  
+  <!-- Counter Beans -->
+
+  <bean id="notesEmailCounterBean" class="se.vgregion.notifications.service.NotesEmailCounterService">
+    <property name="siteKey" value="iNotes" />
+  </bean>
+
+
+  <!-- Destinations -->
+
+  <bean id="destination.test.counter" class="com.liferay.portal.kernel.messaging.SerialDestination"
+        init-method="afterPropertiesSet">
+    <property name="name" value="${test.counter.messagebus.destination}"/>
+  </bean>
+  <!-- Configurator -->
+
+  <bean id="messagingConfigurator.core"
+        class="com.liferay.portal.kernel.messaging.config.DefaultMessagingConfigurator" init-method="init"
+        destroy-method="destroy">
+    <property name="destinations">
+      <list>
+        <ref bean="destination.test.counter"/>
+      </list>
+    </property>
+    <property name="messageBus">
+      <ref bean="messageBus"/>
+    </property>
+  </bean>
+
+</beans>
