@@ -35,12 +35,6 @@
     </dependency>
 
     <dependency>
-      <groupId>se.vgregion.commons-util</groupId>
-      <artifactId>commons-util-core-bc-composite-svc-usd</artifactId>
-      <version>3.18</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.liferay.portal</groupId>
       <artifactId>portal-service</artifactId>
     </dependency>
