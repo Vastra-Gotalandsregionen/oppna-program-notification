@@ -215,6 +215,12 @@ public class NotificationCallManager {
         bannedServices.add(NotificationServiceName.EMAIL.getName());
     }
 
+    @ManagedOperation
+    public void banEwsEmail() {
+        logger.info("Ban ewsEmail");
+        bannedServices.add(NotificationServiceName.EWS_EMAIL.getName());
+    }
+
     /**
      * Make calls to {@link NotificationCallManager#shouldICallThisService(java.lang.String, java.lang.String)} return
      * false for every call with serviceName equal to NotificationServiceName.INVOICES.getName().
