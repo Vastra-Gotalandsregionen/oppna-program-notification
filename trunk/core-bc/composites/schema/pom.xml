@@ -12,7 +12,7 @@ Generation time : 2012-03-12 09:23:52 CET
   <parent>
     <groupId>se.vgregion.notifications</groupId>
     <artifactId>notifications-core-bc</artifactId>
-    <version>1.9-SNAPSHOT</version>
+    <version>1.9</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <groupId>se.vgregion.notifications</groupId>
