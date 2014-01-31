@@ -34,7 +34,7 @@
             </c:choose>
 
             <li class="${listItemCssClass}">
-                <a href="${website}" target="_blank" class="clearfix">
+                <a href="${outlookUrl}" target="_blank" class="clearfix">
                     <span class="notification-email-summary"><div><b>${email.from.mailbox.name}</b></div> - ${email.subject}</span>
                     <span class="notification-email-short-info">
                         <b>${util:xmlGregorianCalendarToNiceString(email.dateTimeSent)}</b>

@@ -76,6 +76,9 @@ public class NotificationController {
     @Value("${outlookUrl}")
     private String outlookUrl;
 
+    @Value("${outlookPortalPage}")
+    private String outlookPortalPage;
+
     /**
      * Constructor.
      *
@@ -251,9 +254,9 @@ public class NotificationController {
         } else if (notificationType.equals("ewsEmail")) {
             List<MessageType> ewsUnreadEmails = notificationService.getEwsUnreadEmails(user.getScreenName(), 20);
             model.addAttribute("emails", ewsUnreadEmails);
-            model.addAttribute("website", outlookUrl);
+            model.addAttribute("outlookUrl", outlookPortalPage);
 
-            String defaultMessage = "<p>Gå till <a href=\"" + outlookUrl + "\" target=\"blank\">Outlook</a>.</p>";
+            String defaultMessage = "<p>Gå till <a href=\"" + outlookPortalPage + "\" target=\"blank\">Outlook</a>.</p>";
             String message = getMessageIfThereIsAny(user, notificationType);
             model.addAttribute("message", message != null ? message : defaultMessage);
             return "view_ews_email";
