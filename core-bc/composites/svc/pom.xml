@@ -17,12 +17,6 @@
   <name>${project.artifactId}</name>
 
   <dependencies>
-<!--    <dependency>
-      <groupId>se.vgregion.commons-util</groupId>
-      <artifactId>commons-util-core-bc-composite-svc-camel</artifactId>
-      <version>${commons-util.version}</version>
-      &lt;!&ndash;<scope>runtime</scope>&ndash;&gt;
-    </dependency>-->
 
     <dependency>
       <groupId>se.vgregion.commons-util</groupId>
@@ -63,7 +57,7 @@
     <dependency>
       <groupId>se.vgregion.ews-services</groupId>
       <artifactId>ews-services-core-bc-composite-svc</artifactId>
-      <version>1.0</version>
+      <version>1.2</version>
     </dependency>
 
     <dependency>
