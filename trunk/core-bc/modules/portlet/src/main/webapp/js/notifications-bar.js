@@ -390,7 +390,7 @@ AUI().add('rp-notifications-bar', function (A) {
             'aui-base',
             'aui-io',
             'aui-loading-mask',
-            'aui-overlay',
+            'aui-overlay-context-panel-deprecated',
             'console',
             'substitute'
         ]

@@ -24,9 +24,16 @@
        xmlns:task="http://www.springframework.org/schema/task" xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:cxf="http://cxf.apache.org/transports/http/configuration"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:http="http://cxf.apache.org/transports/http/configuration"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+          http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+          http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
+          http://cxf.apache.org/configuration/security
+          http://cxf.apache.org/schemas/configuration/security.xsd
+          http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
         >
 
   <!-- This is for commons-util-core-bc-composite-security -->
@@ -36,13 +43,13 @@
 
   <!-- Enables component scanning -->
   <context:component-scan base-package="se.vgregion.notifications.service"/>
-  <context:component-scan base-package="se.vgregion.raindancenotifier" />
-  <context:component-scan base-package="se.vgregion.portal.raindancenotifier" />
+  <context:component-scan base-package="se.vgregion.raindancenotifier"/>
+  <context:component-scan base-package="se.vgregion.portal.raindancenotifier"/>
 
   <context:mbean-export registration="replaceExisting"/>
 
   <!-- Enables annotations -->
-  <context:annotation-config />
+  <context:annotation-config/>
 
   <!-- Enables asynchronous support -->
   <task:annotation-driven executor="notificationsExecutor"/>
@@ -69,13 +76,13 @@
     <constructor-arg index="1" value="X-Alfresco-Remote-User"/>
   </bean>
 
-  <bean class="se.vgregion.portal.medcontrol.services.MedControlDeviationService" />
+  <bean class="se.vgregion.portal.medcontrol.services.MedControlDeviationService"/>
 
   <!-- Caching by AOP -->
   <!-- Enable @AspectJ Support -->
   <aop:aspectj-autoproxy/>
 
-  <bean id="servicesCacheAspect" class="se.vgregion.notifications.aspect.NotificationsCacheAspect" />
+  <bean id="servicesCacheAspect" class="se.vgregion.notifications.aspect.NotificationsCacheAspect"/>
 
   <bean id="servicesCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
     <property name="configLocation" value="classpath:service-cache.xml"/>
@@ -89,5 +96,26 @@
   <util:list id="hiddenUsdStatuses">
     <value>Åtgärdad</value>
   </util:list>
+
+  <http:conduit name="https://navet-test.vgregion.se:8443/.*">
+    <http:tlsClientParameters disableCNCheck="true">
+      <sec:trustManagers>
+        <sec:certStore resource="SITHS Type 2 CA v1.cer"/>
+      </sec:trustManagers>
+      <!-- It is possible to add a keyManager for mutual authentication. -->
+      <!--<sec:keyManagers keyPassword="clientpass">
+        <sec:keyStore type="jks" password="clientpass" resource="cert/clientkeystore.jks"/>
+      </sec:keyManagers>-->
+      <sec:cipherSuitesFilter>
+        <sec:include>.*_WITH_AES_.*</sec:include>
+        <sec:include>.*_WITH_RC4_.*</sec:include>
+        <sec:exclude>SSL_.*</sec:exclude>
+        <sec:exclude>.*_WITH_3DES_.*</sec:exclude>
+        <sec:exclude>.*_WITH_DES_.*</sec:exclude>
+        <sec:exclude>.*_WITH_NULL_.*</sec:exclude>
+        <sec:exclude>.*_DH_anon_.*</sec:exclude>
+      </sec:cipherSuitesFilter>
+    </http:tlsClientParameters>
+  </http:conduit>
 
 </beans>
