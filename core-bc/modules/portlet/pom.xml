@@ -14,7 +14,7 @@
   <name>${project.artifactId}</name>
 
   <build>
-    <finalName>notifications-portlet</finalName>
+    <finalName>notifications-rp-portlet</finalName>
     <plugins>
       <plugin>
         <!-- Configure eclipse plug-in to generate a context root that does not have the version number on it -->
