@@ -1,5 +1,11 @@
 package se.vgregion.notifications.service;
 
+import org.apache.cxf.Bus;
+import org.apache.cxf.bus.spring.SpringBusFactory;
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.slf4j.Logger;
@@ -28,6 +34,14 @@ class UsdIssuesService {
     @Autowired
     public UsdIssuesService(USDService usdService) {
         this.usdService = usdService;
+        initCxf();
+    }
+
+    private void initCxf() {
+        // Init cxf bus to enable ssl/tls configuration.
+        SpringBusFactory bf = new SpringBusFactory();
+        Bus bus = bf.createBus("META-INF/spring/cxf-context.xml");
+        bf.setDefaultBus(bus);
     }
 
 
