@@ -8,7 +8,7 @@
     <portlet:param name="onlyCache" value="false"/>
 </portlet:resourceURL>
 
-<c:set var="cssClassHidden" value="aui-helper-hidden" scope="page"/>
+<c:set var="cssClassHidden" value="helper-hidden" scope="page"/>
 <c:set var="cssClassCountHighlight" value="count-highlight" scope="page"/>
 
 <ul id="<portlet:namespace />notificationsBarList" class="notfications-bar-list clearfix">

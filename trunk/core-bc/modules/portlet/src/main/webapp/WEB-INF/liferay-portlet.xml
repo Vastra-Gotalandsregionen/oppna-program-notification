@@ -9,7 +9,6 @@
     <render-weight>0</render-weight>
     <ajaxable>true</ajaxable>
     <header-portlet-css>/style/notifications.css</header-portlet-css>
-    <css-class-wrapper>notifications-portlet</css-class-wrapper>
   </portlet>
 
   <role-mapper>

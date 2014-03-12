@@ -29,7 +29,7 @@ AUI().add('rp-notifications-bar', function (A) {
             UPDATE_NOTIFICATIONS_NO_CACHE_URL = 'updateNotificationsNoCacheUrl',
 
             CSS_ACTIVE = 'active',
-            CSS_HIDDEN = 'aui-helper-hidden',
+            CSS_HIDDEN = 'helper-hidden',
             CSS_COUNT_HIGHLIGHT = 'count-highlight',
             CSS_NOTIFICATIONS_ITEM = 'notifications-bar-item',
             CSS_NOTIFICATIONS_OVERLAY = 'notifications-overlay'
@@ -392,6 +392,7 @@ AUI().add('rp-notifications-bar', function (A) {
             'aui-loading-mask',
             'aui-overlay-context-panel-deprecated',
             'console',
+            'overlay',
             'substitute'
         ]
     }
