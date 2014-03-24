@@ -20,21 +20,35 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:task="http://www.springframework.org/schema/task" xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:cxf="http://cxf.apache.org/transports/http/configuration"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:http="http://cxf.apache.org/transports/http/configuration"
        xmlns:sec="http://cxf.apache.org/configuration/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-          http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
-          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
           http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
           http://cxf.apache.org/configuration/security
           http://cxf.apache.org/schemas/configuration/security.xsd
-          http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+          "
         >
+
+  <http:conduit name="https://navet.vgregion.se:8443/.*">
+    <http:tlsClientParameters disableCNCheck="true">
+      <sec:trustManagers>
+        <sec:keyStore resource="siths_type_2_ca_v1.jks" password="changeit" type="jks"/>
+      </sec:trustManagers>
+      <!-- It is possible to add a keyManager for mutual authentication. -->
+      <!--<sec:keyManagers keyPassword="clientpass">
+        <sec:keyStore type="jks" password="clientpass" resource="cert/clientkeystore.jks"/>
+      </sec:keyManagers>-->
+      <sec:cipherSuitesFilter>
+        <sec:include>.*_WITH_AES_.*</sec:include>
+        <sec:include>.*_WITH_RC4_.*</sec:include>
+        <sec:exclude>SSL_.*</sec:exclude>
+        <sec:exclude>.*_WITH_3DES_.*</sec:exclude>
+        <sec:exclude>.*_WITH_DES_.*</sec:exclude>
+        <sec:exclude>.*_WITH_NULL_.*</sec:exclude>
+        <sec:exclude>.*_DH_anon_.*</sec:exclude>
+      </sec:cipherSuitesFilter>
+    </http:tlsClientParameters>
+  </http:conduit>
 
   <http:conduit name="https://navet-test.vgregion.se:8443/.*">
     <http:tlsClientParameters disableCNCheck="true">
