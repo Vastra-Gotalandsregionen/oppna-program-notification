@@ -17,7 +17,6 @@
     <portlet-class>org.springframework.web.portlet.DispatcherPortlet</portlet-class>
     <expiration-cache>0</expiration-cache>
 
-
     <supports>
       <mime-type>text/html</mime-type>
       <portlet-mode>VIEW</portlet-mode>
@@ -33,7 +32,11 @@
 
     <portlet-preferences>
       <preference>
-        <name>portlet-setup-show-borders</name>
+        <name>portlet-setup-show-borders</name> <!--For backwards compatibility. May be removed as soon as we stick to LP 6.2 -->
+        <value>false</value>
+      </preference>
+      <preference>
+        <name>portletSetupShowBorders</name>
         <value>false</value>
       </preference>
     </portlet-preferences>

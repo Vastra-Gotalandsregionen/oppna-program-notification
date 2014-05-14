@@ -318,21 +318,23 @@ AUI().add('rp-notifications-bar', function (A) {
 
                         if (isNull(value) || value <= 0) {
                             if (message != null) {
-                                listNode.show();
-                                countWrapperNode.show();
+                                instance._showNode(listNode);
+                                instance._showNode(countWrapperNode);
                                 countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
                                 countNode.html("!");
                                 anythingToShow = true;
                             } else {
                                 countWrapperNode.hide();
+                                countWrapperNode.addClass('helper-hidden');
                             }
                         }
                         else if (value == countNodeValue) {
+                            instance._showNode(listNode);
                             countWrapperNode.show(); // In some cases this is needed even though it shouldn't be
                             anythingToShow = true;
                         }
                         else {
-                            listNode.show();
+                            instance._showNode(listNode);
                             countWrapperNode.show();
                             countWrapperNode.addClass(CSS_COUNT_HIGHLIGHT);
                             countNode.html(value);
@@ -375,8 +377,9 @@ AUI().add('rp-notifications-bar', function (A) {
                         instance.updateNotificationsIO.start();
                     },
 
-                    _someFunction:function () {
-                        var instance = this;
+                    _showNode: function (node) {
+                        node.show();
+                        node.removeClass('helper-hidden');
                     }
 
                 }
