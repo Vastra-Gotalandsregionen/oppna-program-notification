@@ -141,6 +141,6 @@
   </dependencies>
 
   <properties>
-    <commons-util.version>3.21</commons-util.version>
+    <commons-util.version>3.23-SNAPSHOT</commons-util.version>
   </properties>
 </project>
