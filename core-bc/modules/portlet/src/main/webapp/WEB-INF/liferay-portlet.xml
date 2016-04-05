@@ -8,7 +8,6 @@
     <requires-namespaced-parameters>false</requires-namespaced-parameters>
     <render-weight>0</render-weight>
     <ajaxable>true</ajaxable>
-    <header-portlet-css>/style/notifications.css</header-portlet-css>
   </portlet>
 
   <role-mapper>
