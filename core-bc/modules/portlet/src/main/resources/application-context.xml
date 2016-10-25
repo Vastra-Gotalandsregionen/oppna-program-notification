@@ -8,10 +8,12 @@
   <import resource="classpath*:META-INF/spring/services-context.xml" />
   <import resource="classpath:usersNotificationsCache-context.xml" />
 
+  <context:component-scan base-package="se.vgregion.raindancenotifier" />
+  <context:component-scan base-package="se.vgregion.portal.raindancenotifier" />
+
   <context:mbean-export registration="replaceExisting"/>
 
   <context:annotation-config/>
-  <context:component-scan base-package="se.vgregion.notifications.controller"/>
 
   <bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
