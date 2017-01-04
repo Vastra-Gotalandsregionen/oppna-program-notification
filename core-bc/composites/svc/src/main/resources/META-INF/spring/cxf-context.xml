@@ -32,7 +32,7 @@
   <http:conduit name="https://navet.vgregion.se:8443/.*">
     <http:tlsClientParameters disableCNCheck="true">
       <sec:trustManagers>
-        <sec:keyStore resource="siths_type_2_ca_v1.jks" password="changeit" type="jks"/>
+        <sec:keyStore resource="truststore_siths_prod.jks" password="changeit" type="jks"/>
       </sec:trustManagers>
       <!-- It is possible to add a keyManager for mutual authentication. -->
       <!--<sec:keyManagers keyPassword="clientpass">
@@ -53,7 +53,7 @@
   <http:conduit name="https://navet-test.vgregion.se:8443/.*">
     <http:tlsClientParameters disableCNCheck="true">
       <sec:trustManagers>
-        <sec:keyStore resource="siths_type_2_ca_v1.jks" password="changeit" type="jks"/>
+        <sec:keyStore resource="truststore_siths_prod.jks" password="changeit" type="jks"/>
       </sec:trustManagers>
       <!-- It is possible to add a keyManager for mutual authentication. -->
       <!--<sec:keyManagers keyPassword="clientpass">

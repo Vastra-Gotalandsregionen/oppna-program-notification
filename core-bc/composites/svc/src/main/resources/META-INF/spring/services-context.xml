@@ -40,6 +40,7 @@
   <import resource="classpath*:service-configuration.xml"/>
   <import resource="expando-utils-context.xml"/>
   <import resource="classpath*:ews-service-context.xml"/>
+  <import resource="cxf-context.xml"/>
 
   <!-- Enables component scanning -->
   <context:component-scan base-package="se.vgregion.notifications.service"/>
